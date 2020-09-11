@@ -217,7 +217,7 @@ double[][] datas=new double[][]{
 };
 ```
 
-#### 将数据归一化，统一将数据除以100
+#### 定义变量
 ```
 //将数据转成小数再进行计算
 one(datas);
@@ -257,7 +257,7 @@ for(int i=0;i<10000;i++){
     c.setVal(c.getVal()-tc);
 }
 ```
-#### 将数据归一化，统一将数据除以100
+#### 输出结果
 ```
 //输出a、b、c参数值
 System.out.println("a:"+a.getVal()+" b:"+b.getVal()+" c:"+c.getVal()+"\n");
