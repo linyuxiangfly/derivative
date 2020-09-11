@@ -21,14 +21,20 @@ public class Sin extends OperationUnary {
     @Override
     public double der(Function dx) {
         double val=0;
-        if(this.getVal().isDx(dx)){
-            val=Math.cos(this.getVal().calc());
+
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getVal().isDx(dx)){
+                val=Math.cos(this.getVal().calc());
+                val+=derEx(
+                        dx,
+                        val
+                );
+            }
         }
 
-        return derEx(
-                dx,
-                val
-        );
+        return val;
     }
 
     @Override

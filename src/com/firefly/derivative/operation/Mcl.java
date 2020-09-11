@@ -20,16 +20,18 @@ public class Mcl extends OperationBinary {
     @Override
     public double der(Function dx) {
         double val=0;
-        if(this.getA().isDx(dx)){
-            val=this.getB().calc();
-        }else if(this.getB().isDx(dx)){
-            val=this.getA().calc();
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getA().isDx(dx)){
+                val+=derExA(dx,this.getB().calc());
+            }
+            if(this.getB().isDx(dx)){
+                val+=derExB(dx,this.getA().calc());
+            }
         }
 
-        return derEx(
-                dx,
-                val
-        );
+        return val;
     }
 
     @Override

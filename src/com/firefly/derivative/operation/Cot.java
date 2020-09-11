@@ -21,13 +21,20 @@ public class Cot extends OperationUnary {
     @Override
     public double der(Function dx) {
         double val=0;
-        if(this.getVal().isDx(dx)){
-            val=-MathEx.pow(MathEx.csc(this.getVal().calc()),2);
+
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getVal().isDx(dx)){
+                val=-MathEx.pow(MathEx.csc(this.getVal().calc()),2);
+                val+=derEx(
+                        dx,
+                        val
+                );
+            }
         }
-        return derEx(
-                dx,
-                val
-        );
+
+        return val;
     }
 
     @Override

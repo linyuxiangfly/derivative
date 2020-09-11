@@ -34,7 +34,8 @@ public class OperationUnary implements Function {
     }
 
     protected double derEx(Function dx,double d){
-        return d*(val.isDx(dx)?val.der(dx):1);
+//        return d*(val.isDx(dx)?val.der(dx):1);
+        return d*val.der(dx);
     }
 
     @Override

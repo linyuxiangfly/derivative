@@ -21,14 +21,19 @@ public class ArcCos extends OperationUnary {
     @Override
     public double der(Function dx) {
         double val=0;
-        if(this.getVal().isDx(dx)){
-            val=-1.0/MathEx.pow(1.0-MathEx.pow(this.getVal().calc(),2),0.5);
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getVal().isDx(dx)){
+                val=-1.0/MathEx.pow(1.0-MathEx.pow(this.getVal().calc(),2),0.5);
+                val+=derEx(
+                        dx,
+                        val
+                );
+            }
         }
 
-        return derEx(
-                dx,
-                val
-        );
+        return val;
     }
 
     @Override

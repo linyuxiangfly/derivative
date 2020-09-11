@@ -29,16 +29,19 @@ public class Power extends OperationBinary {
         double b=this.getB().calc();
 
         double val=0;
-        if(this.getA().isDx(dx)){
-            val=b*MathEx.pow(a,b-1);
-        }else if(this.getB().isDx(dx)){
-            val=calc()*Math.log(a);
+
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getA().isDx(dx)){
+                val+=derExA(dx,b*MathEx.pow(a,b-1));
+            }
+            if(this.getB().isDx(dx)){
+                val+=derExB(dx,calc()*Math.log(a));
+            }
         }
 
-        return derEx(
-                dx,
-                val
-        );
+        return val;
     }
 //    public double der(Function dx) {
 //        double a=this.getA().calc();

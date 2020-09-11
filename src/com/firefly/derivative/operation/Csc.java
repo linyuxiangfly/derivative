@@ -22,13 +22,20 @@ public class Csc extends OperationUnary {
     public double der(Function dx) {
         double v=this.getVal().calc();
         double val=0;
-        if(this.getVal().isDx(dx)){
-            val=-MathEx.csc(v)*MathEx.cot(v);
+
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getVal().isDx(dx)){
+                val=-MathEx.csc(v)*MathEx.cot(v);
+                val+=derEx(
+                        dx,
+                        val
+                );
+            }
         }
-        return derEx(
-                dx,
-                val
-        );
+
+        return val;
     }
 
     @Override

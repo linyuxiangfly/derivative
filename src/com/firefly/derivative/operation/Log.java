@@ -21,19 +21,27 @@ public class Log extends OperationBinary {
     @Override
     public double der(Function dx) {
         double val=0;
-        if(this.getA().isDx(dx)){
-            val=-Math.log(this.getB().calc())
-                    /
-                    this.getA().calc()*MathEx.pow(Math.log(this.getA().calc()),2);
-        }else if(this.getB().isDx(dx)){
-            val=1.0
-                    /
-                    (this.getB().calc()*Math.log(this.getA().calc()));
+
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getA().isDx(dx)){
+                val+=derExA(dx,
+                        -Math.log(this.getB().calc())
+                                /
+                                this.getA().calc()*MathEx.pow(Math.log(this.getA().calc()),2)
+                );
+            }
+            if(this.getB().isDx(dx)){
+                val+=derExB(dx,
+                        1.0
+                                /
+                                (this.getB().calc()*Math.log(this.getA().calc()))
+                );
+            }
         }
-        return derEx(
-                dx,
-                val
-        );
+
+        return val;
     }
 
     @Override

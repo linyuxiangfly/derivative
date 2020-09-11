@@ -20,14 +20,21 @@ public class Tanh extends OperationUnary {
     @Override
     public double der(Function dx) {
         double val=0;
-        if(this.getVal().isDx(dx)){
-            double fv=calc();
-            val=1-fv*fv;
+
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getVal().isDx(dx)){
+                double fv=calc();
+                val=1-fv*fv;
+                val+=derEx(
+                        dx,
+                        val
+                );
+            }
         }
-        return derEx(
-                dx,
-                val
-        );
+
+        return val;
     }
 
     @Override

@@ -42,9 +42,18 @@ public class OperationBinary implements Function {
         return oldIsDx;
     }
 
-    protected double derEx(Function dx,double d){
-        return d*(a.isDx(dx)?a.der(dx):1)
-                *(b.isDx(dx)?b.der(dx):1);
+    private double derEx(Function param,Function dx,double d){
+//        return d*(param.isDx(dx)?param.der(dx):1);
+        return d*param.der(dx);
+    }
+
+    protected double derExA(Function dx,double d){
+        return derEx(a,dx,d);
+    }
+
+    protected double derExB(Function dx,double d){
+        return derEx(b,dx,d);
+
     }
 
     @Override

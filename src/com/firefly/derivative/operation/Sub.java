@@ -20,16 +20,19 @@ public class Sub extends OperationBinary {
     @Override
     public double der(Function dx) {
         double val=0;
-        if(this.getA().isDx(dx)){
-            val=1.0;
-        }else if(this.getB().isDx(dx)){
-            val=-1.0;
+
+        if(this==dx){
+            val=1;
+        }else{
+            if(this.getA().isDx(dx)){
+                val+=derExA(dx,1.0);
+            }
+            if(this.getB().isDx(dx)){
+                val+=derExB(dx,-1.0);
+            }
         }
 
-        return derEx(
-                dx,
-                val
-        );
+        return val;
     }
 
     @Override
