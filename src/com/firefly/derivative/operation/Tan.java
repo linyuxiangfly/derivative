@@ -27,7 +27,7 @@ public class Tan extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=MathEx.pow(MathEx.sec(this.getVal().calc()),2);
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

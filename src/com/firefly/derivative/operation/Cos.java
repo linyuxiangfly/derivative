@@ -26,7 +26,7 @@ public class Cos extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=-Math.sin(this.getVal().calc());
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

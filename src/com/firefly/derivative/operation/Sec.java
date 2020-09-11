@@ -28,7 +28,7 @@ public class Sec extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=MathEx.sec(v)*Math.tan(v);
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

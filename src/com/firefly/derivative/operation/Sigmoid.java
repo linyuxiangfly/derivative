@@ -27,7 +27,7 @@ public class Sigmoid extends OperationUnary {
             if(this.getVal().isDx(dx)){
                 double fv=calc();
                 val=fv*(1-fv);
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

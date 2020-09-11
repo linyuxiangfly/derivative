@@ -27,7 +27,7 @@ public class Cot extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=-MathEx.pow(MathEx.csc(this.getVal().calc()),2);
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

@@ -27,7 +27,7 @@ public class Ln extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=1.0/this.getVal().calc();
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

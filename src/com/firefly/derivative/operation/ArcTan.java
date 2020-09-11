@@ -27,7 +27,7 @@ public class ArcTan extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=1.0/(1.0+ MathEx.pow(this.getVal().calc(),2));
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

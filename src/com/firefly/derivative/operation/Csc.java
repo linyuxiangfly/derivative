@@ -28,7 +28,7 @@ public class Csc extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=-MathEx.csc(v)*MathEx.cot(v);
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

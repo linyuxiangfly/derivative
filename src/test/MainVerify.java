@@ -14,6 +14,8 @@ public class MainVerify {
         uv3();
 
         uvwxz();
+
+        sin();
     }
 
     private static void x3(){
@@ -161,6 +163,39 @@ public class MainVerify {
         show("y",y,b,y.calc(),1+(-1)*x.calc()*a.calc());
         show("y",y,c,y.calc(),1+(-1)*w.calc()*(1/d.calc()));
         show("y",y,d,y.calc(),(-1)+(-1)*w.calc()*-c.calc()/(d.calc()*d.calc()));
+    }
+
+    private static void sin(){
+        System.out.println("sin##############################################");
+        //u=a*b,v=a/b,w=u+v
+        //y=sin(w)
+        Var a=new Var(4);
+        Var b=new Var(5);
+        Mcl u=new Mcl(a,b);
+        Div v=new Div(a,b);
+        Add w=new Add(u,v);
+        Sin y=new Sin(w);
+
+        show("u",u,a,a.getVal()*b.getVal(),b.getVal());
+        show("u",u,b,a.getVal()*b.getVal(),a.getVal());
+        System.out.println();
+
+        show("v",v,a,a.getVal()/b.getVal(),1/b.getVal());
+        show("v",v,b,a.getVal()/b.getVal(),-a.getVal()/(b.getVal()*b.getVal()));
+        System.out.println();
+
+        show("w",w,u,u.calc()+v.calc(),1);
+        show("w",w,v,u.calc()+v.calc(),1);
+        show("w",w,a,u.calc()+v.calc(),b.getVal()+(1/b.getVal()));
+        show("w",w,b,u.calc()+v.calc(),a.getVal()+(-a.getVal())/(b.getVal()*b.getVal()));
+        System.out.println();
+
+        show("y",y,w,Math.sin(w.calc()),Math.cos(w.calc()));
+        show("y",y,u,Math.sin(w.calc()),Math.cos(w.calc()));
+        show("y",y,v,Math.sin(w.calc()),Math.cos(w.calc()));
+        show("y",y,a,Math.sin(w.calc()),Math.cos(w.calc())*(b.getVal()+(1/b.getVal())));
+        show("y",y,b,Math.sin(w.calc()),Math.cos(w.calc())*(a.getVal()+(-a.getVal())/(b.getVal()*b.getVal())));
+        System.out.println();
     }
 
     public static void show(String title,Function function,Function dx,double verifyCalc,double verifyDer){

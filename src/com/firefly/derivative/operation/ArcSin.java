@@ -26,7 +26,7 @@ public class ArcSin extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=1.0/MathEx.pow(1.0-MathEx.pow(this.getVal().calc(),2),0.5);
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );

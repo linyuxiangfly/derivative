@@ -27,7 +27,7 @@ public class Tanh extends OperationUnary {
             if(this.getVal().isDx(dx)){
                 double fv=calc();
                 val=1-fv*fv;
-                val+=derEx(
+                val=derEx(
                         dx,
                         val
                 );
