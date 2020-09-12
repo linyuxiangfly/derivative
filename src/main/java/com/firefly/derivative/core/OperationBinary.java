@@ -42,22 +42,22 @@ public class OperationBinary implements Function {
         return oldIsDx;
     }
 
-    private double derEx(Function param,Function dx,double d){
-//        return d*(param.isDx(dx)?param.der(dx):1);
-        return d*param.der(dx);
+    private double prtGradEx(Function param,Function dx,double d){
+//        return d*(param.isDx(dx)?param.prtGrad(dx):1);
+        return d*param.prtGrad(dx);
     }
 
-    protected double derExA(Function dx,double d){
-        return derEx(a,dx,d);
+    protected double prtGradExA(Function dx,double d){
+        return prtGradEx(a,dx,d);
     }
 
-    protected double derExB(Function dx,double d){
-        return derEx(b,dx,d);
+    protected double prtGradExB(Function dx,double d){
+        return prtGradEx(b,dx,d);
 
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         return 0;
     }
 

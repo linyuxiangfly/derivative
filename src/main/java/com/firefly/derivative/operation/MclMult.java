@@ -16,7 +16,7 @@ public class MclMult extends OperationMultiple {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
         if(this==dx){
             val=1;
@@ -26,7 +26,7 @@ public class MclMult extends OperationMultiple {
                 for(Function param:this.getParams()){
                     if(param.isDx(dx)){
                         //mclParams装除了当前参数外的所有参数值相乘
-                        val+=this.derEx(param,dx,count/param.calc());
+                        val+=this.prtGradEx(param,dx,count/param.calc());
                     }
                 }
             }

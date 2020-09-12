@@ -19,7 +19,7 @@ public class Csc extends OperationUnary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double v=this.getVal().calc();
         double val=0;
 
@@ -28,7 +28,7 @@ public class Csc extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=-MathEx.csc(v)*MathEx.cot(v);
-                val=derEx(
+                val=prtGradEx(
                         dx,
                         val
                 );

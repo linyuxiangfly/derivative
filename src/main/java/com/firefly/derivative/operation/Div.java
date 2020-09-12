@@ -19,17 +19,17 @@ public class Div extends OperationBinary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
 
         if(this==dx){
             val=1;
         }else{
             if(this.getA().isDx(dx)){
-                val+=derExA(dx,1/this.getB().calc());
+                val+=prtGradExA(dx,1/this.getB().calc());
             }
             if(this.getB().isDx(dx)){
-                val+=derExB(dx,-this.getA().calc()/MathEx.pow(this.getB().calc(),2));
+                val+=prtGradExB(dx,-this.getA().calc()/MathEx.pow(this.getB().calc(),2));
             }
         }
 

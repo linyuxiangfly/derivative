@@ -19,7 +19,7 @@ public class Sin extends OperationUnary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
 
         if(this==dx){
@@ -27,7 +27,7 @@ public class Sin extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=Math.cos(this.getVal().calc());
-                val=derEx(
+                val=prtGradEx(
                         dx,
                         val
                 );

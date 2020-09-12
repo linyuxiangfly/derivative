@@ -24,7 +24,7 @@ public class Power extends OperationBinary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double a=this.getA().calc();
         double b=this.getB().calc();
 
@@ -34,16 +34,16 @@ public class Power extends OperationBinary {
             val=1;
         }else{
             if(this.getA().isDx(dx)){
-                val+=derExA(dx,b*MathEx.pow(a,b-1));
+                val+=prtGradExA(dx,b*MathEx.pow(a,b-1));
             }
             if(this.getB().isDx(dx)){
-                val+=derExB(dx,calc()*Math.log(a));
+                val+=prtGradExB(dx,calc()*Math.log(a));
             }
         }
 
         return val;
     }
-//    public double der(Function dx) {
+//    public double prtGrad(Function dx) {
 //        double a=this.getA().calc();
 //        double b=this.getB().calc();
 //
@@ -72,7 +72,7 @@ public class Power extends OperationBinary {
 //            val=derB_Val;
 //        }
 //
-//        return derEx(
+//        return prtGradEx(
 //                dx,
 //                val
 //        );

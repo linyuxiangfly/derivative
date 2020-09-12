@@ -18,7 +18,7 @@ public class Tanh extends OperationUnary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
 
         if(this==dx){
@@ -27,7 +27,7 @@ public class Tanh extends OperationUnary {
             if(this.getVal().isDx(dx)){
                 double fv=calc();
                 val=1-fv*fv;
-                val=derEx(
+                val=prtGradEx(
                         dx,
                         val
                 );

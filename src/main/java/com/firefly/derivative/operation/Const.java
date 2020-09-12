@@ -16,16 +16,18 @@ public class Const implements Function {
         this.val=val;
     }
 
+    public double getVal() {
+        return val;
+    }
+
     @Override
     public boolean isDx(Function dx) {
         return this==dx;
     }
 
     @Override
-    public double der(Function dx) {
-        return isDx(dx)?
-                1:
-                0;
+    public double prtGrad(Function dx) {
+        return 0;
     }
 
     @Override

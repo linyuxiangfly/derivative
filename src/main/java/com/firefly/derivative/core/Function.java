@@ -5,6 +5,17 @@ package com.firefly.derivative.core;
  */
 public interface Function{
     boolean isDx(Function dx);
-    double der(Function dx);
+
+    /**
+     * 偏梯度
+     * @param dx 求该函数与dx之间的梯度
+     * @return
+     */
+    double prtGrad(Function dx);
+
+    /**
+     * 计算该函数的结果
+     * @return
+     */
     double calc();
 }

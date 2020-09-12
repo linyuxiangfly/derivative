@@ -1,5 +1,5 @@
-# 自动求导
-JAVA语言实现了基本函数和复杂函数的自动求导数函数的值
+# 自动求偏导梯度
+JAVA语言实现了基本函数和复杂函数的自动求偏导的梯度
 
 # 1教程
 ## 1.1接口
@@ -8,7 +8,7 @@ JAVA语言实现了基本函数和复杂函数的自动求导数函数的值
 
 ***isDx***方法是返回该操作符是否存在需要求偏导的对象
 
-***der***方法是返回该对象与指定的对象的偏导结果
+***prtGrad***方法是返回该对象与指定的对象的偏导梯度
 
 ***calc***方法是返回该对象的计算结果
 
@@ -27,8 +27,8 @@ Var v=new Var(5);
 v.setVal(10);
 ```
 
-### 1.2.3 加法
->Add类就是实现了加法的计算以及求导，代码如下：
+### 1.2.3 基础双目操作符
+>Add类就是实现了加法的计算以及求偏导梯度，代码如下：
 ```
 //定义常量
 Const a=new Const(5);
@@ -40,82 +40,18 @@ Add y=new Add(a,b);
 System.out.println("y:"+y.calc());
 
 //求偏导值
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
+System.out.println("y/a:"+y.prtGrad(a));
+System.out.println("y/b:"+y.prtGrad(b));
 
 //结果
 y:9.0
 y/a:1.0
 y/b:1.0
 ```
-### 1.2.4 减法
->Sub类就是实现了减法的计算以及求导，代码如下：
-```
-//定义常量
-Var a=new Var(5);
-Const b=new Const(4);
-//两个数相减
-Sub y=new Sub(a,b);
+>本模块还提供减法(Sub)、乘法(Mcl)、除法(Div)的计算以及偏导梯度，用法跟加法(Add)类似。
 
-//计算结果
-System.out.println("y:"+y.calc());
-
-//求偏导值
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
-
-//结果
-y:1.0
-y/a:1.0
-y/b:-1.0
-```
-
-### 1.2.5 乘法
->Mcl类就是实现了乘法的计算以及求导，代码如下：
-```
-//定义常量
-Var a=new Var(5);
-Var b=new Var(4);
-//两个数相乘
-Mcl y=new Mcl(a,b);
-
-//计算结果
-System.out.println("y:"+y.calc());
-
-//求偏导值
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
-
-//结果
-y:20.0
-y/a:4.0
-y/b:5.0
-```
-
-### 1.2.6 除法
->Div类就是实现了除法的计算以及求导，代码如下：
-```
-//定义常量
-Var a=new Var(5);
-Var b=new Var(4);
-//两个数相除
-Div y=new Div(a,b);
-
-//计算结果
-System.out.println("y:"+y.calc());
-
-//求偏导值
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
-
-//结果
-y:1.25
-y/a:0.25
-y/b:-0.3125
-```
-
-### 1.2.7 加法-多参数
->AddMult类就是实现了多个变量进行相加以及求导，代码如下：
+### 1.2.4 多参数操作符
+>AddMult类就是实现了多个变量进行相加以及偏导梯度，代码如下：
 ```
 Var a=new Var(4);
 Var b=new Var(5);
@@ -137,10 +73,10 @@ System.out.println("y:"+y.calc());
 
 //求偏导值
 for(int i=0;i<params.length;i++){
-    System.out.println("y/param["+i+"]:"+y.der(params[i]));
+    System.out.println("y/param["+i+"]:"+y.prtGrad(params[i]));
 }
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
+System.out.println("y/a:"+y.prtGrad(a));
+System.out.println("y/b:"+y.prtGrad(b));
 
 //结果
 y:30.8
@@ -152,125 +88,11 @@ y/param[4]:1.0
 y/a:5.2
 y/b:3.84
 ```
-### 1.2.8 减法-多参数
->SubMult类就是实现了多个变量进行相减以及求导，代码如下：
-```
-Var a=new Var(4);
-Var b=new Var(5);
+>本模块还提供多参数的减法(SubMult)、多参数的乘法(MclMult)、多参数的除法(DivMult)的计算以及偏导梯度，用法跟加法(AddMult)类似。
+>
 
-//定义常量
-Function[] params=new Function[]{
-        new Const(1),
-        new Mcl(a,b),
-        new Div(a,b),
-        new Const(4),
-        new Const(5),
-};
-
-//多个数相减
-SubMult y=new SubMult(params);
-
-//计算结果
-System.out.println("y:"+y.calc());
-
-//求偏导值
-for(int i=0;i<params.length;i++){
-    System.out.println("y/param["+i+"]:"+y.der(params[i]));
-}
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
-
-//结果
-y:-28.8
-y/param[0]:1.0
-y/param[1]:-1.0
-y/param[2]:-1.0
-y/param[3]:-1.0
-y/param[4]:-1.0
-y/a:-5.2
-y/b:-3.84
-```
-### 1.2.9 乘法-多参数
->MclMult类就是实现了多个变量进行相乘以及求导，代码如下：
-```
-Var a=new Var(4);
-Var b=new Var(5);
-
-//定义常量
-Function[] params=new Function[]{
-        new Const(1),
-        new Mcl(a,b),
-        new Div(a,b),
-        new Const(4),
-        new Const(5),
-};
-
-//多个数相乘
-MclMult y=new MclMult(params);
-
-//计算结果
-System.out.println("y:"+y.calc());
-
-//求偏导值
-for(int i=0;i<params.length;i++){
-    System.out.println("y/param["+i+"]:"+y.der(params[i]));
-}
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
-
-//结果
-y:320.0
-y/param[0]:320.0
-y/param[1]:16.0
-y/param[2]:400.0
-y/param[3]:80.0
-y/param[4]:64.0
-y/a:160.0
-y/b:0.0
-```
-
-### 1.2.10 除法-多参数
->DivMult类就是实现了多个变量进行相除以及求导，代码如下：
-```
-Var a=new Var(2);
-Var b=new Var(3);
-
-//定义常量
-Function[] params=new Function[]{
-        new Const(7),
-        new Mcl(a,b),
-        new Div(a,b),
-        new Const(4),
-        new Const(5),
-};
-
-//多个数相除
-DivMult y=new DivMult(params);
-
-double yy=7.0/(2.0*3.0)/(2.0/3.0)/4.0/5.0;
-//计算结果
-System.out.println("y:"+y.calc());
-
-//求偏导值
-for(int i=0;i<params.length;i++){
-    System.out.println("y/param["+i+"]:"+y.der(params[i]));
-}
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
-
-//结果
-y:0.08750000000000001
-y/param[0]:0.0125
-y/param[1]:-0.014583333333333334
-y/param[2]:-0.13125000000000003
-y/param[3]:-0.021875000000000002
-y/param[4]:-0.0175
-y/a:-0.08750000000000001
-y/b:6.938893903907228E-18
-```
-
-### 1.2.11 指数、幂函数
->Power类就是实现了指数、幂函数的计算以及求导，代码如下：
+### 1.2.5 指数、幂函数
+>Power类就是实现了指数、幂函数的计算以及偏导梯度，代码如下：
 ```
 //定义常量
 Var a=new Var(5);
@@ -282,8 +104,8 @@ Power y=new Power(a,b);
 System.out.println("y:"+y.calc());
 
 //求偏导值
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
+System.out.println("y/a:"+y.prtGrad(a));
+System.out.println("y/b:"+y.prtGrad(b));
 
 //结果
 y:125.0
@@ -291,8 +113,8 @@ y/a:75.0
 y/b:201.17973905426254
 ```
 
-### 1.2.12 对数函数
->Log类就是实现了对数函数的计算以及求导，代码如下：
+### 1.2.6 对数、自然对数函数
+>Log类就是实现了对数函数的计算以及偏导梯度，代码如下：
 ```
 //定义常量
 Var a=new Var(5);
@@ -304,8 +126,8 @@ Log y=new Log(a,b);
 System.out.println("y:"+y.calc());
 
 //求偏导值
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
+System.out.println("y/a:"+y.prtGrad(a));
+System.out.println("y/b:"+y.prtGrad(b));
 
 //结果
 y:125.0
@@ -313,8 +135,7 @@ y/a:75.0
 y/b:201.17973905426254
 ```
 
-### 1.2.13 自然对数函数
->Ln类就是实现了自然对数函数的计算以及求导，代码如下：
+>Ln类就是实现了自然对数函数的计算以及偏导梯度，代码如下：
 ```
 //定义常量
 Var a=new Var(5);
@@ -325,15 +146,15 @@ Ln y=new Ln(a);
 System.out.println("y:"+y.calc());
 
 //求偏导值
-System.out.println("y/a:"+y.der(a));
+System.out.println("y/a:"+y.prtGrad(a));
 
 //结果
 y:1.6094379124341003
 y/a:0.2
 ```
 
-### 1.2.14 三角函数
->Sin类就是实现了三角函数sin的计算以及求导，代码如下：
+### 1.2.7 三角函数
+>Sin类就是实现了三角函数sin的计算以及偏导梯度，代码如下：
 ```
 //定义常量
 Var a=new Var(5);
@@ -344,16 +165,16 @@ Sin y=new Sin(a);
 System.out.println("y:"+y.calc());
 
 //求偏导值
-System.out.println("y/a:"+y.der(a));
+System.out.println("y/a:"+y.prtGrad(a));
 
 //结果
 y:-0.9589242746631385
 y/a:0.28366218546322625
 ```
->本模块还提供Cot、Sec、Csc、ArcSin、ArcCos、ArcTan、ArcCot三角函数的计算以及求导，用法跟Sin类似。
+>本模块还提供Cot、Sec、Csc、ArcSin、ArcCos、ArcTan、ArcCot三角函数的计算以及偏导梯度，用法跟Sin类似。
 
-### 1.2.15 Sigmoid
->Sigmoid类就是实现sigmoid函数的计算以及求导，代码如下：
+### 1.2.8 复合函数
+>Sigmoid类就是实现sigmoid函数的计算以及偏导梯度，代码如下：
 ```
 //定义常量
 Var a=new Var(5);
@@ -364,19 +185,18 @@ Sigmoid y=new Sigmoid(a);
 System.out.println("y:"+y.calc());
 
 //求偏导值
-System.out.println("y/a:"+y.der(a));
+System.out.println("y/a:"+y.prtGrad(a));
 
 //结果
 y:0.9933071490757153
 y/a:0.006648056670790033
 ```
->本模块还提供Tanh函数的计算以及求导，用法跟Sigmoid类似。
+>本模块还提供Tanh函数的计算以及偏导梯度，用法跟Sigmoid类似。
 
+## 1.3 自定义复合函数
 
-## 1.3 复杂函数
-
-### 1.3.1 组合复杂函数
->组合复杂函数并计算y对于每个a、b、c、d等的偏导结果，代码如下：
+### 1.3.1 自定义复合函数
+>自定义复合函数并计算y对于每个a、b、c、d等的偏导结果，代码如下：
 ```
 //定义变量
 Var a=new Var(2);
@@ -384,7 +204,7 @@ Var b=new Var(3);
 Var c=new Var(4);
 Var d=new Var(5);
 
-//组合复杂函数
+//自定义复杂函数
 //u=a*b
 //v=c/d;
 //w=u-v;
@@ -397,17 +217,17 @@ Sin y=new Sin(w);
 //计算结果
 System.out.println("y:"+y.calc());
 
-//求偏导值
-System.out.println("u/a:"+u.der(a));
-System.out.println("u/b:"+u.der(b));
-System.out.println("v/c:"+v.der(c));
-System.out.println("v/d:"+v.der(d));
-System.out.println("y/u:"+y.der(u));
-System.out.println("y/v:"+y.der(v));
-System.out.println("y/a:"+y.der(a));
-System.out.println("y/b:"+y.der(b));
-System.out.println("y/c:"+y.der(c));
-System.out.println("y/d:"+y.der(d));
+//求偏导梯度值
+System.out.println("u/a:"+u.prtGrad(a));
+System.out.println("u/b:"+u.prtGrad(b));
+System.out.println("v/c:"+v.prtGrad(c));
+System.out.println("v/d:"+v.prtGrad(d));
+System.out.println("y/u:"+y.prtGrad(u));
+System.out.println("y/v:"+y.prtGrad(v));
+System.out.println("y/a:"+y.prtGrad(a));
+System.out.println("y/b:"+y.prtGrad(b));
+System.out.println("y/c:"+y.prtGrad(c));
+System.out.println("y/d:"+y.prtGrad(d));
 
 //结果
 y:-0.8834546557201531
@@ -574,8 +394,8 @@ public static double ds(double[][] datas,Function lf,Var y,Var x,Var dx){
     for(double[] item:datas){
         x.setVal(item[0]);
         y.setVal(item[1]);
-        //求导
-        ret+=lf.der(dx);
+        //偏导梯度
+        ret+=lf.prtGrad(dx);
     }
     return ret;
 }

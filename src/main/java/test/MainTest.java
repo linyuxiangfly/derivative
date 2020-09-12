@@ -144,8 +144,8 @@ public class MainTest {
         for(double[] item:datas){
             x.setVal(item[0]);
             y.setVal(item[1]);
-            //求导
-            ret+=lf.der(dx);
+            //偏导梯度
+            ret+=lf.prtGrad(dx);
         }
         return ret;
     }

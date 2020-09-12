@@ -19,21 +19,21 @@ public class Log extends OperationBinary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
 
         if(this==dx){
             val=1;
         }else{
             if(this.getA().isDx(dx)){
-                val+=derExA(dx,
+                val+=prtGradExA(dx,
                         -Math.log(this.getB().calc())
                                 /
                                 this.getA().calc()*MathEx.pow(Math.log(this.getA().calc()),2)
                 );
             }
             if(this.getB().isDx(dx)){
-                val+=derExB(dx,
+                val+=prtGradExB(dx,
                         1.0
                                 /
                                 (this.getB().calc()*Math.log(this.getA().calc()))

@@ -19,7 +19,7 @@ public class Cot extends OperationUnary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
 
         if(this==dx){
@@ -27,7 +27,7 @@ public class Cot extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 val=-MathEx.pow(MathEx.csc(this.getVal().calc()),2);
-                val=derEx(
+                val=prtGradEx(
                         dx,
                         val
                 );

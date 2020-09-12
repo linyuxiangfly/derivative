@@ -26,9 +26,9 @@ public class TestDivMult {
 
         //求偏导值
         for(int i=0;i<params.length;i++){
-            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+            System.out.println("y/param["+i+"]:"+y.prtGrad(params[i]));
         }
-        System.out.println("y/a:"+y.der(a));
-        System.out.println("y/b:"+y.der(b));
+        System.out.println("y/a:"+y.prtGrad(a));
+        System.out.println("y/b:"+y.prtGrad(b));
     }
 }

@@ -57,6 +57,6 @@ public class Main3 {
     }
 
     public static void show(String title,Function function,Function dx){
-        System.out.println(title+",val:"+function.calc()+" derivative:"+function.der(dx));
+        System.out.println(title+",val:"+function.calc()+" derivative:"+function.prtGrad(dx));
     }
 }

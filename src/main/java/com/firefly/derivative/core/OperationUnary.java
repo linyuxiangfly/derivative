@@ -33,13 +33,13 @@ public class OperationUnary implements Function {
         return oldIsDx;
     }
 
-    protected double derEx(Function dx,double d){
-//        return d*(val.isDx(dx)?val.der(dx):1);
-        return d*val.der(dx);
+    protected double prtGradEx(Function dx,double d){
+//        return d*(val.isDx(dx)?val.prtGrad(dx):1);
+        return d*val.prtGrad(dx);
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         return 0;
     }
 
