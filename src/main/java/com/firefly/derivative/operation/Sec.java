@@ -14,6 +14,10 @@ public class Sec extends OperationUnary {
 
     }
 
+    public Sec(double val) {
+        super(val);
+    }
+
     public Sec(Function val){
         super(val);
     }

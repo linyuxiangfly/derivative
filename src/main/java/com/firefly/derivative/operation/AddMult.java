@@ -12,6 +12,10 @@ public class AddMult extends OperationMultiple {
 
     }
 
+    public AddMult(double[] params) {
+        super(params);
+    }
+
     public AddMult(Function[] params){
         super(params);
     }

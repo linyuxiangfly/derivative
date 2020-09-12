@@ -13,6 +13,10 @@ public class ArcSin extends OperationUnary {
 
     }
 
+    public ArcSin(double val) {
+        super(val);
+    }
+
     public ArcSin(Function val){
         super(val);
     }

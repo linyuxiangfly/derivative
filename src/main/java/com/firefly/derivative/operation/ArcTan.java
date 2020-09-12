@@ -14,6 +14,10 @@ public class ArcTan extends OperationUnary {
 
     }
 
+    public ArcTan(double val) {
+        super(val);
+    }
+
     public ArcTan(Function val){
         super(val);
     }

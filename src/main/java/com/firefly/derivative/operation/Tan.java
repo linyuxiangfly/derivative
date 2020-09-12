@@ -14,6 +14,10 @@ public class Tan extends OperationUnary {
 
     }
 
+    public Tan(double val) {
+        super(val);
+    }
+
     public Tan(Function val){
         super(val);
     }

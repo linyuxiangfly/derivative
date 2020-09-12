@@ -14,6 +14,10 @@ public class Cot extends OperationUnary {
 
     }
 
+    public Cot(double val) {
+        super(val);
+    }
+
     public Cot(Function val){
         super(val);
     }

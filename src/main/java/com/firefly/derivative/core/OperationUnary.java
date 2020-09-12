@@ -1,5 +1,7 @@
 package com.firefly.derivative.core;
 
+import com.firefly.derivative.operation.Const;
+
 /**
  * 单目运算符
  */
@@ -8,6 +10,10 @@ public class OperationUnary implements Function {
 
     public OperationUnary(){
 
+    }
+
+    public OperationUnary(double val){
+        this.val=new Const(val);
     }
 
     public OperationUnary(Function val){
@@ -20,6 +26,10 @@ public class OperationUnary implements Function {
 
     public void setVal(Function val) {
         this.val = val;
+    }
+
+    public void setVal(double val) {
+        this.val = new Const(val);
     }
 
     private Function oldDx;

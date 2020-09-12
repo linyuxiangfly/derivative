@@ -14,6 +14,10 @@ public class Csc extends OperationUnary {
 
     }
 
+    public Csc(double val) {
+        super(val);
+    }
+
     public Csc(Function val){
         super(val);
     }

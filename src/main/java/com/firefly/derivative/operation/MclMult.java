@@ -11,6 +11,10 @@ public class MclMult extends OperationMultiple {
 
     }
 
+    public MclMult(double[] params) {
+        super(params);
+    }
+
     public MclMult(Function[] params){
         super(params);
     }

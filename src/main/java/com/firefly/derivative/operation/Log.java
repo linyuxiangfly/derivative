@@ -14,6 +14,18 @@ public class Log extends OperationBinary {
 
     }
 
+    public Log(double a, double b) {
+        super(a, b);
+    }
+
+    public Log(Function a, double b) {
+        super(a, b);
+    }
+
+    public Log(double a, Function b) {
+        super(a, b);
+    }
+
     public Log(Function a, Function b){
         super(a,b);
     }
