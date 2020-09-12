@@ -13,6 +13,10 @@ public class Tanh extends OperationUnary {
 
     }
 
+    public Tanh(double val) {
+        super(val);
+    }
+
     public Tanh(Function val){
         super(val);
     }

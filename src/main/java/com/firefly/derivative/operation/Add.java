@@ -13,6 +13,18 @@ public class Add extends OperationBinary {
 
     }
 
+    public Add(double a, double b) {
+        super(a, b);
+    }
+
+    public Add(Function a, double b) {
+        super(a, b);
+    }
+
+    public Add(double a, Function b) {
+        super(a, b);
+    }
+
     public Add(Function a, Function b){
         super(a,b);
     }

@@ -13,6 +13,10 @@ public class Sigmoid extends OperationUnary {
 
     }
 
+    public Sigmoid(double val) {
+        super(val);
+    }
+
     public Sigmoid(Function val){
         super(val);
     }

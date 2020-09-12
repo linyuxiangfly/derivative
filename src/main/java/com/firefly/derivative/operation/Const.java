@@ -8,10 +8,6 @@ import com.firefly.derivative.core.Function;
 public class Const implements Function {
     double val;
 
-    public Const(){
-
-    }
-
     public Const(double val){
         this.val=val;
     }

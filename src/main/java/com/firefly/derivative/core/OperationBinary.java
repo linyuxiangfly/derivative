@@ -1,5 +1,7 @@
 package com.firefly.derivative.core;
 
+import com.firefly.derivative.operation.Const;
+
 /**
  * 双目运算符
  */
@@ -8,6 +10,21 @@ public class OperationBinary implements Function {
 
     public OperationBinary(){
 
+    }
+
+    public OperationBinary(double a, double b){
+        this.a=new Const(a);
+        this.b=new Const(b);
+    }
+
+    public OperationBinary(Function a, double b){
+        this.a=a;
+        this.b=new Const(b);
+    }
+
+    public OperationBinary(double a, Function b){
+        this.a=new Const(a);
+        this.b=b;
     }
 
     public OperationBinary(Function a, Function b){
@@ -23,12 +40,20 @@ public class OperationBinary implements Function {
         this.a = a;
     }
 
+    public void setA(double a) {
+        this.a = new Const(a);
+    }
+
     public Function getB() {
         return b;
     }
 
     public void setB(Function b) {
         this.b = b;
+    }
+
+    public void setB(double b) {
+        this.b = new Const(b);
     }
 
     private Function oldDx;

@@ -109,11 +109,15 @@ public class MainTest {
      * @return
      */
     public static Function lostFunc(Function fx,Var y){
-        Const zeroPointFive=new Const(0.5);
-        Const two=new Const(2);
+//        Const zeroPointFive=new Const(0.5);
+//        Const two=new Const(2);
+//        Sub diff=new Sub(y,fx);
+//        Power diff2=new Power(diff,two);
+//        Mcl ret=new Mcl(zeroPointFive,diff2);
+//        return ret;
         Sub diff=new Sub(y,fx);
-        Power diff2=new Power(diff,two);
-        Mcl ret=new Mcl(zeroPointFive,diff2);
+        Power diff2=new Power(diff,2);
+        Mcl ret=new Mcl(0.5,diff2);
         return ret;
     }
 

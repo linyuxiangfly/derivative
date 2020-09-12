@@ -14,6 +14,10 @@ public class ArcCot extends OperationUnary {
 
     }
 
+    public ArcCot(double val) {
+        super(val);
+    }
+
     public ArcCot(Function val){
         super(val);
     }

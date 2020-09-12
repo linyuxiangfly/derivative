@@ -11,6 +11,10 @@ public class SubMult extends OperationMultiple {
 
     }
 
+    public SubMult(double[] params) {
+        super(params);
+    }
+
     public SubMult(Function[] params){
         super(params);
     }

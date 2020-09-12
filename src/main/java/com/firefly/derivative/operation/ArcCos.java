@@ -14,6 +14,10 @@ public class ArcCos extends OperationUnary {
 
     }
 
+    public ArcCos(double val) {
+        super(val);
+    }
+
     public ArcCos(Function val){
         super(val);
     }

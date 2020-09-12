@@ -19,7 +19,19 @@ public class Power extends OperationBinary {
 
     }
 
-    public Power(Function a,Function b){
+    public Power(double a, double b) {
+        super(a, b);
+    }
+
+    public Power(Function a, double b) {
+        super(a, b);
+    }
+
+    public Power(double a, Function b) {
+        super(a, b);
+    }
+
+    public Power(Function a, Function b){
         super(a,b);
     }
 

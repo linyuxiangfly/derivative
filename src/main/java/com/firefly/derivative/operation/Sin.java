@@ -14,6 +14,10 @@ public class Sin extends OperationUnary {
 
     }
 
+    public Sin(double val) {
+        super(val);
+    }
+
     public Sin(Function val){
         super(val);
     }

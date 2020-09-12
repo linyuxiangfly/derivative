@@ -13,6 +13,18 @@ public class Mcl extends OperationBinary {
 
     }
 
+    public Mcl(double a, double b) {
+        super(a, b);
+    }
+
+    public Mcl(Function a, double b) {
+        super(a, b);
+    }
+
+    public Mcl(double a, Function b) {
+        super(a, b);
+    }
+
     public Mcl(Function a, Function b){
         super(a,b);
     }

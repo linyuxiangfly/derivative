@@ -1,5 +1,7 @@
 package com.firefly.derivative.core;
 
+import com.firefly.derivative.operation.Const;
+
 /**
  * 多目运算符
  */
@@ -8,6 +10,10 @@ public class OperationMultiple implements Function {
 
     public OperationMultiple(){
 
+    }
+
+    public OperationMultiple(double[] params){
+        this.setParams(params);
     }
 
     public OperationMultiple(Function[] params){
@@ -20,6 +26,15 @@ public class OperationMultiple implements Function {
 
     public void setParams(Function[] params) {
         this.params = params;
+    }
+
+    public void setParams(double[] params){
+        if(params!=null && params.length>0){
+            this.params=new Function[params.length];
+            for(int i=0;i<this.params.length;i++){
+                this.params[i]=new Const(params[i]);
+            }
+        }
     }
 
     /**

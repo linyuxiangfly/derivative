@@ -13,6 +13,18 @@ public class Sub extends OperationBinary {
 
     }
 
+    public Sub(double a, double b) {
+        super(a, b);
+    }
+
+    public Sub(Function a, double b) {
+        super(a, b);
+    }
+
+    public Sub(double a, Function b) {
+        super(a, b);
+    }
+
     public Sub(Function a, Function b){
         super(a,b);
     }

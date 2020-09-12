@@ -14,6 +14,10 @@ public class Ln extends OperationUnary {
 
     }
 
+    public Ln(double val) {
+        super(val);
+    }
+
     public Ln(Function val){
         super(val);
     }

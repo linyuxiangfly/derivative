@@ -11,6 +11,10 @@ public class DivMult extends OperationMultiple {
 
     }
 
+    public DivMult(double[] params) {
+        super(params);
+    }
+
     public DivMult(Function[] params){
         super(params);
     }

@@ -13,6 +13,10 @@ public class Cos extends OperationUnary {
 
     }
 
+    public Cos(double val) {
+        super(val);
+    }
+
     public Cos(Function val){
         super(val);
     }

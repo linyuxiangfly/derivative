@@ -14,6 +14,18 @@ public class Div extends OperationBinary {
 
     }
 
+    public Div(double a, double b) {
+        super(a, b);
+    }
+
+    public Div(Function a, double b) {
+        super(a, b);
+    }
+
+    public Div(double a, Function b) {
+        super(a, b);
+    }
+
     public Div(Function a, Function b){
         super(a,b);
     }
