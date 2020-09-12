@@ -114,7 +114,225 @@ y/a:0.25
 y/b:-0.3125
 ```
 
-### 1.2.7 Sin
+### 1.2.7 加法-多参数
+>AddMult类就是实现了多个变量进行相加以及求导，代码如下：
+```
+Var a=new Var(4);
+Var b=new Var(5);
+
+//定义常量
+Function[] params=new Function[]{
+        new Const(1),
+        new Mcl(a,b),
+        new Div(a,b),
+        new Const(4),
+        new Const(5),
+};
+
+//两个数相加
+AddMult y=new AddMult(params);
+
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+for(int i=0;i<params.length;i++){
+    System.out.println("y/param["+i+"]:"+y.der(params[i]));
+}
+System.out.println("y/a:"+y.der(a));
+System.out.println("y/b:"+y.der(b));
+
+//结果
+y:30.8
+y/param[0]:1.0
+y/param[1]:1.0
+y/param[2]:1.0
+y/param[3]:1.0
+y/param[4]:1.0
+y/a:5.2
+y/b:3.84
+```
+### 1.2.8 减法-多参数
+>SubMult类就是实现了多个变量进行相减以及求导，代码如下：
+```
+Var a=new Var(4);
+Var b=new Var(5);
+
+//定义常量
+Function[] params=new Function[]{
+        new Const(1),
+        new Mcl(a,b),
+        new Div(a,b),
+        new Const(4),
+        new Const(5),
+};
+
+//多个数相减
+SubMult y=new SubMult(params);
+
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+for(int i=0;i<params.length;i++){
+    System.out.println("y/param["+i+"]:"+y.der(params[i]));
+}
+System.out.println("y/a:"+y.der(a));
+System.out.println("y/b:"+y.der(b));
+
+//结果
+y:-28.8
+y/param[0]:1.0
+y/param[1]:-1.0
+y/param[2]:-1.0
+y/param[3]:-1.0
+y/param[4]:-1.0
+y/a:-5.2
+y/b:-3.84
+```
+### 1.2.9 乘法-多参数
+>MclMult类就是实现了多个变量进行相乘以及求导，代码如下：
+```
+Var a=new Var(4);
+Var b=new Var(5);
+
+//定义常量
+Function[] params=new Function[]{
+        new Const(1),
+        new Mcl(a,b),
+        new Div(a,b),
+        new Const(4),
+        new Const(5),
+};
+
+//多个数相乘
+MclMult y=new MclMult(params);
+
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+for(int i=0;i<params.length;i++){
+    System.out.println("y/param["+i+"]:"+y.der(params[i]));
+}
+System.out.println("y/a:"+y.der(a));
+System.out.println("y/b:"+y.der(b));
+
+//结果
+y:320.0
+y/param[0]:320.0
+y/param[1]:16.0
+y/param[2]:400.0
+y/param[3]:80.0
+y/param[4]:64.0
+y/a:160.0
+y/b:0.0
+```
+
+### 1.2.10 除法-多参数
+>DivMult类就是实现了多个变量进行相除以及求导，代码如下：
+```
+Var a=new Var(2);
+Var b=new Var(3);
+
+//定义常量
+Function[] params=new Function[]{
+        new Const(7),
+        new Mcl(a,b),
+        new Div(a,b),
+        new Const(4),
+        new Const(5),
+};
+
+//多个数相除
+DivMult y=new DivMult(params);
+
+double yy=7.0/(2.0*3.0)/(2.0/3.0)/4.0/5.0;
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+for(int i=0;i<params.length;i++){
+    System.out.println("y/param["+i+"]:"+y.der(params[i]));
+}
+System.out.println("y/a:"+y.der(a));
+System.out.println("y/b:"+y.der(b));
+
+//结果
+y:0.08750000000000001
+y/param[0]:0.0125
+y/param[1]:-0.014583333333333334
+y/param[2]:-0.13125000000000003
+y/param[3]:-0.021875000000000002
+y/param[4]:-0.0175
+y/a:-0.08750000000000001
+y/b:6.938893903907228E-18
+```
+
+### 1.2.11 指数、幂函数
+>Power类就是实现了指数、幂函数的计算以及求导，代码如下：
+```
+//定义常量
+Var a=new Var(5);
+Var b=new Var(3);
+//指数、幂函数
+Power y=new Power(a,b);
+
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+System.out.println("y/a:"+y.der(a));
+System.out.println("y/b:"+y.der(b));
+
+//结果
+y:125.0
+y/a:75.0
+y/b:201.17973905426254
+```
+
+### 1.2.12 对数函数
+>Log类就是实现了对数函数的计算以及求导，代码如下：
+```
+//定义常量
+Var a=new Var(5);
+Var b=new Var(3);
+//对数函数
+Log y=new Log(a,b);
+
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+System.out.println("y/a:"+y.der(a));
+System.out.println("y/b:"+y.der(b));
+
+//结果
+y:125.0
+y/a:75.0
+y/b:201.17973905426254
+```
+
+### 1.2.13 自然对数函数
+>Ln类就是实现了自然对数函数的计算以及求导，代码如下：
+```
+//定义常量
+Var a=new Var(5);
+//自然对数函数
+Ln y=new Ln(a);
+
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+System.out.println("y/a:"+y.der(a));
+
+//结果
+y:1.6094379124341003
+y/a:0.2
+```
+
+### 1.2.14 三角函数
 >Sin类就是实现了三角函数sin的计算以及求导，代码如下：
 ```
 //定义常量
@@ -126,12 +344,35 @@ Sin y=new Sin(a);
 System.out.println("y:"+y.calc());
 
 //求偏导值
-System.out.println("y/a:"+y.der(y));
+System.out.println("y/a:"+y.der(a));
 
 //结果
 y:-0.9589242746631385
-y/a:1.0
+y/a:0.28366218546322625
 ```
+>本模块还提供Cot、Sec、Csc、ArcSin、ArcCos、ArcTan、ArcCot三角函数的计算以及求导，用法跟Sin类似。
+
+### 1.2.15 Sigmoid
+>Sigmoid类就是实现sigmoid函数的计算以及求导，代码如下：
+```
+//定义常量
+Var a=new Var(5);
+//sigmoid函数
+Sigmoid y=new Sigmoid(a);
+
+//计算结果
+System.out.println("y:"+y.calc());
+
+//求偏导值
+System.out.println("y/a:"+y.der(a));
+
+//结果
+y:0.9933071490757153
+y/a:0.006648056670790033
+```
+>本模块还提供Tanh函数的计算以及求导，用法跟Sigmoid类似。
+
+
 ## 1.3 复杂函数
 
 ### 1.3.1 组合复杂函数
