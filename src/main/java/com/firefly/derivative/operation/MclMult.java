@@ -22,16 +22,30 @@ public class MclMult extends OperationMultiple {
             val=1;
         }else{
             if(this.getParams()!=null && this.getParams().length>0){
+                double count=mclParams(null);//将所有参数相乘
                 for(Function param:this.getParams()){
                     if(param.isDx(dx)){
                         //mclParams装除了当前参数外的所有参数值相乘
-                        val+=this.derEx(param,dx,mclParams(param));
+                        val+=this.derEx(param,dx,count/param.calc());
                     }
                 }
             }
         }
 
         return val;
+    }
+
+    @Override
+    public double calc() {
+        double calcVal=0;
+        for(int i=0;i<this.getParams().length;i++){
+            if(i==0){
+                calcVal=this.getParams()[i].calc();
+            }else{
+                calcVal*=this.getParams()[i].calc();
+            }
+        }
+        return calcVal;
     }
 
     /**
@@ -53,9 +67,10 @@ public class MclMult extends OperationMultiple {
                 if(ret==0){
                     return ret;
                 }
+                i++;
             }
-            i++;
         }
         return ret;
     }
+
 }

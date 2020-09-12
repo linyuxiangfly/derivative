@@ -61,10 +61,6 @@ public class OperationMultiple implements Function {
 
     @Override
     public double calc() {
-        double calcVal=0;
-        for(int i=0;i<this.getParams().length;i++){
-            calcVal+=this.getParams()[i].calc();
-        }
-        return calcVal;
+        return 0;
     }
 }

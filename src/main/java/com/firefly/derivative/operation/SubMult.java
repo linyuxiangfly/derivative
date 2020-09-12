@@ -34,4 +34,17 @@ public class SubMult extends OperationMultiple {
 
         return val;
     }
+
+    @Override
+    public double calc() {
+        double calcVal=0;
+        for(int i=0;i<this.getParams().length;i++){
+            if(i==0){
+                calcVal=this.getParams()[i].calc();
+            }else{
+                calcVal-=this.getParams()[i].calc();
+            }
+        }
+        return calcVal;
+    }
 }

@@ -16,6 +16,11 @@ public class MainVerify {
         uvwxz();
 
         sin();
+
+        multAdd();
+        multSub();
+        multMcl();
+        multDiv();
     }
 
     private static void x3(){
@@ -195,6 +200,145 @@ public class MainVerify {
         show("y",y,v,Math.sin(w.calc()),Math.cos(w.calc()));
         show("y",y,a,Math.sin(w.calc()),Math.cos(w.calc())*(b.getVal()+(1/b.getVal())));
         show("y",y,b,Math.sin(w.calc()),Math.cos(w.calc())*(a.getVal()+(-a.getVal())/(b.getVal()*b.getVal())));
+        System.out.println();
+    }
+
+    private static void multAdd(){
+        System.out.println("multAdd##############################################");
+        Var a=new Var(2);
+        Var b=new Var(3);
+
+        //定义常量
+        Function[] params=new Function[]{
+                new Const(6),
+                new Mcl(a,b),
+                new Div(a,b),
+                new Const(4),
+                new Const(5),
+        };
+
+        //两个数相加
+        AddMult y=new AddMult(params);
+
+        //计算结果
+        System.out.println("y:"+y.calc());
+
+        //求偏导值
+        for(int i=0;i<params.length;i++){
+//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+            show("y/param["+i+"]:",y,params[i],y.calc(),1.0);
+        }
+        System.out.println();
+
+        show("y/a:",y,a,y.calc(),b.calc()+(1/b.calc()));
+        show("y/b:",y,b,y.calc(),a.calc()+(-a.calc()/(b.calc()*b.calc())));
+        System.out.println();
+    }
+
+    private static void multSub() {
+        System.out.println("multSub##############################################");
+        Var a=new Var(2);
+        Var b=new Var(3);
+
+        //定义常量
+        Function[] params=new Function[]{
+                new Const(6),
+                new Mcl(a,b),
+                new Div(a,b),
+                new Const(4),
+                new Const(5),
+        };
+
+        //两个数相减
+        SubMult y=new SubMult(params);
+
+        //计算结果
+        System.out.println("y:"+y.calc());
+
+        //求偏导值
+        for(int i=0;i<params.length;i++){
+//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+            show("y/param["+i+"]:",y,params[i],y.calc(),i==0?1.0:-1.0);
+        }
+        System.out.println();
+
+        show("y/a:",y,a,y.calc(),-b.calc()+(-1/b.calc()));
+        show("y/b:",y,b,y.calc(),-a.calc()+(a.calc()/(b.calc()*b.calc())));
+        System.out.println();
+    }
+
+    private static void multMcl() {
+        System.out.println("multMcl##############################################");
+        Var a=new Var(125);
+        Var b=new Var(3);
+
+        //定义常量
+        Function[] params=new Function[]{
+                new Const(6),
+                new Mcl(a,b),
+                new Div(a,b),
+                new Const(4),
+                new Const(5),
+        };
+
+        //两个数相乘
+        MclMult y=new MclMult(params);
+
+        //计算结果
+        System.out.println("y:"+y.calc());
+
+        //求偏导值
+        for(int i=0;i<params.length;i++){
+//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+            show("y/param["+i+"]:",y,params[i],y.calc(),y.calc()/params[i].calc());
+        }
+        System.out.println();
+
+        show("y/a:",y,a,y.calc(),(y.calc()/params[1].calc())*b.calc()+(y.calc()/params[2].calc())*(1.0/b.calc()));
+        show("y/b:",y,b,y.calc(),(y.calc()/params[1].calc())*a.calc()+(y.calc()/params[2].calc())*(-a.calc()/(b.calc()*b.calc())));
+        System.out.println();
+    }
+
+    private static void multDiv() {
+        System.out.println("multDiv##############################################");
+        Var a=new Var(123);
+        Var b=new Var(3);
+
+        //定义常量
+        Function[] params=new Function[]{
+                new Const(6),
+                new Mcl(a,b),
+                new Div(a,b),
+                new Const(4),
+                new Const(5),
+        };
+
+        //两个数相乘
+        DivMult y=new DivMult(params);
+
+        //计算结果
+        System.out.println("y:"+y.calc());
+
+        //计算共公部分，1/b*1/c*1/d*1/e
+        double pub=1;
+        for(int i=1;i<params.length;i++){
+            pub*=(1/params[i].calc());
+        }
+        //求偏导值
+        for(int i=0;i<params.length;i++){
+//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+            if(i==0){
+                show("y/param["+i+"]:",y,params[i],y.calc(),pub);
+            }else{
+                show("y/param["+i+"]:",y,params[i],y.calc(),-params[0].calc()*(pub/params[i].calc()));
+            }
+        }
+        System.out.println();
+
+        double y_p1=-params[0].calc()*(pub/params[1].calc());
+        double y_p2=-params[0].calc()*(pub/params[2].calc());
+        show("y/a:",y,a,y.calc(),y_p1*b.calc()+y_p2*(1/b.calc()));
+        show("y/b:",y,b,y.calc(),y_p1*a.calc()+y_p2*(-a.calc()/(b.calc()*b.calc())));
         System.out.println();
     }
 
