@@ -17,7 +17,7 @@ public class AddMult extends OperationMultiple {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
         if(this==dx){
             val=1;
@@ -25,7 +25,7 @@ public class AddMult extends OperationMultiple {
             if(this.getParams()!=null && this.getParams().length>0){
                 for(Function param:this.getParams()){
                     if(param.isDx(dx)){
-                        val+=this.derEx(param,dx,1.0);
+                        val+=this.prtGradEx(param,dx,1.0);
                     }
                 }
             }

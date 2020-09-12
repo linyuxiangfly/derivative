@@ -15,6 +15,6 @@ public class TestSin {
         System.out.println("y:"+y.calc());
 
         //求偏导值
-        System.out.println("y/a:"+y.der(a));
+        System.out.println("y/a:"+y.prtGrad(a));
     }
 }

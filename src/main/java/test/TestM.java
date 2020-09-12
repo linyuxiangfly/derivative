@@ -24,15 +24,15 @@ public class TestM {
         System.out.println("y:"+y.calc());
 
         //求偏导值
-        System.out.println("u/a:"+u.der(a));
-        System.out.println("u/b:"+u.der(b));
-        System.out.println("v/c:"+v.der(c));
-        System.out.println("v/d:"+v.der(d));
-        System.out.println("y/u:"+y.der(u));
-        System.out.println("y/v:"+y.der(v));
-        System.out.println("y/a:"+y.der(a));
-        System.out.println("y/b:"+y.der(b));
-        System.out.println("y/c:"+y.der(c));
-        System.out.println("y/d:"+y.der(d));
+        System.out.println("u/a:"+u.prtGrad(a));
+        System.out.println("u/b:"+u.prtGrad(b));
+        System.out.println("v/c:"+v.prtGrad(c));
+        System.out.println("v/d:"+v.prtGrad(d));
+        System.out.println("y/u:"+y.prtGrad(u));
+        System.out.println("y/v:"+y.prtGrad(v));
+        System.out.println("y/a:"+y.prtGrad(a));
+        System.out.println("y/b:"+y.prtGrad(b));
+        System.out.println("y/c:"+y.prtGrad(c));
+        System.out.println("y/d:"+y.prtGrad(d));
     }
 }

@@ -225,7 +225,7 @@ public class MainVerify {
 
         //求偏导值
         for(int i=0;i<params.length;i++){
-//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+//            System.out.println("y/param["+i+"]:"+y.prtGrad(params[i]));
             show("y/param["+i+"]:",y,params[i],y.calc(),1.0);
         }
         System.out.println();
@@ -257,7 +257,7 @@ public class MainVerify {
 
         //求偏导值
         for(int i=0;i<params.length;i++){
-//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+//            System.out.println("y/param["+i+"]:"+y.prtGrad(params[i]));
             show("y/param["+i+"]:",y,params[i],y.calc(),i==0?1.0:-1.0);
         }
         System.out.println();
@@ -289,7 +289,7 @@ public class MainVerify {
 
         //求偏导值
         for(int i=0;i<params.length;i++){
-//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+//            System.out.println("y/param["+i+"]:"+y.prtGrad(params[i]));
             show("y/param["+i+"]:",y,params[i],y.calc(),y.calc()/params[i].calc());
         }
         System.out.println();
@@ -326,7 +326,7 @@ public class MainVerify {
         }
         //求偏导值
         for(int i=0;i<params.length;i++){
-//            System.out.println("y/param["+i+"]:"+y.der(params[i]));
+//            System.out.println("y/param["+i+"]:"+y.prtGrad(params[i]));
             if(i==0){
                 show("y/param["+i+"]:",y,params[i],y.calc(),pub);
             }else{
@@ -342,14 +342,14 @@ public class MainVerify {
         System.out.println();
     }
 
-    public static void show(String title,Function function,Function dx,double verifyCalc,double verifyDer){
+    public static void show(String title,Function function,Function dx,double verifyCalc,double verifyPrtGrad){
         double calc=function.calc();
-        double der=function.der(dx);
+        double prtGrad=function.prtGrad(dx);
 
-        if(calc==verifyCalc && der==verifyDer){
-            System.out.println(title+",calc:"+calc+" der:"+der);
+        if(calc==verifyCalc && prtGrad==verifyPrtGrad){
+            System.out.println(title+",calc:"+calc+" prtGrad:"+prtGrad);
         }else{
-            System.out.println(title+",calc:"+calc+" verifyCalc:"+verifyCalc+" der:"+der+"   verifyDer:"+verifyDer+"            error!");
+            System.out.println(title+",calc:"+calc+" verifyCalc:"+verifyCalc+" prtGrad:"+prtGrad+"   verifyPrtGrad:"+verifyPrtGrad+"            error!");
         }
     }
 }

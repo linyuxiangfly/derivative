@@ -19,14 +19,14 @@ public class ArcCot extends OperationUnary {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
         if(this==dx){
             val=1;
         }else{
             if(this.getVal().isDx(dx)){
                 val=-1.0/(1.0+MathEx.pow(this.getVal().calc(),2));
-                val=derEx(
+                val=prtGradEx(
                         dx,
                         val
                 );

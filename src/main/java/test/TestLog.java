@@ -16,7 +16,7 @@ public class TestLog {
         System.out.println("y:"+y.calc());
 
         //求偏导值
-        System.out.println("y/a:"+y.der(a));
-        System.out.println("y/b:"+y.der(b));
+        System.out.println("y/a:"+y.prtGrad(a));
+        System.out.println("y/b:"+y.prtGrad(b));
     }
 }

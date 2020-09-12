@@ -22,7 +22,7 @@ public class Const implements Function {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         return isDx(dx)?
                 1:
                 0;

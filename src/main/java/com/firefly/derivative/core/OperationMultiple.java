@@ -49,13 +49,13 @@ public class OperationMultiple implements Function {
         return oldIsDx;
     }
 
-    protected double derEx(Function param,Function dx,double d){
-//        return d*(param.isDx(dx)?param.der(dx):1);
-        return d*param.der(dx);
+    protected double prtGradEx(Function param,Function dx,double d){
+//        return d*(param.isDx(dx)?param.prtGrad(dx):1);
+        return d*param.prtGrad(dx);
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         return 0;
     }
 

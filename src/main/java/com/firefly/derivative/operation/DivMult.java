@@ -16,7 +16,7 @@ public class DivMult extends OperationMultiple {
     }
 
     @Override
-    public double der(Function dx) {
+    public double prtGrad(Function dx) {
         double val=0;
         if(this==dx){
             val=1;
@@ -37,7 +37,7 @@ public class DivMult extends OperationMultiple {
                 for(int i=0;i<params.length;i++){
                     Function param=params[i];
                     if(param.isDx(dx)){
-                        val+=this.derEx(param,dx,
+                        val+=this.prtGradEx(param,dx,
                                 i==0?
                                         pub    //1/b*1/c*1/d*1/e
                                         :
