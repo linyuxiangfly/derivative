@@ -30,9 +30,9 @@ v.setVal(10);
 ### 1.2.3 基础双目操作符
 >Add类就是实现了加法的计算以及求偏导梯度，代码如下：
 ```
-//定义常量
-Const a=new Const(5);
-Const b=new Const(4);
+//定义变量
+Var a=new Var(5);
+Var b=new Var(4);
 //两个数相加
 Add y=new Add(a,b);
 
@@ -56,13 +56,13 @@ y/b:1.0
 Var a=new Var(4);
 Var b=new Var(5);
 
-//定义常量
+//定义变量
 Function[] params=new Function[]{
-        new Const(1),
+        new Var(1),
         new Mcl(a,b),
         new Div(a,b),
-        new Const(4),
-        new Const(5),
+        new Var(4),
+        new Var(5),
 };
 
 //两个数相加
@@ -94,7 +94,7 @@ y/b:3.84
 ### 1.2.5 指数、幂函数
 >Power类就是实现了指数、幂函数的计算以及偏导梯度，代码如下：
 ```
-//定义常量
+//定义变量
 Var a=new Var(5);
 Var b=new Var(3);
 //指数、幂函数
@@ -116,7 +116,7 @@ y/b:201.17973905426254
 ### 1.2.6 对数、自然对数函数
 >Log类就是实现了对数函数的计算以及偏导梯度，代码如下：
 ```
-//定义常量
+//定义变量
 Var a=new Var(5);
 Var b=new Var(3);
 //对数函数
@@ -137,7 +137,7 @@ y/b:201.17973905426254
 
 >Ln类就是实现了自然对数函数的计算以及偏导梯度，代码如下：
 ```
-//定义常量
+//定义变量
 Var a=new Var(5);
 //自然对数函数
 Ln y=new Ln(a);
@@ -156,7 +156,7 @@ y/a:0.2
 ### 1.2.7 三角函数
 >Sin类就是实现了三角函数sin的计算以及偏导梯度，代码如下：
 ```
-//定义常量
+//定义变量
 Var a=new Var(5);
 //sin函数
 Sin y=new Sin(a);
@@ -176,7 +176,7 @@ y/a:0.28366218546322625
 ### 1.2.8 复合函数
 >Sigmoid类就是实现sigmoid函数的计算以及偏导梯度，代码如下：
 ```
-//定义常量
+//定义变量
 Var a=new Var(5);
 //sigmoid函数
 Sigmoid y=new Sigmoid(a);
