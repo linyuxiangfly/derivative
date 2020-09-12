@@ -17,7 +17,7 @@ public class TestSubMult {
                 new Const(5),
         };
 
-        //多个数相加
+        //多个数相减
         SubMult y=new SubMult(params);
 
         //计算结果
