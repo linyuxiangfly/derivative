@@ -16,6 +16,10 @@ public class Const implements Function {
         this.val=val;
     }
 
+    public double getVal() {
+        return val;
+    }
+
     @Override
     public boolean isDx(Function dx) {
         return this==dx;
@@ -23,9 +27,7 @@ public class Const implements Function {
 
     @Override
     public double prtGrad(Function dx) {
-        return isDx(dx)?
-                1:
-                0;
+        return 0;
     }
 
     @Override

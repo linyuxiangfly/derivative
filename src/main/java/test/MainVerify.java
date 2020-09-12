@@ -210,11 +210,11 @@ public class MainVerify {
 
         //定义常量
         Function[] params=new Function[]{
-                new Const(6),
+                new Var(6),
                 new Mcl(a,b),
                 new Div(a,b),
-                new Const(4),
-                new Const(5),
+                new Var(4),
+                new Var(5),
         };
 
         //两个数相加
@@ -242,11 +242,11 @@ public class MainVerify {
 
         //定义常量
         Function[] params=new Function[]{
-                new Const(6),
+                new Var(6),
                 new Mcl(a,b),
                 new Div(a,b),
-                new Const(4),
-                new Const(5),
+                new Var(4),
+                new Var(5),
         };
 
         //两个数相减
@@ -274,11 +274,11 @@ public class MainVerify {
 
         //定义常量
         Function[] params=new Function[]{
-                new Const(6),
+                new Var(6),
                 new Mcl(a,b),
                 new Div(a,b),
-                new Const(4),
-                new Const(5),
+                new Var(4),
+                new Var(5),
         };
 
         //两个数相乘
@@ -306,11 +306,11 @@ public class MainVerify {
 
         //定义常量
         Function[] params=new Function[]{
-                new Const(6),
+                new Var(6),
                 new Mcl(a,b),
                 new Div(a,b),
-                new Const(4),
-                new Const(5),
+                new Var(4),
+                new Var(5),
         };
 
         //两个数相乘
