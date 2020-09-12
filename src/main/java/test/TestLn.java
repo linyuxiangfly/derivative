@@ -1,15 +1,15 @@
 package test;
 
-import com.firefly.derivative.operation.Div;
+import com.firefly.derivative.operation.Ln;
 import com.firefly.derivative.operation.Sin;
 import com.firefly.derivative.operation.Var;
 
-public class TestSin {
+public class TestLn {
     public static void main(String[] args){
         //定义常量
         Var a=new Var(5);
-        //sin函数
-        Sin y=new Sin(a);
+        //自然对数函数
+        Ln y=new Ln(a);
 
         //计算结果
         System.out.println("y:"+y.calc());
