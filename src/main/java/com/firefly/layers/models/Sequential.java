@@ -2,7 +2,7 @@ package com.firefly.layers.models;
 
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
-import com.firefly.layers.loss.Loss;
+import com.firefly.layers.core.Loss;
 
 import java.util.ArrayList;
 import java.util.List;

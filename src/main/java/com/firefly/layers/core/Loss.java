@@ -1,4 +1,4 @@
-package com.firefly.layers.loss;
+package com.firefly.layers.core;
 
 /**
  * 损失函数
