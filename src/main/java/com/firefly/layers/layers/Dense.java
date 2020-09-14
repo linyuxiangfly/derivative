@@ -1,52 +1,61 @@
 package com.firefly.layers.layers;
 
 import com.firefly.derivative.core.Function;
+import com.firefly.derivative.core.OperationUnary;
 import com.firefly.layers.core.Layer;
+import com.firefly.layers.core.Neuron;
+import com.firefly.layers.neuron.GeneralNeuron;
 
 /**
  * 全连接层
  */
 public class Dense implements Layer {
-    private Function[] x;
-    private Function[][] w;
-    private Function[] b;
+    private Neuron[] out;
 
     public Dense(){
 
     }
 
-    public Dense(Function[] x,Function[][] w,Function[] b){
-        this.x=x;
-        this.w=w;
-        this.b=b;
-    }
-
-    public Function[] getX() {
-        return x;
-    }
-
-    public void setX(Function[] x) {
-        this.x = x;
-    }
-
-    public Function[][] getW() {
-        return w;
-    }
-
-    public void setW(Function[][] w) {
-        this.w = w;
-    }
-
-    public Function[] getB() {
-        return b;
-    }
-
-    public void setB(Function[] b) {
-        this.b = b;
+    public Dense(int inputs,int units,Class<? extends OperationUnary> activationCls){
+        out=new Neuron[units];//输出单元数
+        for(int i=0;i<units;i++){
+            out[i]=new GeneralNeuron(inputs,activationCls);
+        }
     }
 
     @Override
-    public void fit(Function[] x, Function y) {
-
+    public void calc(double[] input,double[] out) {
+        for(int i=0;i<this.out.length;i++){
+            out[i]=this.out[i].calc(input);
+        }
     }
+
+    @Override
+    public void resetBackUpdateParamPrtGrad() {
+        for(int i=0;i<this.out.length;i++){
+            this.out[i].resetBackUpdateParamPrtGrad();
+        }
+    }
+
+    @Override
+    public void addBackUpdateParamPrtGrad(double[] prtGrad, double[] input) {
+        for(int i=0;i<this.out.length;i++){
+            this.out[i].addBackUpdateParamPrtGrad(prtGrad,input);
+        }
+    }
+
+    @Override
+    public void flushBackUpdateParamPrtGrad(double rate) {
+        for(int i=0;i<this.out.length;i++){
+            this.out[i].flushBackUpdateParamPrtGrad(rate);
+        }
+    }
+
+    @Override
+    public void backUpdateInputPrtGrad(double[] prtGrad, double[] input, double[] outPrtGrad) {
+        for(int i=0;i<this.out.length;i++){
+            this.out[i].backUpdateInputPrtGrad(prtGrad,input,outPrtGrad);
+        }
+    }
+
 }

@@ -2,62 +2,35 @@ package com.firefly.layers.neuron;
 
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationUnary;
-import com.firefly.derivative.operation.Add;
 import com.firefly.derivative.operation.AddMult;
 import com.firefly.derivative.operation.Mcl;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Neuron;
+import com.firefly.math.Linalg;
 
 /**
  * 一般的神经元
  * y=wx+b
  */
 public class GeneralNeuron implements Neuron {
-    private double[] x;
+    private int inputs;
+    private Class<? extends OperationUnary> activationCls;//激活函数
+
     private double[] w;
     private double b;
     private Var wxb=new Var();
-    private Class<? extends OperationUnary> activationCls;//激活函数
+    private Function activation;
 
-    private Function func;
+    private double[] diffW;
+    private double diffB;
 
     public GeneralNeuron(){
 
     }
 
-    public GeneralNeuron(double[] w,double b,Class<? extends OperationUnary> activationCls) {
-        this.w=w;
-        this.b=b;
+    public GeneralNeuron(int inputs,Class<? extends OperationUnary> activationCls) {
+        this.inputs=inputs;
         this.activationCls=activationCls;
-    }
-
-    /**
-     * 创建w*x以及b数组
-     * @param x
-     * @param w
-     * @return
-     */
-    private Function[] createWxb(Function[] x,Function[] w,Function b){
-        Function[] ret=new Function[x.length+1];
-        for(int i=0;i<x.length-1;i++){
-            ret[i]=new Mcl(x[i],w[i]);//w*x
-        }
-        ret[x.length-1]=b;
-        return ret;
-    }
-
-    /**
-     * 创建神经元函数
-     * @param activationCls 激活函数
-     * @param wxb
-     * @return
-     */
-    private Function createFunc(Class<? extends OperationUnary> activationCls, Function[] wxb) throws IllegalAccessException, InstantiationException {
-        Function add=new AddMult(wxb);//所有元素相加
-        //创建激活函数，以及设置值
-        OperationUnary ret=activationCls.newInstance();
-        ret.setVal(add);
-        return ret;
     }
 
     private Function createFunc(Class<? extends OperationUnary> activationCls, Function wxb) throws IllegalAccessException, InstantiationException {
@@ -91,67 +64,76 @@ public class GeneralNeuron implements Neuron {
         this.activationCls = activationCls;
     }
 
-    /**
-     * 如果参数中是否至少有一个要求偏导
-     * @param params
-     * @param dx
-     * @return
-     */
-    private boolean isDxParams(Function[] params,Function dx){
-        if(params!=null && params.length>0){
-            for(Function func:params){
-                if(func.isDx(dx)){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private Function oldDx;
-    private boolean oldIsDx;
-    @Override
-    public boolean isDx(Function dx) {
-        if(oldDx!=dx){
-            oldDx=dx;
-            oldIsDx=this==dx;
-        }
-        return oldIsDx;
-    }
-
-    @Override
-    public double prtGrad(Function dx) {
-        double val=0;
-//        if(this==dx){
-//            val=1;
-//        }else{
-//            if(this.getParams()!=null && this.getParams().length>0){
-//                for(Function param:this.getParams()){
-//                    if(param.isDx(dx)){
-//                        val+=this.prtGradEx(param,dx,1.0);
-//                    }
-//                }
-//            }
-//        }
-
-        return val;
-    }
-
-    @Override
-    public double calc() {
-        if(func!=null){
-            return func.calc();
-        }
-        return 0;
-    }
-
     @Override
     public void init() throws InstantiationException, IllegalAccessException {
-        func=createFunc(activationCls,wxb);
+        activation=createFunc(activationCls,wxb);
+        if(this.w==null){
+            this.w=new double[inputs];
+            this.diffW=new double[inputs];
+        }
     }
 
     @Override
-    public void backUpdatePrtGrad(double[] prtGrad) {
-        //todo
+    public double calc(double[] input) {
+        //wx+b
+        wxb.setVal(Linalg.inner(w,input)+b);
+        return activation.calc();
+    }
+
+    @Override
+    public void resetBackUpdateParamPrtGrad() {
+        //重置w的更新梯度
+        for(int j=0;j<diffW.length;j++){
+            diffW[j]=0;
+        }
+        //计算b的更新梯度
+        diffB=0;
+    }
+
+    @Override
+    public void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input) {
+        double dy_dwxb=activation.prtGrad(wxb);//激活函数与wx+b的偏导梯度
+
+        //计算w的更新梯度
+        for(int j=0;j<diffW.length;j++){
+            double dw=0;
+            for(int i=0;i<prtGrad.length;i++){
+                dw+=prtGrad[i]*dy_dwxb*input[j];
+            }
+            //累计参数w的更新值
+            diffW[j]+=dw;
+        }
+
+        //计算b的更新梯度
+        double db=0;
+        for(int i=0;i<prtGrad.length;i++){
+            db+=prtGrad[i]*dy_dwxb;
+        }
+        //累计参数b的更新值
+        diffB+=db;
+    }
+
+    @Override
+    public void flushBackUpdateParamPrtGrad(double rate) {
+        //计算w的更新梯度
+        for(int j=0;j<diffW.length;j++){
+            w[j]-=rate*diffW[j];
+        }
+        //计算b的更新梯度
+        b-=rate*diffB;
+    }
+
+    @Override
+    public void backUpdateInputPrtGrad(double[] prtGrad,double[] input,double[] outPrtGrad) {
+        double dy_dwxb=activation.prtGrad(wxb);//激活函数与wx+b的偏导梯度
+
+        //计算w的更新梯度
+        for(int j=0;j<input.length;j++){
+            double diffW=0;
+            for(int i=0;i<prtGrad.length;i++){
+                diffW+=prtGrad[i]*dy_dwxb*w[j];
+            }
+            outPrtGrad[j]+=diffW;
+        }
     }
 }

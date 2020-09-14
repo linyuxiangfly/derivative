@@ -14,5 +14,17 @@ public interface Model {
      * 编译
      * @param loss 损失函数
      */
-    void compile(Loss loss);
+    void setLoss(Loss loss);
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @param batchSize
+     */
+    void evaluate(double[] x, double[] y, int batchSize);
+
+    void predict(double x, int batchSize);
+
+    void fit();
 }

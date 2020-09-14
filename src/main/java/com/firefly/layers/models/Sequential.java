@@ -21,7 +21,22 @@ public class Sequential implements Model {
     }
 
     @Override
-    public void compile(Loss loss) {
+    public void setLoss(Loss loss) {
         this.loss=loss;
+    }
+
+    @Override
+    public void evaluate(double[] x, double[] y, int batchSize) {
+
+    }
+
+    @Override
+    public void predict(double x, int batchSize) {
+
+    }
+
+    @Override
+    public void fit() {
+
     }
 }
