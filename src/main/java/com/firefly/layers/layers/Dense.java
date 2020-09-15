@@ -10,21 +10,58 @@ import com.firefly.layers.neuron.GeneralNeuron;
  * 全连接层
  */
 public class Dense implements Layer {
+    private int inputs;
+    private int units;
+    private Class<? extends OperationUnary> activationCls;
+
     private Neuron[] out;
 
     public Dense(){
 
     }
 
+    public Dense(int units,Class<? extends OperationUnary> activationCls){
+        this.units=units;
+        this.activationCls=activationCls;
+    }
+
     public Dense(int inputs,int units,Class<? extends OperationUnary> activationCls){
+        this.inputs=inputs;
+        this.units=units;
+        this.activationCls=activationCls;
+    }
+
+    public int getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(int inputs) {
+        this.inputs = inputs;
+    }
+
+    public int getUnits() {
+        return units;
+    }
+
+    public void setUnits(int units) {
+        this.units = units;
+    }
+
+    @Override
+    public void init() {
         out=new Neuron[units];//输出单元数
         for(int i=0;i<units;i++){
             out[i]=new GeneralNeuron(inputs,activationCls);
+            try {
+                out[i].init();
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
         }
     }
 
     @Override
-    public void calc(double[] input,double[] out) {
+    public void calc(double[] input,double[] targetVal,double[] out) {
         for(int i=0;i<this.out.length;i++){
             out[i]=this.out[i].calc(input);
         }
@@ -38,9 +75,9 @@ public class Dense implements Layer {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(double[] prtGrad, double[] input) {
+    public void addBackUpdateParamPrtGrad(double[] prtGrad, double[] input,double[][] currentPrtGrad) {
         for(int i=0;i<this.out.length;i++){
-            this.out[i].addBackUpdateParamPrtGrad(prtGrad,input);
+            this.out[i].addBackUpdateParamPrtGrad(prtGrad,input,currentPrtGrad!=null?currentPrtGrad[i]:null);
         }
     }
 

@@ -12,9 +12,9 @@ public interface Model {
 
     /**
      * 编译
-     * @param loss 损失函数
+     * @param lossCls 损失函数
      */
-    void setLoss(Loss loss);
+    void setLossCls(Class<? extends Loss> lossCls);
 
     /**
      *
@@ -22,9 +22,9 @@ public interface Model {
      * @param y
      * @param batchSize
      */
-    void evaluate(double[] x, double[] y, int batchSize);
+    void evaluate(double[][] x, double[][] y, int batchSize);
 
-    void predict(double x, int batchSize);
+    double[] predict(double[] x);
 
-    void fit();
+    void fit(double[][] x, double[][] y, int epoch, int batchSize);
 }

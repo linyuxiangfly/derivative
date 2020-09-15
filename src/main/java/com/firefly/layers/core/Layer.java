@@ -6,11 +6,21 @@ import com.firefly.derivative.core.Function;
  * 网络层
  */
 public interface Layer {
+    int getInputs();
+
+    void setInputs(int inputs);
+
+    int getUnits();
+
+    void setUnits(int units);
+
+    void init();
+
     /**
      * 正向计算
      * @param input
      */
-    void calc(double[] input,double[] out);
+    void calc(double[] input,double[] targetVal,double[] out);
 
     /**
      * 重置反向更新参数梯度
@@ -22,7 +32,7 @@ public interface Layer {
      * @param prtGrad 下一层的梯度
      * @param input 输入值
      */
-    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input);
+    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[][] currentPrtGrad);
 
     /**
      * 更新参数梯度

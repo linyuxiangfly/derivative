@@ -69,6 +69,9 @@ public class GeneralNeuron implements Neuron {
         activation=createFunc(activationCls,wxb);
         if(this.w==null){
             this.w=new double[inputs];
+            for(int i=0;i<this.w.length;i++){
+                this.w[i]=Math.random();
+            }
             this.diffW=new double[inputs];
         }
     }
@@ -91,7 +94,7 @@ public class GeneralNeuron implements Neuron {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input) {
+    public void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[] currentPrtGrad) {
         double dy_dwxb=activation.prtGrad(wxb);//激活函数与wx+b的偏导梯度
 
         //计算w的更新梯度
@@ -102,6 +105,15 @@ public class GeneralNeuron implements Neuron {
             }
             //累计参数w的更新值
             diffW[j]+=dw;
+        }
+
+        if(currentPrtGrad!=null){
+            //计算x的更新梯度
+            for(int j=0;j<input.length;j++){
+                for(int i=0;i<prtGrad.length;i++){
+                    currentPrtGrad[j]+=prtGrad[i]*dy_dwxb*w[j];
+                }
+            }
         }
 
         //计算b的更新梯度
