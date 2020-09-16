@@ -3,6 +3,7 @@ package com.firefly.layers.models;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.core.Loss;
+import com.firefly.layers.listeners.LossCallBackListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ public class Sequential implements Model {
     }
 
     @Override
-    public void fit(double[][] x, double[][] y, int epoch, int batchSize) {
+    public void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener listener) {
         int num=x.length/batchSize;
         int mod=x.length%batchSize;
         num+=mod>0?1:0;
@@ -86,9 +87,12 @@ public class Sequential implements Model {
 
                     double[] lastLayerOut=layersOut.get(layersOut.size()-1);
 
-                    loss.calc(lastLayerOut,y[i],lossOut);
-                    //累计识差
-                    lossVal+=lossOut[0];
+                    //如果要回调损失
+                    if(listener!=null){
+                        loss.calc(lastLayerOut,y[i],lossOut);
+                        //累计识差
+                        lossVal+=lossOut[0];
+                    }
 
                     //损失函数/输入参数的梯度
                     double[] lossPrtGrad=loss.prtGrad(lastLayerOut,y[i]);
@@ -116,7 +120,10 @@ public class Sequential implements Model {
                 }
             }
 
-            System.out.println(String.format("%.10f", lossVal));
+            //回调损失
+            if(listener!=null){
+                listener.onLoss(lossVal);
+            }
         }
     }
 

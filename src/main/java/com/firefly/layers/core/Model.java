@@ -1,5 +1,7 @@
 package com.firefly.layers.core;
 
+import com.firefly.layers.listeners.LossCallBackListener;
+
 /**
  * 模块
  */
@@ -26,5 +28,5 @@ public interface Model {
 
     double[] predict(double[] x);
 
-    void fit(double[][] x, double[][] y, int epoch, int batchSize);
+    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener listener);
 }

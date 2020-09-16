@@ -3,6 +3,7 @@ package test;
 import com.firefly.derivative.operation.Sigmoid;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 
@@ -148,7 +149,12 @@ public class TestNN {
         //识差函数
         model.setLossCls(Mse.class);
 
-        model.fit(x,y,10000,x.length);
+        model.fit(x, y, 10000, x.length, new LossCallBackListener() {
+            @Override
+            public void onLoss(double val) {
+                System.out.println(String.format("%.10f", val));
+            }
+        });
 
         for(int i=0;i<x.length;i++){
             double[] py=model.predict(x[i]);
