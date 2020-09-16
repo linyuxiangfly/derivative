@@ -20,7 +20,7 @@ public interface Layer {
      * 正向计算
      * @param input
      */
-    void calc(double[] input,double[] targetVal,double[] out);
+    void calc(double[] input,double[] out);
 
     /**
      * 重置反向更新参数梯度

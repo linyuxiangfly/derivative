@@ -142,12 +142,24 @@ public class TestNN {
                 {0,1}
         };
 
-        Model model=new Sequential(0.01);
+        Model model=new Sequential(0.1);
         model.add(new Dense(12,3, Sigmoid.class));
         model.add(new Dense(2, Sigmoid.class));
         //识差函数
         model.setLossCls(Mse.class);
 
-        model.fit(x,y,100000,x.length);
+        model.fit(x,y,10000,x.length);
+
+        for(int i=0;i<x.length;i++){
+            double[] py=model.predict(x[i]);
+            for(int j=0;j<py.length;j++){
+                System.out.print(String.format("%.10f   ", py[j]));
+            }
+            for(int j=0;j<y[i].length;j++){
+                System.out.print(String.format("%.10f   ", y[i][j]));
+            }
+            System.out.println();
+        }
+
     }
 }

@@ -94,7 +94,7 @@ public class Dense implements Layer {
     }
 
     @Override
-    public void calc(double[] input,double[] targetVal,double[] out) {
+    public void calc(double[] input,double[] out) {
         for(int i=0;i<this.outs.length;i++){
             //sigmoid(wx+b)
             wxb[i].setVal(Linalg.inner(w[i],input)+b[i]);

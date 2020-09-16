@@ -41,7 +41,15 @@ public class Sequential implements Model {
 
     @Override
     public double[] predict(double[] x) {
-        return null;
+        for(int li=0;li<layers.size();li++){
+            Layer layer=layers.get(li);
+            if(li==0){
+                layer.calc(x,layersOut.get(li));
+            }else{
+                layer.calc(layersOut.get(li-1),layersOut.get(li));
+            }
+        }
+        return layersOut.get(layersOut.size()-1);
     }
 
     @Override
@@ -70,9 +78,9 @@ public class Sequential implements Model {
                         Layer layer=layers.get(li);
                         layer.resetBackUpdateParamPrtGrad();//重置临时梯度变量
                         if(li==0){
-                            layer.calc(x[i],y[i],layersOut.get(li));
+                            layer.calc(x[i],layersOut.get(li));
                         }else{
-                            layer.calc(layersOut.get(li-1),y[i],layersOut.get(li));
+                            layer.calc(layersOut.get(li-1),layersOut.get(li));
                         }
                     }
 
@@ -139,9 +147,8 @@ public class Sequential implements Model {
 
         try {
             loss=lossCls.newInstance();
-            loss.setInputs(lastUnits);
             //创建输出数
-            lossOut=new double[loss.getUnits()];
+            lossOut=new double[1];
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
