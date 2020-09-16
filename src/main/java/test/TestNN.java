@@ -148,6 +148,6 @@ public class TestNN {
         //识差函数
         model.setLossCls(Mse.class);
 
-        model.fit(x,y,10000,10);
+        model.fit(x,y,100000,x.length);
     }
 }

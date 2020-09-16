@@ -32,7 +32,7 @@ public interface Layer {
      * @param prtGrad 下一层的梯度
      * @param input 输入值
      */
-    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[][] currentPrtGrad);
+    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[] currentPrtGrad);
 
     /**
      * 更新参数梯度

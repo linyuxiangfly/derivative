@@ -47,7 +47,7 @@ public class Mse implements Loss {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(double[] prtGrad, double[] input,double[][] currentPrtGrad) {
+    public void addBackUpdateParamPrtGrad(double[] prtGrad, double[] input,double[] currentPrtGrad) {
 
     }
 

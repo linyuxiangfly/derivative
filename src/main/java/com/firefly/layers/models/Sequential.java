@@ -10,7 +10,7 @@ import java.util.List;
 public class Sequential implements Model {
     private List<Layer> layers;
     private List<double[]> layersOut;
-    private List<double[][]> layersInputPrtGrad;//每层的识差/输入的梯度
+    private List<double[]> layersInputPrtGrad;//每层的识差/输入的梯度
     private Loss loss;
     private double[] lossOut;
     private double rate;
@@ -56,12 +56,16 @@ public class Sequential implements Model {
 
         //训练次数
         for(int en=0;en<epoch;en++){
+
+            double lossVal=0;
+
             //分批训练，分成多少批
             for(int n=0;n<num;n++){
                 //循环每批数据
                 int bs=(n==num-1)?lastSize:batchSize;
                 //偏移每批的的位置进行训练
                 for(int i=n*batchSize;i<n*batchSize+bs;i++){
+                    resetLayersInputPrtGrad();//重置每层的损失函数/输入参数偏导梯度
                     for(int li=0;li<layers.size();li++){
                         Layer layer=layers.get(li);
                         layer.resetBackUpdateParamPrtGrad();//重置临时梯度变量
@@ -75,7 +79,8 @@ public class Sequential implements Model {
                     double[] lastLayerOut=layersOut.get(layersOut.size()-1);
 
                     loss.calc(lastLayerOut,y[i],lossOut);
-                    System.out.println(lossOut[0]);
+                    //累计识差
+                    lossVal+=lossOut[0];
 
                     //损失函数/输入参数的梯度
                     double[] lossPrtGrad=loss.prtGrad(lastLayerOut,y[i]);
@@ -83,33 +88,27 @@ public class Sequential implements Model {
                         Layer layer=layers.get(li);
 
                         double[] currentInput=null;
-                        if(li==layers.size()-1){
-                            if(li==0){
-                                currentInput=x[i];
-                            }else{
-                                currentInput=layersOut.get(li-1);
-                            }
+                        if(li==0){
+                            currentInput=x[i];
+                        }else{
+                            currentInput=layersOut.get(li-1);
+                        }
 
+                        if(li==layers.size()-1){
                             layer.addBackUpdateParamPrtGrad(lossPrtGrad,currentInput,layersInputPrtGrad.get(li));
                         }else{
-                            if(li==0){
-                                currentInput=x[i];
-                            }else{
-                                currentInput=layersOut.get(li-1);
-                            }
-
-                            for(double[] lPrtGrad:layersInputPrtGrad.get(li+1)){
-                                layer.addBackUpdateParamPrtGrad(lPrtGrad,currentInput,layersInputPrtGrad.get(li));
-                            }
+                            layer.addBackUpdateParamPrtGrad(layersInputPrtGrad.get(li+1),currentInput,layersInputPrtGrad.get(li));
                         }
                     }
-                }
 
-                for(int li=0;li<layers.size();li++){
-                    Layer layer=layers.get(li);
-                    layer.flushBackUpdateParamPrtGrad(rate);
+                    for(int li=0;li<layers.size();li++){
+                        Layer layer=layers.get(li);
+                        layer.flushBackUpdateParamPrtGrad(rate);
+                    }
                 }
             }
+
+            System.out.println(String.format("%.10f", lossVal));
         }
     }
 
@@ -131,7 +130,7 @@ public class Sequential implements Model {
             if(i==0){
                 layersInputPrtGrad.add(null);
             }else{
-                layersInputPrtGrad.add(new double[layer.getUnits()][layer.getInputs()]);
+                layersInputPrtGrad.add(new double[layer.getInputs()]);
             }
 
             layer.init();
@@ -145,6 +144,19 @@ public class Sequential implements Model {
             lossOut=new double[loss.getUnits()];
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    /**
+     * 重置每层的损失函数/输入参数偏导梯度
+     */
+    private void resetLayersInputPrtGrad(){
+        for(double[] datas:layersInputPrtGrad){
+            if(datas!=null){
+                for(int i=0;i<datas.length;i++){
+                    datas[i]=0;
+                }
+            }
         }
     }
 }

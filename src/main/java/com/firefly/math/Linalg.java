@@ -227,4 +227,34 @@ public class Linalg {
         }
         return ret;
     }
+
+    /**
+     * 向量内积
+     * @param a
+     * @param b
+     * @param rowToCol
+     * @return
+     */
+    public static double[] inner(double[][] a,double[] b,boolean rowToCol){
+        if(rowToCol){
+            return inner(rowToCol(a),b);
+        }else{
+            return inner(a,b);
+        }
+    }
+
+    /**
+     * 行转列
+     * @param vals
+     * @return
+     */
+    private static double[][] rowToCol(double[][] vals){
+        double[][] ret=new double[vals[0].length][vals.length];
+        for(int i=0;i<vals.length;i++){
+            for(int j=0;j<vals[i].length;j++){
+                ret[j][i]=vals[i][j];
+            }
+        }
+        return ret;
+    }
 }
