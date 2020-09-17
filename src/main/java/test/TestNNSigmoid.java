@@ -1,13 +1,14 @@
 package test;
 
 import com.firefly.derivative.operation.Sigmoid;
+import com.firefly.derivative.operation.Softmax;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 
-public class TestNN {
+public class TestNNSigmoid {
     public static void main(String[] args){
         double[][] x=new double[][]{
                 {1,1,1,1,0,1,1,0,1,1,1,1},

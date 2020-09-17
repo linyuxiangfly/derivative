@@ -1,12 +1,13 @@
 package com.firefly.derivative.operation;
 
 import com.firefly.derivative.core.Function;
+import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.core.OperationUnary;
 
 /**
  * sigmoid
  */
-public class Sigmoid extends OperationUnary {
+public class Sigmoid extends OperationActivation {
     private double val=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Sigmoid(){

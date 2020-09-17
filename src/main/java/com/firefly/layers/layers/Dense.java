@@ -1,6 +1,7 @@
 package com.firefly.layers.layers;
 
 import com.firefly.derivative.core.Function;
+import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.core.OperationUnary;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
@@ -14,7 +15,7 @@ import com.firefly.math.Linalg;
 public class Dense implements Layer {
     private int inputs;
     private int units;
-    private Class<? extends OperationUnary> activationCls;
+    private Class<? extends OperationActivation> activationCls;
 
     private double[][] w;
     private double[] b;
@@ -22,18 +23,18 @@ public class Dense implements Layer {
     private double[] diffB;
 
     private Var[] wxb;
-    private OperationUnary[] outs;
+    private OperationActivation[] outs;
 
     public Dense(){
 
     }
 
-    public Dense(int units,Class<? extends OperationUnary> activationCls){
+    public Dense(int units,Class<? extends OperationActivation> activationCls){
         this.units=units;
         this.activationCls=activationCls;
     }
 
-    public Dense(int inputs,int units,Class<? extends OperationUnary> activationCls){
+    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls){
         this.inputs=inputs;
         this.units=units;
         this.activationCls=activationCls;
@@ -80,13 +81,14 @@ public class Dense implements Layer {
     }
 
     private void initFunc(){
-        outs=new OperationUnary[units];//输出单元数
+        outs=new OperationActivation[units];//输出单元数
         wxb=new Var[units];
         for(int i=0;i<units;i++){
             try {
                 wxb[i]=new Var();
                 outs[i]=activationCls.newInstance();
                 outs[i].setVal(wxb[i]);
+                outs[i].setRelations(wxb);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
             }
