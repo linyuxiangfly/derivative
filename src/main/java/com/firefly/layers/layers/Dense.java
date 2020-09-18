@@ -75,6 +75,22 @@ public class Dense implements Layer {
         this.units = units;
     }
 
+    public double[][] getW() {
+        return w;
+    }
+
+    public void setW(double[][] w) {
+        this.w = w;
+    }
+
+    public double[] getB() {
+        return b;
+    }
+
+    public void setB(double[] b) {
+        this.b = b;
+    }
+
     @Override
     public void init() {
         w=new double[units][inputs];

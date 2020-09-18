@@ -5,7 +5,7 @@ import com.firefly.derivative.core.Function;
 /**
  * 损失函数
  */
-public interface Loss{
+public interface Loss extends java.io.Serializable{
     /**
      * 偏梯度
      * @param input 输入参数

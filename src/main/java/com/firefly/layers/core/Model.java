@@ -3,10 +3,12 @@ package com.firefly.layers.core;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 
+import java.util.List;
+
 /**
  * 模块
  */
-public interface Model {
+public interface Model extends java.io.Serializable{
     /**
      * 添加层
      * @param layer 层对象
@@ -14,10 +16,27 @@ public interface Model {
     void add(Layer layer);
 
     /**
+     * 移除层
+     * @param layer
+     */
+    void remove(Layer layer);
+
+    /**
+     * 获取所有层
+     * @return
+     */
+    List<Layer> getLayers();
+
+    /**
      * 编译
      * @param lossCls 损失函数
      */
     void setLossCls(Class<? extends Loss> lossCls);
+
+    /**
+     * 初始化
+     */
+    void init();
 
     /**
      *

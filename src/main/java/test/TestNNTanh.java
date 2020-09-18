@@ -149,6 +149,7 @@ public class TestNNTanh {
         model.add(new Dense(12,2, Tanh.class,new InitParamsRandomGaussian()));//使用softmax激活函数
         //识差函数
         model.setLossCls(Mse.class);
+        model.init();
 
         model.fit(x, y, 10000, 10, new LossCallBackListener() {
             @Override

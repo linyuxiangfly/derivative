@@ -48,6 +48,7 @@ public class TestNNLeakyRelu {
         model.add(new Dense(1,1, LRelu.class,new Function[]{new Const(0.01)}));
         //识差函数
         model.setLossCls(Mse.class);
+        model.init();
 
         model.fit(x, y, 10000, 20, new LossCallBackListener() {
             @Override

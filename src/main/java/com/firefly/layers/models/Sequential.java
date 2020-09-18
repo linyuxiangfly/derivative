@@ -32,6 +32,16 @@ public class Sequential implements Model {
     }
 
     @Override
+    public void remove(Layer layer) {
+        layers.remove(layer);
+    }
+
+    @Override
+    public List<Layer> getLayers() {
+        return layers;
+    }
+
+    @Override
     public void setLossCls(Class<? extends Loss> lossCls) {
         this.lossCls=lossCls;
     }
@@ -43,6 +53,11 @@ public class Sequential implements Model {
 
     @Override
     public double[] predict(double[] x) {
+        //初始化层输出中间结果
+        if(layers.size()!=layersOut.size()){
+            initLayersOut();
+        }
+
         for(int li=0;li<layers.size();li++){
             Layer layer=layers.get(li);
             if(li==0){
@@ -106,6 +121,10 @@ public class Sequential implements Model {
         }
     }
 
+    public void init(){
+        //初始化层
+        initLayers(layers,lossCls);
+    }
 
     @Override
     public void fit(double[][] x, double[][] y, int epoch, int batchSize) {
@@ -123,9 +142,6 @@ public class Sequential implements Model {
         int mod=x.length%batchSize;
         num+=mod>0?1:0;
         int lastSize=mod==0?batchSize:mod;
-
-        //初始化层
-        initLayers(layers,lossCls);
 
         //训练次数
         for(int en=0;en<epoch;en++){
@@ -179,14 +195,25 @@ public class Sequential implements Model {
         }
     }
 
-    private void initLayers(List<Layer> layers,Class<? extends Loss> lossCls){
+    /**
+     * 初始化层输出中间结果
+     */
+    private void initLayersOut(){
         layersOut.clear();
+        for(int i=0;i<layers.size();i++){
+            Layer layer=layers.get(i);
+            layersOut.add(new double[layer.getUnits()]);
+        }
+    }
+
+    private void initLayers(List<Layer> layers,Class<? extends Loss> lossCls){
+        //初始化层输出中间结果
+        initLayersOut();
 
         //初始化层
         int lastUnits=0;
         for(int i=0;i<layers.size();i++){
             Layer layer=layers.get(i);
-            layersOut.add(new double[layer.getUnits()]);
 
             //第二层开始都是继承上层的输出个数
             if(i>0){

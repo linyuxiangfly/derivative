@@ -5,7 +5,7 @@ import com.firefly.derivative.core.Function;
 /**
  * 网络层
  */
-public interface Layer {
+public interface Layer extends java.io.Serializable{
     int getInputs();
 
     void setInputs(int inputs);
@@ -13,6 +13,14 @@ public interface Layer {
     int getUnits();
 
     void setUnits(int units);
+
+    double[][] getW();
+
+    void setW(double[][] w);
+
+    double[] getB();
+
+    void setB(double[] b);
 
     void init();
 

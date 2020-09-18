@@ -3,7 +3,7 @@ package com.firefly.layers.listeners;
 /**
  * 初始化参数事件
  */
-public interface InitParamsListener {
+public interface InitParamsListener extends java.io.Serializable{
     void paramWSize(int row,int col);
     void paramBSize(int row);
 
