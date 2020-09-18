@@ -3,7 +3,7 @@ package com.firefly.derivative.core;
 /**
  * 函数
  */
-public interface Function{
+public interface Function extends java.io.Serializable{
     boolean isDx(Function dx);
 
     /**

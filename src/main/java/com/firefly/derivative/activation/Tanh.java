@@ -1,23 +1,24 @@
-package com.firefly.derivative.operation;
+package com.firefly.derivative.activation;
 
 import com.firefly.derivative.core.Function;
+import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.core.OperationUnary;
 
 /**
- * sigmoid
+ * tanh
  */
-public class Sigmoid extends OperationUnary {
+public class Tanh extends OperationActivation {
     private double val=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
-    public Sigmoid(){
+    public Tanh(){
 
     }
 
-    public Sigmoid(double val) {
+    public Tanh(double val) {
         super(val);
     }
 
-    public Sigmoid(Function val){
+    public Tanh(Function val){
         super(val);
     }
 
@@ -30,7 +31,7 @@ public class Sigmoid extends OperationUnary {
         }else{
             if(this.getVal().isDx(dx)){
                 double fv=calc();
-                val=fv*(1-fv);
+                val=1-fv*fv;
                 val=prtGradEx(
                         dx,
                         val
@@ -46,7 +47,10 @@ public class Sigmoid extends OperationUnary {
         double v=this.getVal().calc();
         if(val!=v){
             val=v;
-            calcVal=1/(1+Math.exp(-v));
+            double ex=Math.exp(v);
+            double ex_=Math.exp(-v);
+
+            calcVal=(ex-ex_)/(ex+ex_);
         }
         return calcVal;
     }
