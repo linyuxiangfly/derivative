@@ -4,6 +4,7 @@ import com.firefly.derivative.activation.Sigmoid;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
@@ -150,12 +151,24 @@ public class TestNNSigmoid {
         //识差函数
         model.setLossCls(Mse.class);
 
-        model.fit(x, y, 10000, 10, new LossCallBackListener() {
-            @Override
-            public void onLoss(double val) {
-                System.out.println(String.format("%.10f", val));
-            }
-        });
+        model.fit(x, y, 10000, 10,
+                new LossCallBackListener() {
+                    @Override
+                    public void onLoss(double val) {
+                        System.out.println(String.format("%.10f", val));
+                    }
+                },
+                new FitControl() {
+                    @Override
+                    public boolean onIsStop(int epoch, double loss) {
+                        if(loss<=0.001){
+                            System.out.println("第"+epoch+"次训练，满足条件自动退出训练！");
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+        );
 
         for(int i=0;i<x.length;i++){
             double[] py=model.predict(x[i]);

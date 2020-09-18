@@ -16,7 +16,7 @@ public class Relu extends OperationActivation {
         }else{
             if(this.getVal().isDx(dx)){
                 double v=this.getVal().calc();
-                val=v>=0?1:0;
+                val=v>0?1:0;
                 val=prtGradEx(
                         dx,
                         val
@@ -31,6 +31,6 @@ public class Relu extends OperationActivation {
     public double calc() {
         double v=this.getVal().calc();
         //f(v)=max(0,v)
-        return v>=0?v:0;
+        return v>0?v:0;
     }
 }

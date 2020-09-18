@@ -1,5 +1,6 @@
 package com.firefly.layers.core;
 
+import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 
 /**
@@ -28,5 +29,9 @@ public interface Model {
 
     double[] predict(double[] x);
 
-    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener listener);
+    void fit(double[][] x, double[][] y, int epoch, int batchSize);
+
+    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener);
+
+    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl);
 }

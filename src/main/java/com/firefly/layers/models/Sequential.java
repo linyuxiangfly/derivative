@@ -3,6 +3,7 @@ package com.firefly.layers.models;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.core.Loss;
+import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 
 import java.util.ArrayList;
@@ -105,8 +106,19 @@ public class Sequential implements Model {
         }
     }
 
+
     @Override
-    public void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener listener) {
+    public void fit(double[][] x, double[][] y, int epoch, int batchSize) {
+        fit(x,y,epoch,batchSize,null);
+    }
+
+    @Override
+    public void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener) {
+        fit(x,y,epoch,batchSize,lossCallBackListener,null);
+    }
+
+    @Override
+    public void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl) {
         int num=x.length/batchSize;
         int mod=x.length%batchSize;
         num+=mod>0?1:0;
@@ -136,7 +148,7 @@ public class Sequential implements Model {
                     double[] lastLayerOut=calcAllLayers(x[i]);
 
                     //如果要回调损失
-                    if(listener!=null){
+                    if(lossCallBackListener!=null || fitControl!=null){
                         loss.calc(lastLayerOut,y[i],lossOut);
                         //累计识差
                         lossVal+=lossOut[0];
@@ -154,8 +166,15 @@ public class Sequential implements Model {
             }
 
             //回调损失
-            if(listener!=null){
-                listener.onLoss(lossVal);
+            if(lossCallBackListener!=null){
+                lossCallBackListener.onLoss(lossVal);
+            }
+            //拟合过程控制
+            if(fitControl!=null){
+                //如果要停止则退出循环
+                if(fitControl.onIsStop(en,lossVal)){
+                    break;
+                }
             }
         }
     }
