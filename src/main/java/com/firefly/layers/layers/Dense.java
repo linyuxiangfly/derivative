@@ -184,19 +184,4 @@ public class Dense implements Layer {
         }
     }
 
-    @Override
-    public void backUpdateInputPrtGrad(double[] prtGrad, double[] input, double[] outPrtGrad) {
-//        for(int i=0;i<this.outs.length;i++){
-//            double dloss_dwxb=prtGrad[i]*outs[i].prtGrad(wxb[i]);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
-//
-//            //累计输入参数的更新值
-//            if(outPrtGrad!=null){
-//                //计算x的更新梯度
-//                for(int j=0;j<input.length;j++){
-//                    outPrtGrad[i][j]+=dloss_dwxb*w[i][j];
-//                }
-//            }
-//        }
-    }
-
 }

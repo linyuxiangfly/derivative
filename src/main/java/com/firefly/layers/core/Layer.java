@@ -31,6 +31,7 @@ public interface Layer {
      * 累加反向更新参数梯度
      * @param prtGrad 下一层的梯度
      * @param input 输入值
+     * @param currentPrtGrad 识差函数/当前层的输入的梯度
      */
     void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[] currentPrtGrad);
 
@@ -40,11 +41,4 @@ public interface Layer {
      */
     void flushBackUpdateParamPrtGrad(double rate);
 
-    /**
-     * 反向更新输入变量梯度
-     * @param prtGrad 下一层的梯度
-     * @param input 输入值
-     * @param outPrtGrad 输出梯度值
-     */
-    void backUpdateInputPrtGrad(double[] prtGrad,double[] input,double[] outPrtGrad);
 }
