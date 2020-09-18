@@ -31,7 +31,7 @@ public class Dense implements Layer {
     }
 
     public Dense(int units, Class<? extends OperationActivation> activationCls){
-        this(units,activationCls,null);
+        this(units,activationCls,(InitParamsListener)null);
     }
 
     public Dense(int units, Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
@@ -42,9 +42,16 @@ public class Dense implements Layer {
         this(inputs,units,activationCls,(Function[])null);
     }
 
+    public Dense(int units,Class<? extends OperationActivation> activationCls, Function[] activationSettings){
+        this(0,units,activationCls,activationSettings,null);
+    }
 
     public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, Function[] activationSettings){
         this(inputs,units,activationCls,activationSettings,null);
+    }
+
+    public Dense(int units,Class<? extends OperationActivation> activationCls,Function[] activationSettings, InitParamsListener initParamsListener){
+        this(0,units,activationCls,activationSettings,initParamsListener);
     }
 
     public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){

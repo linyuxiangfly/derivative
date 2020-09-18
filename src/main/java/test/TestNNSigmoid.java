@@ -259,7 +259,7 @@ public class TestNNSigmoid {
         System.out.println("{");
         for(int j=0;j<vals.length;j++){
             System.out.print("{");
-            for(int i=0;i<vals.length;i++){
+            for(int i=0;i<vals[j].length;i++){
                 if(i==0){
                     System.out.print(vals[j][i]);
                 }else{
