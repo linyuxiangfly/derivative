@@ -1,6 +1,7 @@
 package test;
 
 import com.firefly.derivative.activation.Softmax;
+import com.firefly.derivative.activation.Tanh;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
@@ -8,7 +9,7 @@ import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 
-public class TestNNSoftmax {
+public class TestNNTanh {
     public static void main(String[] args){
         double[][] x=new double[][]{
                 {1,1,1,1,0,1,1,0,1,1,1,1},
@@ -144,8 +145,8 @@ public class TestNNSoftmax {
                 {0,1}
         };
 
-        Model model=new Sequential(0.1);
-        model.add(new Dense(12,2, Softmax.class,new InitParamsRandomGaussian()));//使用softmax激活函数
+        Model model=new Sequential(0.001);
+        model.add(new Dense(12,2, Tanh.class,new InitParamsRandomGaussian()));//使用softmax激活函数
         //识差函数
         model.setLossCls(Mse.class);
 

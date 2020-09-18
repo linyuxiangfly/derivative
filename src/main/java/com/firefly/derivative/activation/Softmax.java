@@ -1,4 +1,4 @@
-package com.firefly.derivative.operation;
+package com.firefly.derivative.activation;
 
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;

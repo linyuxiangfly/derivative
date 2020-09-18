@@ -1,5 +1,6 @@
 package test;
 
+import com.firefly.derivative.activation.Sigmoid;
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.operation.*;
 

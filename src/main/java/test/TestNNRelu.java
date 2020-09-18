@@ -1,14 +1,13 @@
 package test;
 
-import com.firefly.derivative.operation.Relu;
-import com.firefly.derivative.operation.Sigmoid;
+import com.firefly.derivative.activation.Relu;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 
-public class TestNN2 {
+public class TestNNRelu {
     public static void main(String[] args){
         //二维数组，第1列是x,第二列是y
         double[][] datas=new double[][]{
@@ -43,13 +42,12 @@ public class TestNN2 {
             y[i][0]=datas[i][1]/100.0;
         }
 
-        Model model=new Sequential(0.007);
+        Model model=new Sequential(0.04);
         model.add(new Dense(1,1, Relu.class));
-//        model.add(new Dense(1, Sigmoid.class));
         //识差函数
         model.setLossCls(Mse.class);
 
-        model.fit(x, y, 100000, 20, new LossCallBackListener() {
+        model.fit(x, y, 10000, 20, new LossCallBackListener() {
             @Override
             public void onLoss(double val) {
                 System.out.println(String.format("%.10f", val));
@@ -58,8 +56,8 @@ public class TestNN2 {
 
         for(int i=0;i<x.length;i++){
             double[] py=model.predict(x[i]);
-            System.out.print(String.format("%.10f   ", py[0]));
-            System.out.print(String.format("%.10f   ", y[i][0]));
+            System.out.print(String.format("%.2f   ", py[0]*100));
+            System.out.print(String.format("%.2f   ", y[i][0]*100));
             System.out.println();
         }
 

@@ -1,7 +1,6 @@
 package test;
 
-import com.firefly.derivative.operation.Sigmoid;
-import com.firefly.derivative.operation.Softmax;
+import com.firefly.derivative.activation.Sigmoid;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;

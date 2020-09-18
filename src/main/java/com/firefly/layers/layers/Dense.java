@@ -1,5 +1,6 @@
 package com.firefly.layers.layers;
 
+import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
@@ -14,6 +15,7 @@ public class Dense implements Layer {
     private int inputs;//输出单元数
     private int units;//输出单元数
     private Class<? extends OperationActivation> activationCls;//激活函数类
+    private Function[] activationSettings;
     private InitParamsListener initParamsListener;//初始化参数事件
 
     private double[][] w;
@@ -37,13 +39,23 @@ public class Dense implements Layer {
     }
 
     public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls){
-        this(inputs,units,activationCls,null);
+        this(inputs,units,activationCls,(Function[])null);
+    }
+
+
+    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, Function[] activationSettings){
+        this(inputs,units,activationCls,activationSettings,null);
     }
 
     public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
+        this(inputs,units,activationCls,null,initParamsListener);
+    }
+
+    public Dense(int inputs, int units, Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
         this.inputs=inputs;
         this.units=units;
         this.activationCls=activationCls;
+        this.activationSettings=activationSettings;
         this.initParamsListener=initParamsListener;
     }
 
@@ -101,6 +113,8 @@ public class Dense implements Layer {
             try {
                 wxb[i]=new Var();
                 outs[i]=activationCls.newInstance();
+                //激活函数设置值
+                outs[i].setSettings(activationSettings);
                 //设置当前数据
                 outs[i].setVal(wxb[i]);
                 //设置相关的数据

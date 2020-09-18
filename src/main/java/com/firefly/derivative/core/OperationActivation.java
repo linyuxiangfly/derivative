@@ -7,6 +7,7 @@ import com.firefly.derivative.operation.Const;
  */
 public class OperationActivation extends OperationUnary {
     private Function[] relations;//关联的参数
+    private Function[] settings;//设置参数
 
     public OperationActivation(){
 
@@ -55,6 +56,14 @@ public class OperationActivation extends OperationUnary {
 
     public void setRelations(Function[] relations) {
         this.relations = relations;
+    }
+
+    public Function[] getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Function[] settings) {
+        this.settings = settings;
     }
 
     /**

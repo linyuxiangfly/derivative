@@ -1,12 +1,13 @@
-package com.firefly.derivative.operation;
+package com.firefly.derivative.activation;
 
 import com.firefly.derivative.core.Function;
+import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.core.OperationUnary;
 
 /**
  * tanh
  */
-public class Tanh extends OperationUnary {
+public class Tanh extends OperationActivation {
     private double val=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Tanh(){
