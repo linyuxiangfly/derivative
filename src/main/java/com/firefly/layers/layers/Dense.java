@@ -1,14 +1,10 @@
 package com.firefly.layers.layers;
 
-import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
-import com.firefly.derivative.core.OperationUnary;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
-import com.firefly.layers.core.Neuron;
 import com.firefly.layers.init.params.InitParamsRandomOrdinary;
 import com.firefly.layers.listeners.InitParamsListener;
-import com.firefly.layers.neuron.GeneralNeuron;
 import com.firefly.math.Linalg;
 
 /**

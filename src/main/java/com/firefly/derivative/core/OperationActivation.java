@@ -77,12 +77,12 @@ public class OperationActivation extends OperationUnary {
     private boolean oldIsDx;
     @Override
     public boolean isDx(Function dx) {
-        if(!super.isDx(dx)){
+        oldIsDx=super.isDx(dx);
+        if(!oldIsDx){
             if(oldDx!=dx){
                 oldDx=dx;
                 oldIsDx=isDxRelations(dx);
             }
-            return oldIsDx;
         }
         return oldIsDx;
     }
