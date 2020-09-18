@@ -1,5 +1,6 @@
 package test;
 
+import com.firefly.derivative.operation.Relu;
 import com.firefly.derivative.operation.Sigmoid;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.layers.Dense;
@@ -42,13 +43,13 @@ public class TestNN2 {
             y[i][0]=datas[i][1]/100.0;
         }
 
-        Model model=new Sequential(0.01);
-        model.add(new Dense(1,5, Sigmoid.class));
-        model.add(new Dense(1, Sigmoid.class));
+        Model model=new Sequential(0.007);
+        model.add(new Dense(1,1, Relu.class));
+//        model.add(new Dense(1, Sigmoid.class));
         //识差函数
         model.setLossCls(Mse.class);
 
-        model.fit(x, y, 10000, 20, new LossCallBackListener() {
+        model.fit(x, y, 100000, 20, new LossCallBackListener() {
             @Override
             public void onLoss(double val) {
                 System.out.println(String.format("%.10f", val));
