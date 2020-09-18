@@ -151,7 +151,7 @@ public class TestNNSigmoid {
         //识差函数
         model.setLossCls(Mse.class);
 
-        model.fit(x, y, 10000, x.length, new LossCallBackListener() {
+        model.fit(x, y, 10000, 10, new LossCallBackListener() {
             @Override
             public void onLoss(double val) {
                 System.out.println(String.format("%.10f", val));

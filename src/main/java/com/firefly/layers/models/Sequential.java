@@ -53,6 +53,58 @@ public class Sequential implements Model {
         return layersOut.get(layersOut.size()-1);
     }
 
+    /**
+     * 计算所有层的值
+     * @param x
+     * @return
+     */
+    private double[] calcAllLayers(double[] x){
+        for(int li=0;li<layers.size();li++){
+            Layer layer=layers.get(li);
+            if(li==0){
+                layer.calc(x,layersOut.get(li));
+            }else{
+                layer.calc(layersOut.get(li-1),layersOut.get(li));
+            }
+        }
+
+        return layersOut.get(layersOut.size()-1);
+    }
+
+    /**
+     * 计算反向修正参数
+     * @param x 输入值
+     * @param lossPrtGrad 损失函数/计算结果的梯度
+     */
+    private void calcBackPropagation(double[] x,double[] lossPrtGrad){
+        for(int li=layers.size()-1;li>=0;li--){
+            Layer layer=layers.get(li);
+
+            double[] currentInput=null;
+            if(li==0){
+                currentInput=x;
+            }else{
+                currentInput=layersOut.get(li-1);
+            }
+
+            if(li==layers.size()-1){
+                layer.addBackUpdateParamPrtGrad(lossPrtGrad,currentInput,layersInputPrtGrad.get(li));
+            }else{
+                layer.addBackUpdateParamPrtGrad(layersInputPrtGrad.get(li+1),currentInput,layersInputPrtGrad.get(li));
+            }
+        }
+    }
+
+    /**
+     * 更新反向计算后的参数
+     */
+    private void flushBackPropagation(){
+        for(int li=0;li<layers.size();li++){
+            Layer layer=layers.get(li);
+            layer.flushBackUpdateParamPrtGrad(rate);
+        }
+    }
+
     @Override
     public void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener listener) {
         int num=x.length/batchSize;
@@ -65,27 +117,23 @@ public class Sequential implements Model {
 
         //训练次数
         for(int en=0;en<epoch;en++){
-
+            //损失结果
             double lossVal=0;
 
             //分批训练，分成多少批
             for(int n=0;n<num;n++){
                 //循环每批数据
                 int bs=(n==num-1)?lastSize:batchSize;
+
+                //重置每层的损失函数/输入参数偏导梯度
+                resetLayersInputPrtGrad();
+                //重置每层内部的临时偏导梯度变量
+                resetBackUpdateParamPrtGrad();
+
                 //偏移每批的的位置进行训练
                 for(int i=n*batchSize;i<n*batchSize+bs;i++){
-                    resetLayersInputPrtGrad();//重置每层的损失函数/输入参数偏导梯度
-                    for(int li=0;li<layers.size();li++){
-                        Layer layer=layers.get(li);
-                        layer.resetBackUpdateParamPrtGrad();//重置临时梯度变量
-                        if(li==0){
-                            layer.calc(x[i],layersOut.get(li));
-                        }else{
-                            layer.calc(layersOut.get(li-1),layersOut.get(li));
-                        }
-                    }
-
-                    double[] lastLayerOut=layersOut.get(layersOut.size()-1);
+                    //计算所有层的值
+                    double[] lastLayerOut=calcAllLayers(x[i]);
 
                     //如果要回调损失
                     if(listener!=null){
@@ -94,30 +142,15 @@ public class Sequential implements Model {
                         lossVal+=lossOut[0];
                     }
 
-                    //损失函数/输入参数的梯度
+                    //损失函数/计算结果的梯度
                     double[] lossPrtGrad=loss.prtGrad(lastLayerOut,y[i]);
-                    for(int li=layers.size()-1;li>=0;li--){
-                        Layer layer=layers.get(li);
 
-                        double[] currentInput=null;
-                        if(li==0){
-                            currentInput=x[i];
-                        }else{
-                            currentInput=layersOut.get(li-1);
-                        }
-
-                        if(li==layers.size()-1){
-                            layer.addBackUpdateParamPrtGrad(lossPrtGrad,currentInput,layersInputPrtGrad.get(li));
-                        }else{
-                            layer.addBackUpdateParamPrtGrad(layersInputPrtGrad.get(li+1),currentInput,layersInputPrtGrad.get(li));
-                        }
-                    }
-
-                    for(int li=0;li<layers.size();li++){
-                        Layer layer=layers.get(li);
-                        layer.flushBackUpdateParamPrtGrad(rate);
-                    }
+                    //计算反向修正参数
+                    calcBackPropagation(x[i],lossPrtGrad);
                 }
+
+                //更新反向计算后的参数
+                flushBackPropagation();
             }
 
             //回调损失
@@ -171,6 +204,16 @@ public class Sequential implements Model {
                     datas[i]=0;
                 }
             }
+        }
+    }
+
+    /**
+     * 重置每层内部的临时偏导梯度变量
+     */
+    private void resetBackUpdateParamPrtGrad(){
+        for(int li=0;li<layers.size();li++){
+            Layer layer=layers.get(li);
+            layer.resetBackUpdateParamPrtGrad();//重置每层内部的临时偏导梯度变量
         }
     }
 }
