@@ -6,6 +6,8 @@ import com.firefly.derivative.core.OperationUnary;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Neuron;
+import com.firefly.layers.init.params.InitParamsRandomOrdinary;
+import com.firefly.layers.listeners.InitParamsListener;
 import com.firefly.layers.neuron.GeneralNeuron;
 import com.firefly.math.Linalg;
 
@@ -13,9 +15,10 @@ import com.firefly.math.Linalg;
  * 全连接层
  */
 public class Dense implements Layer {
-    private int inputs;
-    private int units;
-    private Class<? extends OperationActivation> activationCls;
+    private int inputs;//输出单元数
+    private int units;//输出单元数
+    private Class<? extends OperationActivation> activationCls;//激活函数类
+    private InitParamsListener initParamsListener;//初始化参数事件
 
     private double[][] w;
     private double[] b;
@@ -29,15 +32,23 @@ public class Dense implements Layer {
 
     }
 
-    public Dense(int units,Class<? extends OperationActivation> activationCls){
-        this.units=units;
-        this.activationCls=activationCls;
+    public Dense(int units, Class<? extends OperationActivation> activationCls){
+        this(units,activationCls,null);
+    }
+
+    public Dense(int units, Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
+        this(0,units,activationCls,initParamsListener);
     }
 
     public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls){
+        this(inputs,units,activationCls,null);
+    }
+
+    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
         this.inputs=inputs;
         this.units=units;
         this.activationCls=activationCls;
+        this.initParamsListener=initParamsListener;
     }
 
     public int getInputs() {
@@ -68,15 +79,22 @@ public class Dense implements Layer {
         initFunc();
 
         //随机初始化参数
-        randomInitParmas();
+        randomInitParmas(initParamsListener);
     }
 
-    private void randomInitParmas(){
-        for(int i=0;i<this.outs.length;i++){
-            for(int j=0;j<this.w[i].length;j++){
-                this.w[i][j]=Math.random();
+    private void randomInitParmas(InitParamsListener initParamsListener){
+        if(initParamsListener==null){
+            initParamsListener=new InitParamsRandomOrdinary();
+        }
+        //设置初始化参数事件的大小
+        initParamsListener.paramWSize(this.units,this.inputs);
+        initParamsListener.paramBSize(this.units);
+
+        for(int i=0;i<this.units;i++){
+            for(int j=0;j<this.inputs;j++){
+                this.w[i][j]=initParamsListener.initParamW(i,j);
             }
-            this.b[i]=Math.random();
+            this.b[i]=initParamsListener.initParamB(i);
         }
     }
 
@@ -87,7 +105,9 @@ public class Dense implements Layer {
             try {
                 wxb[i]=new Var();
                 outs[i]=activationCls.newInstance();
+                //设置当前数据
                 outs[i].setVal(wxb[i]);
+                //设置相关的数据
                 outs[i].setRelations(wxb);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());

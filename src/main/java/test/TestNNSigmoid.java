@@ -3,6 +3,7 @@ package test;
 import com.firefly.derivative.operation.Sigmoid;
 import com.firefly.derivative.operation.Softmax;
 import com.firefly.layers.core.Model;
+import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -145,7 +146,7 @@ public class TestNNSigmoid {
         };
 
         Model model=new Sequential(0.1);
-        model.add(new Dense(12,3, Sigmoid.class));
+        model.add(new Dense(12,3, Sigmoid.class,new InitParamsRandomGaussian()));
         model.add(new Dense(2, Sigmoid.class));
         //识差函数
         model.setLossCls(Mse.class);
