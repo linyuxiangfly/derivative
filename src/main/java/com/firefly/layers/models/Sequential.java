@@ -47,11 +47,6 @@ public class Sequential implements Model {
     }
 
     @Override
-    public void evaluate(double[][] x, double[][] y, int batchSize) {
-
-    }
-
-    @Override
     public double[] predict(double[] x) {
         //初始化层输出中间结果
         if(layers.size()!=layersOut.size()){
