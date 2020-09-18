@@ -1,7 +1,8 @@
 # 自动求偏导梯度
-JAVA语言实现了基本函数和复杂函数的自动求偏导的梯度
+1、JAVA语言实现了基本函数和复杂函数的自动求偏导的梯度
+2、实现了BP神经网络
 
-# 1教程
+# 1偏导梯度使用教程
 ## 1.1接口
 
 >所有操作符都继承***Function***接口，该接口主要有以下方法  
@@ -424,4 +425,298 @@ y:41.5   y':41.59475768546402
 y:42.0   y':41.98575729076121
 y:42.5   y':42.66746133299428
 y:43.0   y':43.217278859814535
+```
+
+# 2 BP神经网络教程
+## 2.1接口
+
+>***Model***是模型接口
+>
+>***Layer***是层接口，层与层进行连接，每个层都有输入与输出，上一层的输出与下一层的输入进行连接
+>
+>***Loss***是损失函数接口，模型最后一层与损失函数进行连接
+
+## 2.2 Model接口
+```
+/**
+ * 模型
+ */
+public interface Model extends java.io.Serializable{
+    /**
+     * 添加层
+     * @param layer 层对象
+     */
+    void add(Layer layer);
+
+    /**
+     * 移除层
+     * @param layer
+     */
+    void remove(Layer layer);
+
+    /**
+     * 获取所有层
+     * @return
+     */
+    List<Layer> getLayers();
+
+    /**
+     * 编译
+     * @param lossCls 损失函数
+     */
+    void setLossCls(Class<? extends Loss> lossCls);
+
+    /**
+     * 初始化
+     */
+    void init();
+
+
+    /**
+     * 预测
+     * @param x 输入数据进行预测
+     * @return 返回预测结果
+     */
+    double[] predict(double[] x);
+
+    /**
+     *
+     * @param x 需要训练的数据
+     * @param y 训练数据的标签
+     * @param epoch 训练次数
+     * @param batchSize 训练数据批量大小
+     */
+    void fit(double[][] x, double[][] y, int epoch, int batchSize);
+
+    /**
+     *
+     * @param x 需要训练的数据
+     * @param y 训练数据的标签
+     * @param epoch 训练次数
+     * @param batchSize 训练数据批量大小
+     * @param lossCallBackListener 损失函数返回事件
+     */
+    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener);
+
+    /**
+     *
+     * @param x 需要训练的数据
+     * @param y 训练数据的标签
+     * @param epoch 训练次数
+     * @param batchSize 训练数据批量大小
+     * @param lossCallBackListener 损失函数返回事件
+     * @param fitControl 拟合过程控制，可以设置达到某个条件退出训练
+     */
+    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl);
+}
+```
+
+## 2.3 Layer接口
+```
+/**
+ * 网络层
+ */
+public interface Layer extends java.io.Serializable{
+    /**
+     * 获取层的输入数量
+     * @return
+     */
+    int getInputs();
+
+    /**
+     * 设置层的输入数量
+     * @param inputs
+     */
+    void setInputs(int inputs);
+
+    /**
+     * 获取层的输出数量，即是神经元数
+     * @return
+     */
+    int getUnits();
+
+    /**
+     * 设置层的输出数量，即是神经元数
+     * @param units
+     */
+    void setUnits(int units);
+
+    /**
+     * 获取层的W参数
+     * @return
+     */
+    double[][] getW();
+
+    /**
+     * 设置层的W参数
+     * @param w
+     */
+    void setW(double[][] w);
+
+    /**
+     * 获取层的B参数
+     * @return
+     */
+    double[] getB();
+
+    /**
+     * 设置层的B参数
+     * @param b
+     */
+    void setB(double[] b);
+
+    /**
+     * 初始化层
+     */
+    void init();
+
+    /**
+     * 正向计算
+     * @param input 输入数量
+     * @param out 计算后并输出数据
+     */
+    void calc(double[] input,double[] out);
+
+    /**
+     * 重置反向更新参数梯度
+     */
+    void resetBackUpdateParamPrtGrad();
+
+    /**
+     * 累加反向更新参数梯度
+     * @param prtGrad 下一层的梯度
+     * @param input 输入值
+     * @param currentPrtGrad 识差函数/当前层的输入的梯度
+     */
+    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[] currentPrtGrad);
+
+    /**
+     * 更新参数梯度
+     * @param rate 更新比例
+     */
+    void flushBackUpdateParamPrtGrad(double rate);
+
+}
+```
+
+## 2.4 Loss接口
+```
+/**
+ * 损失函数
+ */
+public interface Loss extends java.io.Serializable{
+    /**
+     * 偏梯度
+     * @param input 输入要训练的数据
+     * @param targetVal 标签数据
+     * @return
+     */
+    double[] prtGrad(double[] input,double[] targetVal);
+
+    /**
+     * 正向计算
+     * @param input 输入要训练的数据
+     * @param targetVal 标签数据
+     * @param out 输出计算结果
+     */
+    void calc(double[] input,double[] targetVal,double[] out);
+}
+```
+
+## 2.5 BP神经网络例子
+
+#### 定义需要训练的数组
+```
+//二维数组，第1列是x,第2列是y
+double[][] datas=new double[][]{
+        {32.3787591,32},
+        {32.8252527,32.5},
+        {33.3753966,33},
+        {33.6624282,33.5},
+        {33.9414867,34},
+        {34.4039265,34.5},
+        {34.7308236,35},
+        {35.2331289,35.5},
+        {35.5121874,36},
+        {35.9188155,36.5},
+        {36.5088249,37},
+        {36.8038296,37.5},
+        {36.9393723,38},
+        {37.3539735,38.5},
+        {38.0077677,39},
+        {38.2629069,39.5},
+        {38.749266,40},
+        {39.1957596,40.5},
+        {39.6342801,41},
+        {40.0409082,41.5},
+        {40.343886,42},
+        {40.8701106,42.5},
+        {41.2926849,43}
+};
+double[][] x=new double[datas.length][1];
+double[][] y=new double[datas.length][1];
+
+//将数据除以100，转成0-1的数
+for(int i=0;i<datas.length;i++){
+    x[i][0]=datas[i][0]/100.0;
+    y[i][0]=datas[i][1]/100.0;
+}
+
+```
+
+#### 定义模型
+```
+Model model=new Sequential(0.04);
+model.add(new Dense(1,1, Relu.class));
+//识差函数
+model.setLossCls(Mse.class);
+//初始化模型
+model.init();
+
+```
+#### 训练
+```
+//训练模型
+model.fit(x, y, 10000, 20, new LossCallBackListener() {
+    @Override
+    public void onLoss(double val) {
+        System.out.println(String.format("%.10f", val));
+    }
+});
+```
+
+#### 预测
+```
+for(int i=0;i<x.length;i++){
+    double[] py=model.predict(x[i]);
+    System.out.print(String.format("%.2f   ", py[0]*100));
+    System.out.print(String.format("%.2f   ", y[i][0]*100));
+    System.out.println();
+}
+```
+### 输出
+```
+32.00   32.00   
+32.56   32.50   
+33.24   33.00   
+33.60   33.50   
+33.95   34.00   
+34.53   34.50   
+34.94   35.00   
+35.56   35.50   
+35.91   36.00   
+36.42   36.50   
+37.16   37.00   
+37.53   37.50   
+37.70   38.00   
+38.21   38.50   
+39.03   39.00   
+39.35   39.50   
+39.96   40.00   
+40.51   40.50   
+41.06   41.00   
+41.57   41.50   
+41.95   42.00   
+42.60   42.50   
+43.13   43.00  
 ```
