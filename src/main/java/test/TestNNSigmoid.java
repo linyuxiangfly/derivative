@@ -14,7 +14,7 @@ import java.io.*;
 
 public class TestNNSigmoid {
 
-    private static String modelFile="f:/test.ser";
+    private static String modelFile="d:/test.ser";
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         double[][] x=new double[][]{

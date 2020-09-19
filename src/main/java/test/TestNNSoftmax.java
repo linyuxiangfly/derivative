@@ -5,6 +5,7 @@ import com.firefly.layers.core.Model;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.LossCallBackListener;
+import com.firefly.layers.loss.Cel;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 
@@ -144,13 +145,13 @@ public class TestNNSoftmax {
                 {0,1}
         };
 
-        Model model=new Sequential(0.1);
+        Model model=new Sequential(0.0001);
         model.add(new Dense(12,2, Softmax.class,new InitParamsRandomGaussian()));//使用softmax激活函数
         //识差函数
-        model.setLossCls(Mse.class);
+        model.setLossCls(Cel.class);
         model.init();
 
-        model.fit(x, y, 10000, 10, new LossCallBackListener() {
+        model.fit(x, y, 1000000, 10, new LossCallBackListener() {
             @Override
             public void onLoss(double val) {
                 System.out.println(String.format("%.10f", val));

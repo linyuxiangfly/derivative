@@ -106,6 +106,10 @@ public class OperationActivation extends OperationUnary {
         return 0;
     }
 
+    public double prtGrad(Function dx,double[] targetVal){
+        return 0;
+    }
+
     @Override
     public double calc() {
         return 0;
