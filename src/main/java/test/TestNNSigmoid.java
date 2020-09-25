@@ -14,7 +14,7 @@ import java.io.*;
 
 public class TestNNSigmoid {
 
-    private static String modelFile="f:/test.ser";
+    private static String modelFile="d:/test.ser";
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         double[][] x=new double[][]{
@@ -152,8 +152,8 @@ public class TestNNSigmoid {
         };
 
         Model model=new Sequential(0.1);
-        model.add(new Dense(12,3, Sigmoid.class,new InitParamsRandomGaussian()));
-        model.add(new Dense(2, Sigmoid.class));
+        model.add(new Dense(12,6, Sigmoid.class,0.3f,new InitParamsRandomGaussian()));
+        model.add(new Dense(2, Sigmoid.class,0.5f));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
@@ -203,7 +203,7 @@ public class TestNNSigmoid {
         out.writeObject(model);
         out.close();
         fileOut.close();
-        System.out.printf("Serialized data is saved in /tmp/employee.ser");
+        System.out.printf("Serialized data is saved in /tmp/employee.ser\n");
     }
 
     private static Model importModel(String file) throws IOException, ClassNotFoundException {
@@ -256,7 +256,7 @@ public class TestNNSigmoid {
 
     private static void printArray(String title,double[][] vals){
         System.out.println(title);
-        System.out.println("{");
+        System.out.println("\n{");
         for(int j=0;j<vals.length;j++){
             System.out.print("{");
             for(int i=0;i<vals[j].length;i++){

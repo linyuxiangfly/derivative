@@ -87,7 +87,7 @@ public class Sequential implements Model {
      * @param x 输入值
      * @param lossPrtGrad 损失函数/计算结果的梯度
      */
-    private void calcBackPropagation(double[] x,double[] lossPrtGrad){
+    private void calcBackPropagation(double[] x,double[] y,double[] lossPrtGrad){
         for(int li=layers.size()-1;li>=0;li--){
             Layer layer=layers.get(li);
 
@@ -99,9 +99,9 @@ public class Sequential implements Model {
             }
 
             if(li==layers.size()-1){
-                layer.addBackUpdateParamPrtGrad(lossPrtGrad,currentInput,layersInputPrtGrad.get(li));
+                layer.addBackUpdateParamPrtGrad(lossPrtGrad,currentInput,y,layersInputPrtGrad.get(li));
             }else{
-                layer.addBackUpdateParamPrtGrad(layersInputPrtGrad.get(li+1),currentInput,layersInputPrtGrad.get(li));
+                layer.addBackUpdateParamPrtGrad(layersInputPrtGrad.get(li+1),currentInput,y,layersInputPrtGrad.get(li));
             }
         }
     }
@@ -169,7 +169,7 @@ public class Sequential implements Model {
                     double[] lossPrtGrad=loss.prtGrad(lastLayerOut,y[i]);
 
                     //计算反向修正参数
-                    calcBackPropagation(x[i],lossPrtGrad);
+                    calcBackPropagation(x[i],y[i],lossPrtGrad);
                 }
 
                 //更新反向计算后的参数

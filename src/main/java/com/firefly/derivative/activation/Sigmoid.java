@@ -42,6 +42,10 @@ public class Sigmoid extends OperationActivation {
         return val;
     }
 
+    public double prtGrad(Function dx,double[] targetVal){
+        return prtGrad(dx);
+    }
+
     @Override
     public double calc() {
         double v=this.getVal().calc();

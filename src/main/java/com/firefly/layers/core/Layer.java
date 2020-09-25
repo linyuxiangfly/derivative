@@ -75,7 +75,7 @@ public interface Layer extends java.io.Serializable{
      * @param input 输入值
      * @param currentPrtGrad 识差函数/当前层的输入的梯度
      */
-    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[] currentPrtGrad);
+    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[] targetVal,double[] currentPrtGrad);
 
     /**
      * 更新参数梯度
