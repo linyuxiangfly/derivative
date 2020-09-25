@@ -6,17 +6,21 @@ import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.init.params.InitParamsRandomOrdinary;
 import com.firefly.layers.listeners.InitParamsListener;
+import com.firefly.math.Binomial;
 import com.firefly.math.Linalg;
 
 /**
  * 全连接层
  */
 public class Dense implements Layer {
+    private static float KEEP_PROB_DEFAULT=1.0F;
+
     private int inputs;//输出单元数
     private int units;//输出单元数
     private Class<? extends OperationActivation> activationCls;//激活函数类
     private Function[] activationSettings;
     private InitParamsListener initParamsListener;//初始化参数事件
+    private float keepProb=KEEP_PROB_DEFAULT;//节点保留概率，dropout功能
 
     private double[][] w;
     private double[] b;
@@ -31,37 +35,70 @@ public class Dense implements Layer {
     }
 
     public Dense(int units, Class<? extends OperationActivation> activationCls){
-        this(units,activationCls,(InitParamsListener)null);
+        this(units,activationCls,KEEP_PROB_DEFAULT);
+    }
+
+    public Dense(int units, Class<? extends OperationActivation> activationCls,float keepProb){
+        this(units,activationCls,keepProb,(InitParamsListener)null);
     }
 
     public Dense(int units, Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
-        this(0,units,activationCls,initParamsListener);
+        this(0,units,activationCls,KEEP_PROB_DEFAULT,initParamsListener);
+    }
+
+    public Dense(int units, Class<? extends OperationActivation> activationCls,float keepProb, InitParamsListener initParamsListener){
+        this(0,units,activationCls,keepProb,initParamsListener);
     }
 
     public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls){
-        this(inputs,units,activationCls,(Function[])null);
+        this(inputs,units,activationCls,KEEP_PROB_DEFAULT,(Function[])null);
+    }
+
+    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls,float keepProb){
+        this(inputs,units,activationCls,keepProb,(Function[])null);
     }
 
     public Dense(int units,Class<? extends OperationActivation> activationCls, Function[] activationSettings){
-        this(0,units,activationCls,activationSettings,null);
+        this(0,units,activationCls,KEEP_PROB_DEFAULT,activationSettings,null);
+    }
+
+    public Dense(int units,Class<? extends OperationActivation> activationCls,float keepProb, Function[] activationSettings){
+        this(0,units,activationCls,keepProb,activationSettings,null);
     }
 
     public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, Function[] activationSettings){
-        this(inputs,units,activationCls,activationSettings,null);
+        this(inputs,units,activationCls,KEEP_PROB_DEFAULT,activationSettings,null);
+    }
+
+    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls,float keepProb, Function[] activationSettings){
+        this(inputs,units,activationCls,keepProb,activationSettings,null);
     }
 
     public Dense(int units,Class<? extends OperationActivation> activationCls,Function[] activationSettings, InitParamsListener initParamsListener){
-        this(0,units,activationCls,activationSettings,initParamsListener);
+        this(0,units,activationCls,KEEP_PROB_DEFAULT,activationSettings,initParamsListener);
     }
 
-    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
-        this(inputs,units,activationCls,null,initParamsListener);
+    public Dense(int units,Class<? extends OperationActivation> activationCls,float keepProb,Function[] activationSettings, InitParamsListener initParamsListener){
+        this(0,units,activationCls,keepProb,activationSettings,initParamsListener);
+    }
+
+    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls,InitParamsListener initParamsListener){
+        this(inputs,units,activationCls,KEEP_PROB_DEFAULT,null,initParamsListener);
+    }
+
+    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls,float keepProb, InitParamsListener initParamsListener){
+        this(inputs,units,activationCls,keepProb,null,initParamsListener);
     }
 
     public Dense(int inputs, int units, Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
+        this(inputs,units,activationCls,KEEP_PROB_DEFAULT,activationSettings,initParamsListener);
+    }
+
+    public Dense(int inputs, int units, Class<? extends OperationActivation> activationCls,float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
         this.inputs=inputs;
         this.units=units;
         this.activationCls=activationCls;
+        this.keepProb=keepProb;
         this.activationSettings=activationSettings;
         this.initParamsListener=initParamsListener;
     }
@@ -150,9 +187,12 @@ public class Dense implements Layer {
 
     @Override
     public void calc(double[] input,double[] out) {
+        double val=0;
         for(int i=0;i<this.outs.length;i++){
             //sigmoid(wx+b)
-            wxb[i].setVal(Linalg.inner(w[i],input)+b[i]);
+            val=Linalg.inner(w[i],input)+b[i];
+            val/=keepProb;//参数除以keep_prob来保证输出的期望值不变
+            wxb[i].setVal(val);
             out[i]=this.outs[i].calc();
         }
     }
@@ -172,17 +212,19 @@ public class Dense implements Layer {
     @Override
     public void addBackUpdateParamPrtGrad(double[] prtGrad, double[] input,double[] targetVal,double[] currentPrtGrad) {
         double[] dloss_dwxb=new double[outs.length];
+        int[] binomial= Binomial.binomialOfInt(keepProb,this.outs.length);//二项分布
+
         for(int i=0;i<this.outs.length;i++){
             dloss_dwxb[i]=prtGrad[i]*outs[i].prtGrad(wxb[i],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
 
             //计算w的更新梯度
             for(int j=0;j<diffW[i].length;j++){
                 //累计参数w的更新值
-                diffW[i][j]+=dloss_dwxb[i]*input[j];
+                diffW[i][j]+=dloss_dwxb[i]*input[j]*binomial[i];
             }
 
             //累计参数b的更新值
-            diffB[i]+=dloss_dwxb[i];
+            diffB[i]+=dloss_dwxb[i]*binomial[i];
         }
 
         //累计输入参数的更新值

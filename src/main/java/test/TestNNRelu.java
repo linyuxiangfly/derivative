@@ -43,7 +43,7 @@ public class TestNNRelu {
         }
 
         Model model=new Sequential(0.04);
-        model.add(new Dense(1,1, Relu.class));
+        model.add(new Dense(1,1, Relu.class,0.5f));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();

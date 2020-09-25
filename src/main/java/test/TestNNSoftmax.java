@@ -146,12 +146,12 @@ public class TestNNSoftmax {
         };
 
         Model model=new Sequential(0.0001);
-        model.add(new Dense(12,2, Softmax.class,new InitParamsRandomGaussian()));//使用softmax激活函数
+        model.add(new Dense(12,2, Softmax.class,0.5f,new InitParamsRandomGaussian()));//使用softmax激活函数
         //识差函数
         model.setLossCls(Cel.class);
         model.init();
 
-        model.fit(x, y, 1000000, 10, new LossCallBackListener() {
+        model.fit(x, y, 10000, 10, new LossCallBackListener() {
             @Override
             public void onLoss(double val) {
                 System.out.println(String.format("%.10f", val));
