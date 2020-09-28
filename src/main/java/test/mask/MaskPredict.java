@@ -31,6 +31,21 @@ public class MaskPredict {
             //导入并进行预测
             Model newModel=importModel(modelFile);
 
+            double error=0,error2=0;
+
+            long start=System.currentTimeMillis();
+
+            for(int i=0;i<1000;i++){
+                error=1-calcPredictError(newModel,x,y);
+//            System.out.println(String.format("diff:%.10f   ", error));
+                error2=1-calcPredictError(newModel,xTest,yTest);
+//            System.out.println(String.format("diff:%.10f   ", error));
+            }
+
+            long end=System.currentTimeMillis();
+            System.out.println("time(ms):"+((end-start)/1000.0)+"   Accuracy:"+String.format("%.10f   ", error)+"   Accuracy2:"+String.format("%.10f   ", error2));
+            System.out.println();
+
             showPredict(newModel,x,y);
             showPredict(newModel,xTest,yTest);
 
@@ -96,6 +111,21 @@ public class MaskPredict {
         fileIn.close();
 
         return newModel;
+    }
+
+    private static double calcPredictError(Model model,double[][] x,double[][] y){
+        double errorNum=0;
+        for(int i=0;i<x.length;i++){
+            double[] py=model.predict(x[i]);
+            for(int j=0;j<py.length;j++){
+                double diff=Math.abs(py[j]-y[i][j]);
+                if(diff>=0.05){
+                    errorNum++;
+                    break;
+                }
+            }
+        }
+        return errorNum/x.length;
     }
 
     private static void showPredict(Model model,double[][] x,double[][] y){
