@@ -3,6 +3,9 @@ package test.mask;
 import com.firefly.derivative.activation.Sigmoid;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.FitControl;
@@ -22,12 +25,12 @@ public class MaskFit {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         double[][][] xy=loadXY("src/main/resources/datas/train/mask.txt","src/main/resources/datas/train/nomask.txt");
-        double[][] x=xy[0];
-        double[][] y=xy[1];
+        MultiDim[] x=arr2MultDim(xy[0]);
+        MultiDim[] y=arr2MultDim(xy[1]);
 
         double[][][] xyTest=loadXY("src/main/resources/datas/test/mask.txt","src/main/resources/datas/test/nomask.txt");
-        double[][] xTest=xyTest[0];
-        double[][] yTest=xyTest[1];
+        MultiDim[] xTest=arr2MultDim(xyTest[0]);
+        MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
         Model model=new Sequential(0.1);
         model.add(new Dense(300,10, Sigmoid.class,1.0f,new InitParamsRandomGaussian()));
@@ -70,6 +73,14 @@ public class MaskFit {
 
         //将参数导入到新的模型里
 //        importParams(model,x,y);
+    }
+
+    private static MultiDim[] arr2MultDim(double[][] datas){
+        MultiDim[] ret=new MultiDim[datas.length];
+        for(int i=0;i<ret.length;i++){
+            ret[i]=new MultiDim(Double.TYPE,new Shape(new int[]{datas[i].length}),datas[i]);
+        }
+        return ret;
     }
 
     private static double[][][] loadXY(String maskFile,String nomaskFile) throws IOException {
@@ -144,21 +155,28 @@ public class MaskFit {
         return newModel;
     }
 
-    private static void showPredict(Model model,double[][] x,double[][] y){
+    private static void showPredict(Model model,MultiDim[] x,MultiDim[] y){
         for(int i=0;i<x.length;i++){
-            double[] py=model.predict(x[i]);
-            for(int j=0;j<py.length;j++){
-                System.out.print(String.format("%.10f   ", py[j]));
-            }
-            for(int j=0;j<y[i].length;j++){
-                System.out.print(String.format("%.10f   ", y[i][j]));
-            }
-            for(int j=0;j<py.length;j++){
-                double diff=Math.abs(py[j]-y[i][j]);
+            MultiDim py=model.predict(x[i]);
+
+            ShapeIndex j=new ShapeIndex(py.getShape());
+            do{
+                System.out.print(String.format("%.10f   ", (double)py.getVal(j)));
+            }while(j.next());
+
+            j=new ShapeIndex(y[i].getShape());
+            do{
+                System.out.print(String.format("%.10f   ", (double)y[i].getVal(j)));
+            }while(j.next());
+
+            j=new ShapeIndex(py.getShape());
+            do{
+                double diff=Math.abs((double)py.getVal(j)-(double)y[i].getVal(j));
                 if(diff>=0.1){
                     System.out.print(String.format("diff:%.10f   ", diff));
                 }
-            }
+            }while(j.next());
+
             System.out.println();
         }
     }
@@ -166,8 +184,8 @@ public class MaskFit {
     private static void showParams(Model model){
         int i=0;
         for(Layer layer:model.getLayers()){
-            printArray("第"+(i+1)+"层的W",layer.getW());
-            printArray("第"+(i+1)+"层的B",layer.getB());
+            printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
+            printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
             i++;
         }
     }

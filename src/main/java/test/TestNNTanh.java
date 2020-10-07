@@ -3,6 +3,9 @@ package test;
 import com.firefly.derivative.activation.Softmax;
 import com.firefly.derivative.activation.Tanh;
 import com.firefly.layers.core.Model;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.LossCallBackListener;
@@ -11,7 +14,7 @@ import com.firefly.layers.models.Sequential;
 
 public class TestNNTanh {
     public static void main(String[] args){
-        double[][] x=new double[][]{
+        MultiDim[] x=arr2MultDim(new double[][]{
                 {1,1,1,1,0,1,1,0,1,1,1,1},
                 {0,1,1,1,0,1,1,0,1,1,1,1},
                 {1,1,0,1,0,1,1,0,1,1,1,1},
@@ -76,9 +79,9 @@ public class TestNNTanh {
                 {0,1,0,0,1,0,0,1,0,0,0,0},
                 {0,1,0,0,0,1,0,0,1,0,1,0},
                 {0,1,0,1,0,0,1,0,0,0,1,0}
-        };
+        });
 
-        double[][] y=new double[][]{
+        MultiDim[] y=arr2MultDim(new double[][]{
                 {1,0},
                 {1,0},
                 {1,0},
@@ -143,7 +146,7 @@ public class TestNNTanh {
                 {0,1},
                 {0,1},
                 {0,1}
-        };
+        });
 
         Model model=new Sequential(0.001);
         model.add(new Dense(12,2, Tanh.class,new InitParamsRandomGaussian()));//使用softmax激活函数
@@ -159,15 +162,28 @@ public class TestNNTanh {
         });
 
         for(int i=0;i<x.length;i++){
-            double[] py=model.predict(x[i]);
-            for(int j=0;j<py.length;j++){
-                System.out.print(String.format("%.10f   ", py[j]));
-            }
-            for(int j=0;j<y[i].length;j++){
-                System.out.print(String.format("%.10f   ", y[i][j]));
-            }
+            MultiDim py=model.predict(x[i]);
+
+            ShapeIndex j=new ShapeIndex(py.getShape());
+            do{
+                System.out.print(String.format("%.10f   ", (double)py.getVal(j)*100));
+            }while(j.next());
+
+            j=new ShapeIndex(y[i].getShape());
+            do{
+                System.out.print(String.format("%.10f   ", (double)y[i].getVal(j)*100));
+            }while(j.next());
+
             System.out.println();
         }
 
+    }
+
+    private static MultiDim[] arr2MultDim(double[][] datas){
+        MultiDim[] ret=new MultiDim[datas.length];
+        for(int i=0;i<ret.length;i++){
+            ret[i]=new MultiDim(Double.TYPE,new Shape(new int[]{datas[i].length}),datas[i]);
+        }
+        return ret;
     }
 }

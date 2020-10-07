@@ -3,6 +3,9 @@ package test;
 import com.firefly.derivative.activation.Sigmoid;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.FitControl;
@@ -17,7 +20,7 @@ public class TestNNSigmoid_Import {
     private static String modelFile="d:/test.ser";
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        double[][] x=new double[][]{
+        MultiDim[] x=arr2MultDim(new double[][]{
                 {1,1,1,1,0,1,1,0,1,1,1,1},
                 {0,1,1,1,0,1,1,0,1,1,1,1},
                 {1,1,0,1,0,1,1,0,1,1,1,1},
@@ -82,9 +85,9 @@ public class TestNNSigmoid_Import {
                 {0,1,0,0,1,0,0,1,0,0,0,0},
                 {0,1,0,0,0,1,0,0,1,0,1,0},
                 {0,1,0,1,0,0,1,0,0,0,1,0}
-        };
+        });
 
-        double[][] y=new double[][]{
+        MultiDim[] y=arr2MultDim(new double[][]{
                 {1,0},
                 {1,0},
                 {1,0},
@@ -149,7 +152,7 @@ public class TestNNSigmoid_Import {
                 {0,1},
                 {0,1},
                 {0,1}
-        };
+        });
 
         try{
             //导入并进行预测
@@ -162,6 +165,14 @@ public class TestNNSigmoid_Import {
 
         //将参数导入到新的模型里
 //        importParams(model,x,y);
+    }
+
+    private static MultiDim[] arr2MultDim(double[][] datas){
+        MultiDim[] ret=new MultiDim[datas.length];
+        for(int i=0;i<ret.length;i++){
+            ret[i]=new MultiDim(Double.TYPE,new Shape(new int[]{datas[i].length}),datas[i]);
+        }
+        return ret;
     }
 
     /**
@@ -191,7 +202,7 @@ public class TestNNSigmoid_Import {
         return newModel;
     }
 
-    private static void showParams(Model model,double[][] x,double[][] y){
+    private static void showParams(Model model,MultiDim[] x,MultiDim[] y){
         //新建一个模型，将之前模型的参数导入再进行拟合
 //        Model newModel=new Sequential(0.1);
 //        newModel.add(new Dense(12,3, Sigmoid.class,new InitParamsRandomGaussian()));
@@ -208,20 +219,25 @@ public class TestNNSigmoid_Import {
 //        }
 
         for(int i=0;i<x.length;i++){
-            double[] py=model.predict(x[i]);
-            for(int j=0;j<py.length;j++){
-                System.out.print(String.format("%.10f   ", py[j]));
-            }
-            for(int j=0;j<y[i].length;j++){
-                System.out.print(String.format("%.10f   ", y[i][j]));
-            }
+            MultiDim py=model.predict(x[i]);
+
+            ShapeIndex j=new ShapeIndex(py.getShape());
+            do{
+                System.out.print(String.format("%.10f   ", (double)py.getVal(j)));
+            }while(j.next());
+
+            j=new ShapeIndex(y[i].getShape());
+            do{
+                System.out.print(String.format("%.10f   ", (double)y[i].getVal(j)));
+            }while(j.next());
+
             System.out.println();
         }
 
         int i=0;
         for(Layer layer:model.getLayers()){
-            printArray("第"+(i+1)+"层的W",layer.getW());
-            printArray("第"+(i+1)+"层的B",layer.getB());
+            printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
+            printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
             i++;
         }
     }

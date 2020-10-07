@@ -4,6 +4,9 @@ import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomOrdinary;
 import com.firefly.layers.listeners.InitParamsListener;
 import com.firefly.math.Binomial;
@@ -15,18 +18,26 @@ import com.firefly.math.Linalg;
 public class Dense implements Layer {
     private static float KEEP_PROB_DEFAULT=1.0F;
 
+    private Shape inputShape;
+    private Shape unitShape;
     private int inputs;//输出单元数
     private int units;//输出单元数
+
     private Class<? extends OperationActivation> activationCls;//激活函数类
+
+    private MultiDim activationSettingsMd;
     private Function[] activationSettings;
     private InitParamsListener initParamsListener;//初始化参数事件
     private float keepProb=KEEP_PROB_DEFAULT;//节点保留概率，dropout功能
 
+    private MultiDim wmd;
+    private MultiDim bmd;
     private double[][] w;
     private double[] b;
     private double[][] diffW;
     private double[] diffB;
 
+    private MultiDim wxbmd;
     private Var[] wxb;
     private OperationActivation[] outs;
 
@@ -97,48 +108,72 @@ public class Dense implements Layer {
     public Dense(int inputs, int units, Class<? extends OperationActivation> activationCls,float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
         this.inputs=inputs;
         this.units=units;
+        this.inputShape=new Shape(new int[]{inputs});
+        this.unitShape=new Shape(new int[]{units});
+
         this.activationCls=activationCls;
         this.keepProb=keepProb;
+
         this.activationSettings=activationSettings;
+        if(activationSettings!=null){
+            this.activationSettingsMd=new MultiDim(Function.class,new Shape(new int[]{activationSettings.length}),activationSettings);
+        }
+
         this.initParamsListener=initParamsListener;
     }
 
-    public int getInputs() {
-        return inputs;
+    public Shape getInputShape() {
+        return inputShape;
     }
 
-    public void setInputs(int inputs) {
-        this.inputs = inputs;
+    public void setInputShape(Shape inputShape) {
+        this.inputShape = inputShape;
+        if(inputShape.getDims().length==1){
+            this.inputs=inputShape.getDims()[0];
+        }else{
+            //只允许1维数组
+            throw new RuntimeException("Only 1-dimensional arrays are allowed");
+        }
     }
 
-    public int getUnits() {
-        return units;
+    public Shape getUnitShape() {
+        return unitShape;
     }
 
-    public void setUnits(int units) {
-        this.units = units;
+    public void setUnitShape(Shape unitShape) {
+        this.unitShape = unitShape;
+        if(unitShape.getDims().length==1){
+            this.units=unitShape.getDims()[0];
+        }else{
+            //只允许1维数组
+            throw new RuntimeException("Only 1-dimensional arrays are allowed");
+        }
     }
 
-    public double[][] getW() {
-        return w;
+    public MultiDim getW() {
+        return wmd;
     }
 
-    public void setW(double[][] w) {
-        this.w = w;
+    public void setW(MultiDim w) {
+        this.wmd = w;
+        this.w=(double[][])w.getData();
     }
 
-    public double[] getB() {
-        return b;
+    public MultiDim getB() {
+        return bmd;
     }
 
-    public void setB(double[] b) {
-        this.b = b;
+    public void setB(MultiDim b) {
+        this.bmd = b;
+        this.b=(double[])b.getData();
     }
 
     @Override
     public void init() {
         w=new double[units][inputs];
         b=new double[units];
+        wmd=new MultiDim(Double.TYPE,new Shape(new int[]{units,inputs}),w);
+        bmd=new MultiDim(Double.TYPE,new Shape(new int[]{units}),b);
 
         diffW=new double[units][inputs];
         diffB=new double[units];
@@ -155,30 +190,39 @@ public class Dense implements Layer {
             initParamsListener=new InitParamsRandomOrdinary();
         }
         //设置初始化参数事件的大小
-        initParamsListener.paramWSize(this.units,this.inputs);
-        initParamsListener.paramBSize(this.units);
+        initParamsListener.paramWSize(this.wmd.getShape());
+        initParamsListener.paramBSize(this.bmd.getShape());
 
+        ShapeIndex wsi=new ShapeIndex(new int[]{0,0});
+        ShapeIndex bsi=new ShapeIndex(new int[]{0});
         for(int i=0;i<this.units;i++){
             for(int j=0;j<this.inputs;j++){
-                this.w[i][j]=initParamsListener.initParamW(i,j);
+                wsi.setDimIndexVal(0,i);
+                wsi.setDimIndexVal(1,j);
+
+                this.w[i][j]=initParamsListener.initParamW(wsi);
             }
-            this.b[i]=initParamsListener.initParamB(i);
+
+            bsi.setDimIndexVal(0,i);
+            this.b[i]=initParamsListener.initParamB(bsi);
         }
     }
 
     private void initFunc(){
         outs=new OperationActivation[units];//输出单元数
         wxb=new Var[units];
+        wxbmd=new MultiDim(Var.class,new Shape(new int[]{wxb.length}),wxb);
+
         for(int i=0;i<units;i++){
             try {
                 wxb[i]=new Var();
                 outs[i]=activationCls.newInstance();
                 //激活函数设置值
-                outs[i].setSettings(activationSettings);
+                outs[i].setSettings(activationSettingsMd);
                 //设置当前数据
                 outs[i].setVal(wxb[i]);
                 //设置相关的数据
-                outs[i].setRelations(wxb);
+                outs[i].setRelations(wxbmd);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
             }
@@ -186,14 +230,18 @@ public class Dense implements Layer {
     }
 
     @Override
-    public void calc(double[] input,double[] out) {
+    public void calc(MultiDim input,MultiDim out) {
+        double[] outVal=(double[])out.getData();
+
         double val=0;
+
         for(int i=0;i<this.outs.length;i++){
             //sigmoid(wx+b)
-            val=Linalg.inner(w[i],input)+b[i];
+            val=Linalg.inner(w[i],(double[])input.getData())+b[i];
             val/=keepProb;//参数除以keep_prob来保证输出的期望值不变
             wxb[i].setVal(val);
-            out[i]=this.outs[i].calc();
+
+            outVal[i]=this.outs[i].calc();
         }
     }
 
@@ -210,17 +258,20 @@ public class Dense implements Layer {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(double[] prtGrad, double[] input,double[] targetVal,double[] currentPrtGrad) {
+    public void addBackUpdateParamPrtGrad(MultiDim prtGrad, MultiDim input,MultiDim targetVal,MultiDim currentPrtGrad) {
+        double[] inputVal=(double[])input.getData();
+        double[] prtGradVal=(double[])prtGrad.getData();
+
         double[] dloss_dwxb=new double[outs.length];
         int[] binomial= Binomial.binomialOfInt(keepProb,this.outs.length);//二项分布
 
         for(int i=0;i<this.outs.length;i++){
-            dloss_dwxb[i]=prtGrad[i]*outs[i].prtGrad(wxb[i],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
+            dloss_dwxb[i]=prtGradVal[i]*outs[i].prtGrad(wxb[i],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
 
             //计算w的更新梯度
             for(int j=0;j<diffW[i].length;j++){
                 //累计参数w的更新值
-                diffW[i][j]+=dloss_dwxb[i]*input[j]*binomial[i];
+                diffW[i][j]+=dloss_dwxb[i]*inputVal[j]*binomial[i];
             }
 
             //累计参数b的更新值
@@ -229,10 +280,12 @@ public class Dense implements Layer {
 
         //累计输入参数的更新值
         if(currentPrtGrad!=null){
+            double[] currentPrtGradVal=(double[])currentPrtGrad.getData();
+
             //计算输入值的更新梯度
             double[] cpt=Linalg.inner(w,dloss_dwxb,true);
-            for(int i=0;i<currentPrtGrad.length;i++){
-                currentPrtGrad[i]+=cpt[i];
+            for(int i=0;i<currentPrtGradVal.length;i++){
+                currentPrtGradVal[i]+=cpt[i];
             }
         }
     }

@@ -1,15 +1,18 @@
 package com.firefly.layers.listeners;
 
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
+
 /**
  * 初始化参数事件
  */
 public interface InitParamsListener extends java.io.Serializable{
-    void paramWSize(int row,int col);
-    void paramBSize(int row);
+    void paramWSize(Shape shape);
+    void paramBSize(Shape shape);
 
     //初始化参数W
-    double initParamW(int i,int j);
+    double initParamW(ShapeIndex shapeIndex);
 
     //初始化参数B
-    double initParamB(int i);
+    double initParamB(ShapeIndex shapeIndex);
 }

@@ -3,6 +3,9 @@ package com.firefly.layers.models;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.core.Loss;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 
@@ -11,9 +14,11 @@ import java.util.List;
 
 public class Sequential implements Model {
     private List<Layer> layers;
-    private List<double[]> layersOut;
-    private List<double[]> layersInputPrtGrad;//每层的识差/输入的梯度
+    private List<MultiDim> layersOut;
+    private List<MultiDim> layersInputPrtGrad;//每层的识差/输入的梯度
     private Loss loss;
+
+    private MultiDim lossOutMd=null;
     private double[] lossOut;
     private double rate;
 
@@ -47,7 +52,7 @@ public class Sequential implements Model {
     }
 
     @Override
-    public double[] predict(double[] x) {
+    public MultiDim predict(MultiDim x) {
         //初始化层输出中间结果
         if(layers.size()!=layersOut.size()){
             initLayersOut();
@@ -69,7 +74,7 @@ public class Sequential implements Model {
      * @param x
      * @return
      */
-    private double[] calcAllLayers(double[] x){
+    private MultiDim calcAllLayers(MultiDim x){
         for(int li=0;li<layers.size();li++){
             Layer layer=layers.get(li);
             if(li==0){
@@ -87,11 +92,11 @@ public class Sequential implements Model {
      * @param x 输入值
      * @param lossPrtGrad 损失函数/计算结果的梯度
      */
-    private void calcBackPropagation(double[] x,double[] y,double[] lossPrtGrad){
+    private void calcBackPropagation(MultiDim x,MultiDim y,MultiDim lossPrtGrad){
         for(int li=layers.size()-1;li>=0;li--){
             Layer layer=layers.get(li);
 
-            double[] currentInput=null;
+            MultiDim currentInput=null;
             if(li==0){
                 currentInput=x;
             }else{
@@ -122,17 +127,17 @@ public class Sequential implements Model {
     }
 
     @Override
-    public void fit(double[][] x, double[][] y, int epoch, int batchSize) {
+    public void fit(MultiDim[] x, MultiDim[] y, int epoch, int batchSize) {
         fit(x,y,epoch,batchSize,null);
     }
 
     @Override
-    public void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener) {
+    public void fit(MultiDim[] x, MultiDim[] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener) {
         fit(x,y,epoch,batchSize,lossCallBackListener,null);
     }
 
     @Override
-    public void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl) {
+    public void fit(MultiDim[] x, MultiDim[] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl) {
         int num=x.length/batchSize;
         int mod=x.length%batchSize;
         num+=mod>0?1:0;
@@ -156,17 +161,17 @@ public class Sequential implements Model {
                 //偏移每批的的位置进行训练
                 for(int i=n*batchSize;i<n*batchSize+bs;i++){
                     //计算所有层的值
-                    double[] lastLayerOut=calcAllLayers(x[i]);
+                    MultiDim lastLayerOut=calcAllLayers(x[i]);
 
                     //如果要回调损失
                     if(lossCallBackListener!=null || fitControl!=null){
-                        loss.calc(lastLayerOut,y[i],lossOut);
+                        loss.calc(lastLayerOut,y[i],lossOutMd);
                         //累计识差
                         lossVal+=lossOut[0];
                     }
 
                     //损失函数/计算结果的梯度
-                    double[] lossPrtGrad=loss.prtGrad(lastLayerOut,y[i]);
+                    MultiDim lossPrtGrad=loss.prtGrad(lastLayerOut,y[i]);
 
                     //计算反向修正参数
                     calcBackPropagation(x[i],y[i],lossPrtGrad);
@@ -197,7 +202,7 @@ public class Sequential implements Model {
         layersOut.clear();
         for(int i=0;i<layers.size();i++){
             Layer layer=layers.get(i);
-            layersOut.add(new double[layer.getUnits()]);
+            layersOut.add(new MultiDim(layer.getUnitShape()));
         }
     }
 
@@ -206,30 +211,31 @@ public class Sequential implements Model {
         initLayersOut();
 
         //初始化层
-        int lastUnits=0;
+        Shape lastUnits=null;
         for(int i=0;i<layers.size();i++){
             Layer layer=layers.get(i);
 
             //第二层开始都是继承上层的输出个数
             if(i>0){
-                layer.setInputs(lastUnits);
+                layer.setInputShape(lastUnits);
             }
 
             //定义每层的临时梯度
             if(i==0){
                 layersInputPrtGrad.add(null);
             }else{
-                layersInputPrtGrad.add(new double[layer.getInputs()]);
+                layersInputPrtGrad.add(new MultiDim(Double.TYPE,layer.getInputShape()));
             }
 
             layer.init();
-            lastUnits=layer.getUnits();//记录上一层的输出参数个数
+            lastUnits=layer.getUnitShape();//记录上一层的输出参数个数
         }
 
         try {
             loss=lossCls.newInstance();
             //创建输出数
             lossOut=new double[1];
+            lossOutMd=new MultiDim(Double.TYPE,new Shape(new int[]{lossOut.length}),lossOut);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -239,11 +245,12 @@ public class Sequential implements Model {
      * 重置每层的损失函数/输入参数偏导梯度
      */
     private void resetLayersInputPrtGrad(){
-        for(double[] datas:layersInputPrtGrad){
+        for(MultiDim datas:layersInputPrtGrad){
             if(datas!=null){
-                for(int i=0;i<datas.length;i++){
-                    datas[i]=0;
-                }
+                ShapeIndex i=new ShapeIndex(datas.getShape());
+                do{
+                    datas.setVal(i,0);
+                }while (i.next());
             }
         }
     }

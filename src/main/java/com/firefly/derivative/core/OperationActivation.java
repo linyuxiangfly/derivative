@@ -1,13 +1,15 @@
 package com.firefly.derivative.core;
 
 import com.firefly.derivative.operation.Const;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.ShapeIndex;
 
 /**
  * 单目运算符
  */
 public class OperationActivation extends OperationUnary {
-    private Function[] relations;//关联的参数
-    private Function[] settings;//设置参数
+    private MultiDim relations;//关联的参数
+    private MultiDim settings;//设置参数
 
     public OperationActivation(){
 
@@ -21,48 +23,30 @@ public class OperationActivation extends OperationUnary {
         super(val);
     }
 
-    public OperationActivation(double val,double[] relations){
+
+    public OperationActivation(double val,MultiDim relations){
         super(val);
         setRelations(relations);
     }
 
-    public OperationActivation(double val,Function[] relations){
+    public OperationActivation(Function val,MultiDim relations){
         super(val);
         setRelations(relations);
     }
 
-    public OperationActivation(Function val,double[] relations){
-        super(val);
-        setRelations(relations);
-    }
-
-    public OperationActivation(Function val,Function[] relations){
-        super(val);
-        setRelations(relations);
-    }
-
-    public void setRelations(double[] vals){
-        if(vals!=null && vals.length>0){
-            this.relations=new Function[vals.length];
-            for(int i=0;i<this.relations.length;i++){
-                this.relations[i]=new Const(vals[i]);
-            }
-        }
-    }
-
-    public Function[] getRelations() {
+    public MultiDim getRelations() {
         return relations;
     }
 
-    public void setRelations(Function[] relations) {
+    public void setRelations(MultiDim relations) {
         this.relations = relations;
     }
 
-    public Function[] getSettings() {
+    public MultiDim getSettings() {
         return settings;
     }
 
-    public void setSettings(Function[] settings) {
+    public void setSettings(MultiDim settings) {
         this.settings = settings;
     }
 
@@ -72,12 +56,14 @@ public class OperationActivation extends OperationUnary {
      * @return
      */
     private boolean isDxRelations(Function dx){
-        if(relations!=null && relations.length>0){
-            for(Function func:relations){
+        if(relations!=null){
+            ShapeIndex index=new ShapeIndex(relations.getShape());
+            do{
+                Function func=(Function)relations.getVal(index);
                 if(func.isDx(dx)){
                     return true;
                 }
-            }
+            }while (index.next());
         }
         return false;
     }
@@ -106,7 +92,7 @@ public class OperationActivation extends OperationUnary {
         return 0;
     }
 
-    public double prtGrad(Function dx,double[] targetVal){
+    public double prtGrad(Function dx,MultiDim targetVal){
         return 0;
     }
 
