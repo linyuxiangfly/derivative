@@ -3,6 +3,8 @@ package com.firefly.derivative.activation;
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.core.OperationUnary;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.ShapeIndex;
 
 /**
  * softmax
@@ -20,19 +22,11 @@ public class Softmax extends OperationActivation {
         super(val);
     }
 
-    public Softmax(double val,double[] relations){
+    public Softmax(double val, MultiDim relations){
         super(val,relations);
     }
 
-    public Softmax(double val,Function[] relations){
-        super(val,relations);
-    }
-
-    public Softmax(Function val,double[] relations){
-        super(val,relations);
-    }
-
-    public Softmax(Function val,Function[] relations){
+    public Softmax(Function val,MultiDim relations){
         super(val,relations);
     }
 
@@ -41,7 +35,7 @@ public class Softmax extends OperationActivation {
         return 0;
     }
 
-    public double prtGrad(Function dx,double[] targetVal){
+    public double prtGrad(Function dx,MultiDim targetVal){
         double val=0;
 
         if(this==dx){
@@ -66,24 +60,28 @@ public class Softmax extends OperationActivation {
         return val;
     }
 
-    private Function max(double[] vals){
+    private Function max(MultiDim vals){
         Function ret=null;
-        double max=vals[0];
-        int index=0;
-        Function[] funcs=this.getRelations();
-        for(int i=0;i<vals.length;i++){
-            if(vals[i]>max){
-                max=vals[i];
-                index=i;
+        ShapeIndex i=new ShapeIndex(vals.getShape());
+        ShapeIndex index=new ShapeIndex(vals.getShape());
+
+        double max=(double)vals.getVal(i);
+        double temp=0;
+        do{
+            temp=(double)vals.getVal(i);
+            if(temp>max){
+                max=temp;
+                index.copy(i);
             }
-        }
-        ret=funcs[index];
+        }while (i.next());
+
+        ret=(Function) this.getRelations().getVal(index);
         return ret;
     }
 
     private double sumRelations(){
         double ret=0;
-        Function[] funcs=this.getRelations();
+        Function[] funcs=(Function[]) this.getRelations().getData();
         for(Function func:funcs){
             ret+=Math.exp(func.calc());
         }

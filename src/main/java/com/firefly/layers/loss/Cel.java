@@ -2,6 +2,8 @@ package com.firefly.layers.loss;
 
 import com.firefly.derivative.util.MathEx;
 import com.firefly.layers.core.Loss;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.math.Linalg;
 import com.firefly.math.Statistics;
 
@@ -10,13 +12,16 @@ import com.firefly.math.Statistics;
  */
 public class Cel implements Loss {
     @Override
-    public void calc(double[] input,double[] targetVal,double[] out) {
+    public void calc(MultiDim input,MultiDim targetVal,MultiDim out) {
         double ret=0;
 //        double si=sumInput(input);//累计所有输入的和
-        for(int i=0;i<input.length;i++){
-            ret+=targetVal[i]* Math.log(input[i]);
-        }
-        out[0]=-ret;
+        ShapeIndex i=new ShapeIndex(input.getShape());
+        do{
+            ret+=(double)targetVal.getVal(i)*Math.log((double)input.getVal(i));
+        }while (i.next());
+
+        ShapeIndex oi=new ShapeIndex(out.getShape());
+        out.setVal(oi,-ret);
     }
 
     /**
@@ -29,11 +34,13 @@ public class Cel implements Loss {
     }
 
     @Override
-    public double[] prtGrad(double[] input,double[] targetVal) {
-        double[] ret=new double[input.length];
-        for(int i=0;i<input.length;i++){
-            ret[i]=-targetVal[i]/input[i];
-        }
+    public MultiDim prtGrad(MultiDim input, MultiDim targetVal) {
+        MultiDim ret=new MultiDim(input.getShape());
+        ShapeIndex i=new ShapeIndex(input.getShape());
+        do{
+            ret.setVal(i,-(double)targetVal.getVal(i)/(double)input.getVal(i));
+        }while (i.next());
+
         return ret;
     }
 }

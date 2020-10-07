@@ -1,5 +1,7 @@
 package com.firefly.layers.init.params;
 
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.listeners.InitParamsListener;
 
 import java.util.Random;
@@ -9,20 +11,22 @@ import java.util.Random;
  */
 public class InitParamsRandomOrdinary implements InitParamsListener {
     @Override
-    public void paramWSize(int row, int col) {
+    public void paramWSize(Shape shape) {
+
     }
 
     @Override
-    public void paramBSize(int row) {
+    public void paramBSize(Shape shape) {
+
     }
 
     @Override
-    public double initParamW(int i, int j) {
+    public double initParamW(ShapeIndex shapeIndex) {
         return Math.random();
     }
 
     @Override
-    public double initParamB(int i) {
+    public double initParamB(ShapeIndex shapeIndex) {
         return Math.random();
     }
 }

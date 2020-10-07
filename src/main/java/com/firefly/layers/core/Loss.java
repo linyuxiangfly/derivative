@@ -1,5 +1,7 @@
 package com.firefly.layers.core;
 
+import com.firefly.layers.data.MultiDim;
+
 /**
  * 损失函数
  */
@@ -10,7 +12,7 @@ public interface Loss extends java.io.Serializable{
      * @param targetVal 标签数据
      * @return
      */
-    double[] prtGrad(double[] input,double[] targetVal);
+    MultiDim prtGrad(MultiDim input, MultiDim targetVal);
 
     /**
      * 正向计算
@@ -18,5 +20,5 @@ public interface Loss extends java.io.Serializable{
      * @param targetVal 标签数据
      * @param out 输出计算结果
      */
-    void calc(double[] input,double[] targetVal,double[] out);
+    void calc(MultiDim input,MultiDim targetVal,MultiDim out);
 }

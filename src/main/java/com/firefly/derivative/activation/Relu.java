@@ -2,6 +2,7 @@ package com.firefly.derivative.activation;
 
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
+import com.firefly.layers.data.MultiDim;
 
 /**
  * relu
@@ -27,7 +28,7 @@ public class Relu extends OperationActivation {
         return val;
     }
 
-    public double prtGrad(Function dx,double[] targetVal){
+    public double prtGrad(Function dx, MultiDim targetVal){
         return prtGrad(dx);
     }
 

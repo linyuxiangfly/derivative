@@ -2,6 +2,8 @@ package com.firefly.layers.loss;
 
 import com.firefly.derivative.core.Function;
 import com.firefly.layers.core.Loss;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.math.Linalg;
 
 /**
@@ -9,16 +11,20 @@ import com.firefly.math.Linalg;
  */
 public class Mse implements Loss {
     @Override
-    public void calc(double[] input,double[] targetVal,double[] out) {
-        double[] error=new double[input.length];
-        for(int i=0;i<input.length;i++){
-            error[i]=targetVal[i]-input[i];
-        }
-        out[0]=Linalg.inner(error, error)*0.5;
+    public void calc(MultiDim input, MultiDim targetVal, MultiDim out) {
+        MultiDim error=new MultiDim(input.getShape());
+        ShapeIndex i=new ShapeIndex(input.getShape());
+
+        do{
+            error.setVal(i,(double)targetVal.getVal(i)-(double)input.getVal(i));
+        }while(i.next());
+
+        ShapeIndex oi=new ShapeIndex(out.getShape());
+        out.setVal(oi,Linalg.inner(error, error)*0.5);
     }
 
     @Override
-    public double[] prtGrad(double[] input,double[] targetVal) {
+    public MultiDim prtGrad(MultiDim input,MultiDim targetVal) {
         return Linalg.sub(input,targetVal);
     }
 }

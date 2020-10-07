@@ -4,6 +4,9 @@ import com.firefly.derivative.activation.LRelu;
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.operation.Const;
 import com.firefly.layers.core.Model;
+import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -37,12 +40,14 @@ public class TestNNLeakyRelu {
                 {40.8701106,42.5},
                 {41.2926849,43}
         };
-        double[][] x=new double[datas.length][1];
-        double[][] y=new double[datas.length][1];
+        double[][] xx=new double[datas.length][1];
+        double[][] yy=new double[datas.length][1];
         for(int i=0;i<datas.length;i++){
-            x[i][0]=datas[i][0]/100.0;
-            y[i][0]=datas[i][1]/100.0;
+            xx[i][0]=datas[i][0]/100.0;
+            yy[i][0]=datas[i][1]/100.0;
         }
+        MultiDim[] x=arr2MultDim(xx);
+        MultiDim[] y=arr2MultDim(yy);
 
         Model model=new Sequential(0.04);
         model.add(new Dense(1,1, LRelu.class,new Function[]{new Const(0.01)}));
@@ -58,11 +63,29 @@ public class TestNNLeakyRelu {
         });
 
         for(int i=0;i<x.length;i++){
-            double[] py=model.predict(x[i]);
-            System.out.print(String.format("%.2f   ", py[0]*100));
-            System.out.print(String.format("%.2f   ", y[i][0]*100));
+
+            MultiDim py=model.predict(x[i]);
+
+            ShapeIndex j=new ShapeIndex(py.getShape());
+            do{
+                System.out.print(String.format("%.2f   ", (double)py.getVal(j)*100));
+            }while(j.next());
+
+            j=new ShapeIndex(y[i].getShape());
+            do{
+                System.out.print(String.format("%.2f   ", (double)y[i].getVal(j)*100));
+            }while(j.next());
+
             System.out.println();
         }
 
+    }
+
+    private static MultiDim[] arr2MultDim(double[][] datas){
+        MultiDim[] ret=new MultiDim[datas.length];
+        for(int i=0;i<ret.length;i++){
+            ret[i]=new MultiDim(Double.TYPE,new Shape(new int[]{datas[i].length}),datas[i]);
+        }
+        return ret;
     }
 }

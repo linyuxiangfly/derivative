@@ -1,5 +1,6 @@
 package com.firefly.layers.core;
 
+import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 
@@ -44,7 +45,7 @@ public interface Model extends java.io.Serializable{
      * @param x 输入数据进行预测
      * @return 返回预测结果
      */
-    double[] predict(double[] x);
+    MultiDim predict(MultiDim x);
 
     /**
      *
@@ -53,7 +54,7 @@ public interface Model extends java.io.Serializable{
      * @param epoch 训练次数
      * @param batchSize 训练数据批量大小
      */
-    void fit(double[][] x, double[][] y, int epoch, int batchSize);
+    void fit(MultiDim[] x, MultiDim[] y, int epoch, int batchSize);
 
     /**
      *
@@ -63,7 +64,7 @@ public interface Model extends java.io.Serializable{
      * @param batchSize 训练数据批量大小
      * @param lossCallBackListener 损失函数返回事件
      */
-    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener);
+    void fit(MultiDim[] x, MultiDim[] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener);
 
     /**
      *
@@ -74,5 +75,5 @@ public interface Model extends java.io.Serializable{
      * @param lossCallBackListener 损失函数返回事件
      * @param fitControl 拟合过程控制，可以设置达到某个条件退出训练
      */
-    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl);
+    void fit(MultiDim[] x, MultiDim[] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl);
 }
