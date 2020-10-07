@@ -131,7 +131,7 @@ public class MaskPredict {
 
             ShapeIndex j=new ShapeIndex(py.getShape());
             do{
-                System.out.print(String.format("%.10f   ", (double)py.getVal(j)*100));
+//                System.out.print(String.format("%.10f   ", (double)py.getVal(j)*100));
                 double diff=Math.abs((double)py.getVal(j)-(double) y[i].getVal(j));
                 if(diff>=0.05){
                     errorNum++;

@@ -166,12 +166,12 @@ public class TestNNSoftmax {
 
             ShapeIndex j=new ShapeIndex(py.getShape());
             do{
-                System.out.print(String.format("%.10f   ", (double)py.getVal(j)*100));
+                System.out.print(String.format("%.10f   ", (double)py.getVal(j)));
             }while(j.next());
 
             j=new ShapeIndex(y[i].getShape());
             do{
-                System.out.print(String.format("%.10f   ", (double)y[i].getVal(j)*100));
+                System.out.print(String.format("%.10f   ", (double)y[i].getVal(j)));
             }while(j.next());
 
             System.out.println();
