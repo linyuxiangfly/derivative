@@ -49,6 +49,17 @@ public class MultiDim implements java.io.Serializable{
     }
 
     /**
+     * 由1维下标获取多维下标
+     * @param index
+     * @return
+     */
+    public Object getOneDimIndexVal(int index){
+        int[] dimIndex=this.getShape().getOneDimIndex(index);
+
+        return getVal(data,dimIndex);
+    }
+
+    /**
      * 获取下标值
      * @param shapeIndex
      * @return

@@ -127,13 +127,16 @@ public class Dense implements Layer {
     }
 
     public void setInputShape(Shape inputShape) {
-        this.inputShape = inputShape;
-        if(inputShape.getDims().length==1){
-            this.inputs=inputShape.getDims()[0];
-        }else{
-            //只允许1维数组
-            throw new RuntimeException("Only 1-dimensional arrays are allowed");
-        }
+        inputs=inputShape.getNums();
+//        this.inputShape = inputShape;
+        this.inputShape = new Shape(new int[]{inputs});
+
+//        if(inputShape.getDims().length==1){
+//            this.inputs=inputShape.getDims()[0];
+//        }else{
+//            //只允许1维数组
+//            throw new RuntimeException("Only 1-dimensional arrays are allowed");
+//        }
     }
 
     public Shape getUnitShape() {
@@ -237,7 +240,7 @@ public class Dense implements Layer {
 
         for(int i=0;i<this.outs.length;i++){
             //sigmoid(wx+b)
-            val=Linalg.inner(w[i],(double[])input.getData())+b[i];
+            val=Linalg.inner(w[i],input)+b[i];
             val/=keepProb;//参数除以keep_prob来保证输出的期望值不变
             wxb[i].setVal(val);
 
@@ -259,7 +262,7 @@ public class Dense implements Layer {
 
     @Override
     public void addBackUpdateParamPrtGrad(MultiDim prtGrad, MultiDim input,MultiDim targetVal,MultiDim currentPrtGrad) {
-        double[] inputVal=(double[])input.getData();
+//        double[] inputVal=(double[])input.getData();
         double[] prtGradVal=(double[])prtGrad.getData();
 
         double[] dloss_dwxb=new double[outs.length];
@@ -271,7 +274,7 @@ public class Dense implements Layer {
             //计算w的更新梯度
             for(int j=0;j<diffW[i].length;j++){
                 //累计参数w的更新值
-                diffW[i][j]+=dloss_dwxb[i]*inputVal[j]*binomial[i];
+                diffW[i][j]+=dloss_dwxb[i]*(double)input.getOneDimIndexVal(j)*binomial[i];
             }
 
             //累计参数b的更新值

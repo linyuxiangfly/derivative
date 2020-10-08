@@ -230,6 +230,17 @@ public class Linalg {
         return ret;
     }
 
+    public static double inner(double[] a,MultiDim b){
+        double ret=0;
+        if(a.length!=b.getShape().getNums()){
+            throw new RuntimeException("The data shape is not correct");
+        }
+        for(int i=0;i<a.length;i++){
+            ret+=a[i]*(double)b.getOneDimIndexVal(i);
+        }
+        return ret;
+    }
+
     public static double inner(MultiDim a,MultiDim b){
         double ret=0;
         if(a.getShape().equals(b.getShape())){
