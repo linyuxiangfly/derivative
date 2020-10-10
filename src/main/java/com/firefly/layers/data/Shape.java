@@ -44,7 +44,7 @@ public class Shape implements java.io.Serializable{
      * @param index
      * @return
      */
-    public int[] getOneDimIndex(int index){
+    public int[] getOneDim2MultDimIndex(int index){
         int[] indexs=new int[dimsNum.length];//1维下标转多维的数组
         int val=index;
 

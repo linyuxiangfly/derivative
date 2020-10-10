@@ -261,9 +261,9 @@ public class Dense implements Layer {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(MultiDim prtGrad, MultiDim input,MultiDim targetVal,MultiDim currentPrtGrad) {
+    public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim inputPrtGrad,MultiDim outPrtGrad) {
 //        double[] inputVal=(double[])input.getData();
-        double[] prtGradVal=(double[])prtGrad.getData();
+        double[] prtGradVal=(double[])outPrtGrad.getData();
 
         double[] dloss_dwxb=new double[outs.length];
         int[] binomial= Binomial.binomialOfInt(keepProb,this.outs.length);//二项分布
@@ -274,7 +274,7 @@ public class Dense implements Layer {
             //计算w的更新梯度
             for(int j=0;j<diffW[i].length;j++){
                 //累计参数w的更新值
-                diffW[i][j]+=dloss_dwxb[i]*(double)input.getOneDimIndexVal(j)*binomial[i];
+                diffW[i][j]+=dloss_dwxb[i]*(double)input.getOneDim2MultDimIndexVal(j)*binomial[i];
             }
 
             //累计参数b的更新值
@@ -282,8 +282,8 @@ public class Dense implements Layer {
         }
 
         //累计输入参数的更新值
-        if(currentPrtGrad!=null){
-            double[] currentPrtGradVal=(double[])currentPrtGrad.getData();
+        if(inputPrtGrad!=null){
+            double[] currentPrtGradVal=(double[])inputPrtGrad.getData();
 
             //计算输入值的更新梯度
             double[] cpt=Linalg.inner(w,dloss_dwxb,true);

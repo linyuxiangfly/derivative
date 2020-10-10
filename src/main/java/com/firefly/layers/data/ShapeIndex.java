@@ -63,6 +63,38 @@ public class ShapeIndex implements java.io.Serializable {
     }
 
     /**
+     * 由1维下标获取多维下标
+     * @param index
+     * @return
+     */
+    public int[] getOneDim2MultDimIndex(int index){
+        int[] indexs=new int[this.getShape().getDims().length];//1维下标转多维的数组
+        int val=index;
+
+        for(int i=0;i<this.getShape().getDims().length-1;i++){
+            indexs[i]=val/this.getShape().getNums(i+1);//计算下标
+            val=val%this.getShape().getNums(i+1);//求剩余多少下标
+        }
+        indexs[indexs.length-1]=val;
+
+        return indexs;
+    }
+
+    /**
+     * 获取多维转1维的下标
+     * @return
+     */
+    public int getMultDim2OneDimIndex(){
+        int ret=0;
+        for(int i=0;i<dimIndex.length-1;i++){
+            ret+=this.getShape().getNums(i+1)*dimIndex[i];
+        }
+        //加上最后一维
+        ret+=dimIndex[dimIndex.length-1];
+        return ret;
+    }
+
+    /**
      * 将下标置0
      */
     public void zero(){

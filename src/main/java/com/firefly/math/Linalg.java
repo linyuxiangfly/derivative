@@ -236,7 +236,7 @@ public class Linalg {
             throw new RuntimeException("The data shape is not correct");
         }
         for(int i=0;i<a.length;i++){
-            ret+=a[i]*(double)b.getOneDimIndexVal(i);
+            ret+=a[i]*(double)b.getOneDim2MultDimIndexVal(i);
         }
         return ret;
     }

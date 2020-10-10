@@ -74,11 +74,11 @@ public interface Layer extends java.io.Serializable{
 
     /**
      * 累加反向更新参数梯度
-     * @param prtGrad 下一层的梯度
+     * @param outPrtGrad 误差函数/输出值的梯度
      * @param input 输入值
-     * @param currentPrtGrad 识差函数/当前层的输入的梯度
+     * @param inputPrtGrad 识差函数/输入值的梯度
      */
-    void addBackUpdateParamPrtGrad(MultiDim prtGrad,MultiDim input,MultiDim targetVal,MultiDim currentPrtGrad);
+    void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim inputPrtGrad,MultiDim outPrtGrad);
 
     /**
      * 更新参数梯度

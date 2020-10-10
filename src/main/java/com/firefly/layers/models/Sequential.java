@@ -104,9 +104,9 @@ public class Sequential implements Model {
             }
 
             if(li==layers.size()-1){
-                layer.addBackUpdateParamPrtGrad(lossPrtGrad,currentInput,y,layersInputPrtGrad.get(li));
+                layer.addBackUpdateParamPrtGrad(currentInput,y,layersInputPrtGrad.get(li),lossPrtGrad);
             }else{
-                layer.addBackUpdateParamPrtGrad(layersInputPrtGrad.get(li+1),currentInput,y,layersInputPrtGrad.get(li));
+                layer.addBackUpdateParamPrtGrad(currentInput,y,layersInputPrtGrad.get(li),layersInputPrtGrad.get(li+1));
             }
         }
     }

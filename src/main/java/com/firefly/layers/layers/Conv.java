@@ -299,14 +299,14 @@ public class Conv implements Layer {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(MultiDim prtGrad, MultiDim input,MultiDim targetVal,MultiDim currentPrtGrad) {
+    public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim inputPrtGrad,MultiDim outPrtGrad) {
         double[][][]inputVal=(double[][][])input.getData();
 
         double[][][] prtGradVal;
-        if(prtGrad.getShape().getDims().length==1){
-            prtGradVal=one2ThreeDim((double[])prtGrad.getData(),unitShape);
+        if(outPrtGrad.getShape().getDims().length==1){
+            prtGradVal=one2ThreeDim((double[])outPrtGrad.getData(),unitShape);
         }else{
-            prtGradVal=(double[][][])prtGrad.getData();
+            prtGradVal=(double[][][])outPrtGrad.getData();
         }
 
         MultiDim dloss_dwxb_md=new MultiDim(this.unitShape);
