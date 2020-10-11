@@ -299,14 +299,14 @@ public class Conv implements Layer {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim inputPrtGrad,MultiDim outPrtGrad) {
+    public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad) {
         double[][][]inputVal=(double[][][])input.getData();
 
-        double[][][] prtGradVal;
-        if(outPrtGrad.getShape().getDims().length==1){
-            prtGradVal=one2ThreeDim((double[])outPrtGrad.getData(),unitShape);
+        double[][][] backLayerPrtGradVal;
+        if(backLayerPrtGrad.getShape().getDims().length==1){
+            backLayerPrtGradVal=one2ThreeDim((double[])backLayerPrtGrad.getData(),unitShape);
         }else{
-            prtGradVal=(double[][][])outPrtGrad.getData();
+            backLayerPrtGradVal=(double[][][])backLayerPrtGrad.getData();
         }
 
         MultiDim dloss_dwxb_md=new MultiDim(this.unitShape);
@@ -317,7 +317,7 @@ public class Conv implements Layer {
         for(int x=0;x<dloss_dwxb.length;x++){
             for(int y=0;y<dloss_dwxb[x].length;y++){
                 for(int z=0;z<dloss_dwxb[x][y].length;z++){
-                    dloss_dwxb[x][y][z]=prtGradVal[x][y][z]*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
+                    dloss_dwxb[x][y][z]=backLayerPrtGradVal[x][y][z]*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
                 }
             }
         }

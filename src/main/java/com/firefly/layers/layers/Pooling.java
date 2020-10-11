@@ -6,7 +6,6 @@ import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.data.ThreeDimShape;
 import com.firefly.layers.enums.PollingType;
-import com.firefly.math.Linalg;
 
 /**
  * 池化层
@@ -20,6 +19,10 @@ public class Pooling implements Layer {
     private int kernelWidth;//池化核宽度
     private int kernelHeight;//池化核高度
     private boolean outOneDim;//多维转为1维输出
+
+    public Pooling(PollingType pollingType, int kernelWidth, int kernelHeight, boolean outOneDim){
+        this(null,pollingType,kernelWidth,kernelHeight,outOneDim);
+    }
 
     public Pooling(ThreeDimShape inputShape, PollingType pollingType, int kernelWidth, int kernelHeight, boolean outOneDim){
         this.inputShape=inputShape;
@@ -38,14 +41,14 @@ public class Pooling implements Layer {
      * @return
      */
     private Shape calcOutShape(ThreeDimShape inputShape, int kernelWidth, int kernelHeight, boolean outOneDim){
-        int outWidth=inputShape.getX()/kernelWidth;
-        int outHeight=inputShape.getY()/kernelHeight;
+        int outWidth=inputShape.getY()/kernelWidth;
+        int outHeight=inputShape.getZ()/kernelHeight;
 
         //如果输出1维
         if(outOneDim){
-            return new Shape(new int[]{outWidth*outHeight*inputShape.getZ()});
+            return new Shape(new int[]{inputShape.getX()*outWidth*outHeight});
         }else{
-            return new Shape(new int[]{outWidth,outHeight,inputShape.getZ()});
+            return new Shape(new int[]{inputShape.getX(),outWidth,outHeight});
         }
     }
 
@@ -73,6 +76,7 @@ public class Pooling implements Layer {
 
     public void setInputShape(Shape inputShape) {
         this.inputShape = (ThreeDimShape) inputShape;
+        this.unitShape=calcOutShape(this.inputShape,kernelWidth,kernelHeight,outOneDim);
     }
 
     public Shape getUnitShape() {
@@ -80,7 +84,7 @@ public class Pooling implements Layer {
     }
 
     public void setUnitShape(Shape unitShape) {
-        this.unitShape = (ThreeDimShape) unitShape;
+        this.unitShape = unitShape;
     }
 
     @Override
@@ -113,16 +117,16 @@ public class Pooling implements Layer {
 
     @Override
     public void calc(MultiDim input, MultiDim out) {
-        int outWidth=inputShape.getX()/kernelWidth;
-        int outHeight=inputShape.getY()/kernelHeight;
+        int outWidth=inputShape.getY()/kernelWidth;
+        int outHeight=inputShape.getZ()/kernelHeight;
 
-        for(int z=0;z<inputShape.getZ();z++){
-            for(int x=0;x<outWidth;x++){
-                for(int y=0;y<outHeight;y++){
+        for(int x=0;x<inputShape.getX();x++){
+            for(int y=0;y<outWidth;y++){
+                for(int z=0;z<outHeight;z++){
                     if(pollingType==PollingType.max){
-                        max(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z,outOneDim);
+                        max(input,out,gradient,x,y,z,x,y*kernelWidth,kernelWidth,z*kernelHeight,kernelHeight,outOneDim);
                     }else{
-                        avg(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z,outOneDim);
+                        avg(input,out,gradient,x,y,z,x,y*kernelWidth,kernelWidth,z*kernelHeight,kernelHeight,outOneDim);
                     }
                 }
             }
@@ -161,54 +165,56 @@ public class Pooling implements Layer {
      * @param px
      * @param py
      * @param pz
-     * @param xStart
-     * @param xLen
+     * @param x
      * @param yStart
      * @param yLen
-     * @param z
+     * @param zStart
+     * @param zLen
      * @param outOneDim
      */
-    private void max(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z,boolean outOneDim){
+    private void max(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int x,int yStart,int yLen,int zStart,int zLen,boolean outOneDim){
         //求最大值或平均值
-        int maxX=xStart;
         int maxY=yStart;
+        int maxZ=zStart;
 
         ShapeIndex index=new ShapeIndex(inputShape);
+        ShapeIndex outIndex=new ShapeIndex(unitRealShape);
 
-        index.setDimIndexVal(inputShape.X,xStart);
+        index.setDimIndexVal(inputShape.X,x);
         index.setDimIndexVal(inputShape.Y,yStart);
-        index.setDimIndexVal(inputShape.Z,z);
+        index.setDimIndexVal(inputShape.Z,zStart);
         double maxVal=(double)input.getVal(index);
 
-        for(int xx=xStart;px<xStart+xLen;px++){
-            for(int yy=yStart;py<yStart+yLen;py++){
-                index.setDimIndexVal(inputShape.X,xx);
+        for(int yy=yStart;yy<yStart+yLen;yy++){
+            for(int zz=zStart;zz<zStart+zLen;zz++){
                 index.setDimIndexVal(inputShape.Y,yy);
+                index.setDimIndexVal(inputShape.Z,zz);
                 double tempVal=(double)input.getVal(index);
                 if(tempVal>maxVal){
-                    maxX=px;
-                    maxY=py;
+                    maxY=yy;
+                    maxZ=zz;
                     maxVal=tempVal;
                 }
             }
         }
 
         //记录梯度值
-        setGradientVal(gradient,xStart,xLen,yStart,yLen,z,z,0.0);//置零
+        setGradientVal(gradient,x,1,yStart,yLen,zStart,zLen,0.0);//置零
+
         //设置最大值的点梯度为1
-        index.setDimIndexVal(inputShape.X,maxX);
+        index.setDimIndexVal(inputShape.X,x);
         index.setDimIndexVal(inputShape.Y,maxY);
-        index.setDimIndexVal(inputShape.Z,z);
+        index.setDimIndexVal(inputShape.Z,maxZ);
         gradient.setVal(index,1.0);
 
         //设置最大值
-        index.setDimIndexVal(inputShape.X,px);
-        index.setDimIndexVal(inputShape.Y,py);
-        index.setDimIndexVal(inputShape.Z,pz);
+        outIndex.setDimIndexVal(inputShape.X,px);
+        outIndex.setDimIndexVal(inputShape.Y,py);
+        outIndex.setDimIndexVal(inputShape.Z,pz);
         if(outOneDim){
-            setOneDimOutVal(out,index,maxVal);
+            setOneDimOutVal(out,outIndex,maxVal);
         }else{
-            setThreeDimOutVal(out,index,maxVal);
+            setThreeDimOutVal(out,outIndex,maxVal);
         }
     }
 
@@ -220,33 +226,33 @@ public class Pooling implements Layer {
      * @param px
      * @param py
      * @param pz
-     * @param xStart
-     * @param xLen
+     * @param x
      * @param yStart
      * @param yLen
-     * @param z
+     * @param zStart
+     * @param zLen
      * @param outOneDim
      */
-    private void avg(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z,boolean outOneDim){
+    private void avg(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int x,int yStart,int yLen,int zStart,int zLen,boolean outOneDim){
         double sum=0;
-        double num=xLen*yLen;//计算数量
+        double num=yLen*zLen;//计算数量
         ShapeIndex index=new ShapeIndex(inputShape);
 
-        index.setDimIndexVal(inputShape.X,xStart);
+        index.setDimIndexVal(inputShape.X,x);
         index.setDimIndexVal(inputShape.Y,yStart);
-        index.setDimIndexVal(inputShape.Z,z);
+        index.setDimIndexVal(inputShape.Z,zStart);
 
-        for(int xx=xStart;px<xStart+xLen;px++){
-            for(int yy=yStart;py<yStart+yLen;py++){
-                index.setDimIndexVal(inputShape.X,xx);
+        for(int yy=yStart;yy<yStart+yLen;yy++){
+            for(int zz=zStart;zz<zStart+zLen;zz++){
                 index.setDimIndexVal(inputShape.Y,yy);
+                index.setDimIndexVal(inputShape.Z,zz);
                 double tempVal=(double)input.getVal(index);
                 sum+=tempVal;
             }
         }
 
         //记录梯度值
-        setGradientVal(gradient,xStart,xLen,yStart,yLen,z,z,1.0/num);//设置梯度
+        setGradientVal(gradient,x,1,yStart,yLen,zStart,zLen,1.0/num);//设置梯度
 
         //设置最大值
         index.setDimIndexVal(inputShape.X,px);
@@ -265,17 +271,54 @@ public class Pooling implements Layer {
     }
 
     @Override
-    public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim inputPrtGrad,MultiDim outPrtGrad) {
-//        //累计输入参数的更新值
-//        if(inputPrtGrad!=null){
-//            double[] currentPrtGradVal=(double[])inputPrtGrad.getData();
-//
-//            //计算输入值的更新梯度
-//            double[] cpt= Linalg.inner(w,dloss_dwxb,true);
+    public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad) {
+        //累计输入参数的更新值
+        if(outFrontLayerPrtGrad!=null){
+            setInputPrtGrad(gradient,outFrontLayerPrtGrad,backLayerPrtGrad);
+
+            //计算输入值的更新梯度
 //            for(int i=0;i<currentPrtGradVal.length;i++){
 //                currentPrtGradVal[i]+=cpt[i];
 //            }
-//        }
+        }
+    }
+
+    private void setInputPrtGrad(MultiDim gradient,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad){
+        ShapeIndex index=new ShapeIndex(unitRealShape);
+        do{
+            double val=(double)backLayerPrtGrad.getVal(new int[]{index.getMultDim2OneDimIndex()});
+            addGradientVal(
+                    gradient,
+                    outFrontLayerPrtGrad,
+                    index.getDimIndexVal(ThreeDimShape.X),
+                    1,
+                    index.getDimIndexVal(ThreeDimShape.Y)*kernelWidth,
+                    kernelWidth,
+                    index.getDimIndexVal(ThreeDimShape.Z)*kernelHeight,
+                    kernelHeight,
+                    val
+                    );
+        }while (index.next());
+    }
+
+    private void addGradientVal(MultiDim gradient,MultiDim outFrontLayerPrtGrad,int xStart,int xLen,int yStart,int yLen,int zStart,int zLen,double val){
+        ShapeIndex index=new ShapeIndex(gradient.getShape());
+        for(int x=xStart;x<xStart+xLen;x++){
+            for(int y=yStart;y<yStart+yLen;y++){
+                for(int z=zStart;z<zStart+zLen;z++){
+                    index.setDimIndexVal(0,x);
+                    index.setDimIndexVal(1,y);
+                    index.setDimIndexVal(2,z);
+
+                    double v=(double)gradient.getVal(index);
+                    if(v!=0){
+                        double ov=(double)outFrontLayerPrtGrad.getVal(index);
+                        //更新输出梯度
+                        outFrontLayerPrtGrad.setVal(index,ov+v*val);
+                    }
+                }
+            }
+        }
     }
 
     @Override

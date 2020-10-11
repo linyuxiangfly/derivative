@@ -207,9 +207,6 @@ public class Sequential implements Model {
     }
 
     private void initLayers(List<Layer> layers,Class<? extends Loss> lossCls){
-        //初始化层输出中间结果
-        initLayersOut();
-
         //初始化层
         Shape lastUnits=null;
         for(int i=0;i<layers.size();i++){
@@ -239,6 +236,9 @@ public class Sequential implements Model {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+
+        //初始化层输出中间结果
+        initLayersOut();
     }
 
     /**

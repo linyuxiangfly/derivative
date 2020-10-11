@@ -10,9 +10,11 @@ import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.data.ThreeDimShape;
 import com.firefly.layers.enums.Padding;
+import com.firefly.layers.enums.PollingType;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Conv;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.layers.Pooling;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -37,6 +39,7 @@ public class MaskConvFit {
 
         Model model=new Sequential(0.1);
         model.add(new Conv((ThreeDimShape) x[0].getShape(),4,3,1, Padding.same, Relu.class,1.0f,null,new InitParamsRandomGaussian()));
+        model.add(new Pooling(PollingType.max,2,2,true));
         model.add(new Dense(1, Relu.class,1.0f));
         //识差函数
         model.setLossCls(Mse.class);
