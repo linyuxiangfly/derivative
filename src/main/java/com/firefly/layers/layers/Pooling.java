@@ -302,19 +302,21 @@ public class Pooling implements Layer {
     }
 
     private void addGradientVal(MultiDim gradient,MultiDim outFrontLayerPrtGrad,int xStart,int xLen,int yStart,int yLen,int zStart,int zLen,double val){
-        ShapeIndex index=new ShapeIndex(gradient.getShape());
-        for(int x=xStart;x<xStart+xLen;x++){
-            for(int y=yStart;y<yStart+yLen;y++){
-                for(int z=zStart;z<zStart+zLen;z++){
-                    index.setDimIndexVal(0,x);
-                    index.setDimIndexVal(1,y);
-                    index.setDimIndexVal(2,z);
+        if(val!=0){
+            ShapeIndex index=new ShapeIndex(gradient.getShape());
+            for(int x=xStart;x<xStart+xLen;x++){
+                for(int y=yStart;y<yStart+yLen;y++){
+                    for(int z=zStart;z<zStart+zLen;z++){
+                        index.setDimIndexVal(0,x);
+                        index.setDimIndexVal(1,y);
+                        index.setDimIndexVal(2,z);
 
-                    double v=(double)gradient.getVal(index);
-                    if(v!=0){
-                        double ov=(double)outFrontLayerPrtGrad.getVal(index);
-                        //更新输出梯度
-                        outFrontLayerPrtGrad.setVal(index,ov+v*val);
+                        double v=(double)gradient.getVal(index);
+                        if(v!=0){
+                            double ov=(double)outFrontLayerPrtGrad.getVal(index);
+                            //更新输出梯度
+                            outFrontLayerPrtGrad.setVal(index,ov+v*val);
+                        }
                     }
                 }
             }

@@ -10,7 +10,6 @@ import com.firefly.layers.init.params.InitParamsRandomOrdinary;
 import com.firefly.layers.listeners.InitParamsListener;
 import com.firefly.math.Binomial;
 import com.firefly.math.ConvUtil;
-import com.firefly.math.Linalg;
 
 /**
  * 卷积层
@@ -300,42 +299,23 @@ public class Conv implements Layer {
 
     @Override
     public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad) {
+        input=ConvUtil.expand(input,inputShapeExpand);
         double[][][]inputVal=(double[][][])input.getData();
 
-        double[][][] backLayerPrtGradVal;
-        if(backLayerPrtGrad.getShape().getDims().length==1){
-            backLayerPrtGradVal=one2ThreeDim((double[])backLayerPrtGrad.getData(),unitShape);
-        }else{
-            backLayerPrtGradVal=(double[][][])backLayerPrtGrad.getData();
-        }
+        double[][][] backLayerPrtGradVal=(double[][][])backLayerPrtGrad.getData();
 
         MultiDim dloss_dwxb_md=new MultiDim(this.unitShape);
         double[][][] dloss_dwxb=(double[][][])dloss_dwxb_md.getData();
         int[][][] binomial= (int[][][])Binomial.binomialOfInt(keepProb,this.unitShape).getData();//二项分布
 
         //计算（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
-        for(int x=0;x<dloss_dwxb.length;x++){
-            for(int y=0;y<dloss_dwxb[x].length;y++){
-                for(int z=0;z<dloss_dwxb[x][y].length;z++){
-                    dloss_dwxb[x][y][z]=backLayerPrtGradVal[x][y][z]*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
-                }
-            }
-        }
+        calcDLossDWxb(backLayerPrtGradVal,outs,wxb,binomial,targetVal,dloss_dwxb);
 
-//        input=ConvUtil.expand(input,inputShapeExpand);
+        //计算（损失函数/激活函数）*（激活函数/w）的偏导梯度
+        calcDLossDWs(dloss_dwxb,inputVal,diffW,strides);
 
-        for(int w=0;w<diffW.length;w++){
-            //计算卷积
-//            double[][] conv=ConvUtil.conv((double[][][])input.getData(),dloss_dwxb,1,keepProb,strides);
-//            diffW[w]=conv;
-
-            //计算w的更新梯度
-            //累计参数w的更新值
-//            diffW[w][x][y][z]+=dloss_dwxb[x][y][z]*inputVal[x][y][z]*binomial[x][y][z];
-
-            //累计参数b的更新值
-//            diffB[w]+=dloss_dwxb[i]*binomial[i];
-        }
+        //计算（损失函数/激活函数）*（激活函数/b）的偏导梯度
+        calcDLossDBs(dloss_dwxb,inputVal,diffB);
 //
 //        //累计输入参数的更新值
 //        if(currentPrtGrad!=null){
@@ -349,16 +329,121 @@ public class Conv implements Layer {
 //        }
     }
 
+    /**
+     * 计算（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
+     * @param backLayerPrtGradVal
+     * @param outs
+     * @param wxb
+     * @param targetVal
+     * @param out_dloss_dwxb
+     */
+    private void calcDLossDWxb(double[][][] backLayerPrtGradVal,OperationActivation[][][] outs,Var[][][] wxb,int[][][] binomial,MultiDim targetVal,double[][][] out_dloss_dwxb){
+        //计算（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
+        for(int x=0;x<out_dloss_dwxb.length;x++){
+            for(int y=0;y<out_dloss_dwxb[x].length;y++){
+                for(int z=0;z<out_dloss_dwxb[x][y].length;z++){
+                    if(backLayerPrtGradVal[x][y][z]!=0){
+                        if(binomial[x][y][z]!=0){
+                            out_dloss_dwxb[x][y][z]=backLayerPrtGradVal[x][y][z]*binomial[x][y][z]*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 计算（损失函数/激活函数）*（激活函数/所有w）的偏导梯度
+     * @param dloss_dwxb
+     * @param input
+     * @param out_dloss_dw
+     */
+    private void calcDLossDWs(double[][][] dloss_dwxb,double[][][] input,double[][][][] out_dloss_dw,int strides){
+        //计算（损失函数/激活函数）*（激活函数/所有w）的偏导梯度
+        for(int w=0;w<out_dloss_dw.length;w++){
+            for(int x=0;x<out_dloss_dw[w].length;x++){
+                for(int y=0;y<out_dloss_dw[w][x].length;y++){
+                    for(int z=0;z<out_dloss_dw[w][x][y].length;z++){
+                        //计算单个损失函数/权重的梯度
+                        out_dloss_dw[w][x][y][z]+=calcDLossDW(dloss_dwxb,input,w,x,y,z,strides);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 计算（损失函数/激活函数）*（激活函数/w）的偏导梯度
+     * @param dloss_dwxb
+     * @param input
+     * @param w
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
+    private double calcDLossDW(double[][][] dloss_dwxb,double[][][] input,int w,int x,int y,int z,int strides){
+        double ret=0;
+
+        double[][] dloss_dwxb_filter=dloss_dwxb[w];//第几通道的梯度
+        //循环指定过滤器的所有（损失函数/wxb）梯度
+        for(int i=0;i<dloss_dwxb_filter.length;i++){
+            for(int j=0;j<dloss_dwxb_filter[i].length;j++){
+                ret+=dloss_dwxb[w][i][j]*input[(i*strides)+x][(j*strides)+y][z];
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * 计算（损失函数/激活函数）*（激活函数/所有b）的偏导梯度
+     * @param dloss_dwxb
+     * @param input
+     * @param out_dloss_db
+     */
+    private void calcDLossDBs(double[][][] dloss_dwxb,double[][][] input,double[] out_dloss_db){
+        //计算（损失函数/激活函数）*（激活函数/所有b）的偏导梯度
+        for(int w=0;w<out_dloss_db.length;w++){
+            out_dloss_db[w]=calcDLossDB(dloss_dwxb,input,w);
+        }
+    }
+
+    /**
+     * 计算（损失函数/激活函数）*（激活函数/w）的偏导梯度
+     * @param dloss_dwxb
+     * @param input
+     * @param w
+     * @return
+     */
+    private double calcDLossDB(double[][][] dloss_dwxb,double[][][] input,int w){
+        double ret=0;
+
+        double[][] dloss_dwxb_filter=dloss_dwxb[w];//第几通道的梯度
+        //循环指定过滤器的所有（损失函数/wxb）梯度
+        for(int i=0;i<dloss_dwxb_filter.length;i++){
+            for(int j=0;j<dloss_dwxb_filter[i].length;j++){
+                ret+=dloss_dwxb[w][i][j];
+            }
+        }
+
+        return ret;
+    }
+
     @Override
     public void flushBackUpdateParamPrtGrad(double rate) {
-//        for(int i=0;i<this.outs.length;i++){
-//            //计算w的更新梯度
-//            for(int j=0;j<diffW[i].length;j++){
-//                w[i][j]-=rate*diffW[i][j];
-//            }
-//            //计算b的更新梯度
-//            b[i]-=rate*diffB[i];
-//        }
+        //计算（损失函数/激活函数）*（激活函数/所有w）的偏导梯度
+        for(int w=0;w<diffW.length;w++){
+            for(int x=0;x<diffW[w].length;x++){
+                for(int y=0;y<diffW[w][x].length;y++){
+                    for(int z=0;z<diffW[w][x][y].length;z++){
+                        this.w[w][x][y][z]-=rate*diffW[w][x][y][z];
+                    }
+                }
+            }
+            //计算b的更新梯度
+            b[w]-=rate*diffB[w];
+        }
     }
 
 }

@@ -269,16 +269,16 @@ public class Dense implements Layer {
         int[] binomial= Binomial.binomialOfInt(keepProb,this.outs.length);//二项分布
 
         for(int i=0;i<this.outs.length;i++){
-            dloss_dwxb[i]=backLayerPrtGradVal[i]*outs[i].prtGrad(wxb[i],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
+            dloss_dwxb[i]=backLayerPrtGradVal[i]*outs[i].prtGrad(wxb[i],targetVal)*binomial[i];//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
 
             //计算w的更新梯度
             for(int j=0;j<diffW[i].length;j++){
                 //累计参数w的更新值
-                diffW[i][j]+=dloss_dwxb[i]*(double)input.getOneDim2MultDimIndexVal(j)*binomial[i];
+                diffW[i][j]+=dloss_dwxb[i]*(double)input.getOneDim2MultDimIndexVal(j);
             }
 
             //累计参数b的更新值
-            diffB[i]+=dloss_dwxb[i]*binomial[i];
+            diffB[i]+=dloss_dwxb[i];
         }
 
         //累计输入参数的更新值
