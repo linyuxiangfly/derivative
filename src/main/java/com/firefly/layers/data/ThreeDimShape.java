@@ -16,6 +16,13 @@ public class ThreeDimShape extends Shape{
         this.setDims(dimDataNum);
     }
 
+    public ThreeDimShape(Shape shape){
+        this(shape.getDim(0),shape.getDim(1),shape.getDim(2));
+        if(shape.getDims().length!=3){
+            throw new RuntimeException("Wrong dimension!");
+        }
+    }
+
     public int getX(){
         return getDim(X);
     }

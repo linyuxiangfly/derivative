@@ -14,6 +14,13 @@ public class TwoDimShape extends Shape{
         this.setDims(dimDataNum);
     }
 
+    public TwoDimShape(Shape shape){
+        this(shape.getDim(0),shape.getDim(1));
+        if(shape.getDims().length!=2){
+            throw new RuntimeException("Wrong dimension!");
+        }
+    }
+
     public int getX(){
         return getDim(X);
     }

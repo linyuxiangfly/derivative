@@ -262,7 +262,7 @@ public class Dense implements Layer {
 
     @Override
     public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad) {
-//        double[] inputVal=(double[])input.getData();
+        double[] inputVal=(double[])input.getData();
         double[] backLayerPrtGradVal=(double[])backLayerPrtGrad.getData();
 
         double[] dloss_dwxb=new double[outs.length];
@@ -274,7 +274,7 @@ public class Dense implements Layer {
             //计算w的更新梯度
             for(int j=0;j<diffW[i].length;j++){
                 //累计参数w的更新值
-                diffW[i][j]+=dloss_dwxb[i]*(double)input.getOneDim2MultDimIndexVal(j);
+                diffW[i][j]+=dloss_dwxb[i]*inputVal[j];
             }
 
             //累计参数b的更新值

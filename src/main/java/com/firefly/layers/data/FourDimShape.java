@@ -18,6 +18,13 @@ public class FourDimShape extends Shape{
         this.setDims(dimDataNum);
     }
 
+    public FourDimShape(Shape shape){
+        this(shape.getDim(0),shape.getDim(1),shape.getDim(2),shape.getDim(3));
+        if(shape.getDims().length!=4){
+            throw new RuntimeException("Wrong dimension!");
+        }
+    }
+
     public int getW(){
         return getDim(W);
     }

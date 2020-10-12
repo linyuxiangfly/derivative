@@ -21,7 +21,8 @@ public class Conv implements Layer {
     private ThreeDimShape inputShapeExpand;//输入参数扩大的形状
     private ThreeDimShape unitShape;//输出单元数
     private int filters;
-    private int kernelSize;
+    private int kernelWidth;
+    private int kernelHeight;
     private int strides;
     private Padding padding;
 
@@ -48,11 +49,38 @@ public class Conv implements Layer {
 
     }
 
+    public Conv(
+            int filters,
+            int kernelSize,
+            int strides, Padding padding,
+            Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
+        this(filters,kernelSize,kernelSize,strides,padding,activationCls,keepProb,activationSettings,initParamsListener);
+    }
+
+    public Conv(
+            int filters,
+            int kernelWidth,
+            int kernelHeight,
+            int strides, Padding padding,
+            Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
+        this(null,filters,kernelWidth,kernelHeight,strides,padding,activationCls,keepProb,activationSettings,initParamsListener);
+    }
+
+    public Conv(
+            ThreeDimShape inputShape,
+            int filters,
+            int kernelSize,
+            int strides, Padding padding,
+            Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
+        this(inputShape,filters,kernelSize,kernelSize,strides,padding,activationCls,keepProb,activationSettings,initParamsListener);
+    }
+
     /**
      *
      * @param inputShape 输入形状
      * @param filters 卷积核（就是过滤器！）的数目（即输出的维度）
-     * @param kernelSize 单个整数或由两个整数构成的list/tuple，卷积核（过滤器）的宽度和长度。（kernel n.核心，要点，[计]内核） 如为单个整数，则表示在各个空间维度的相同长度。
+     * @param kernelWidth
+     * @param kernelHeight 单个整数或由两个整数构成的list/tuple，卷积核（过滤器）的宽度和长度。（kernel n.核心，要点，[计]内核） 如为单个整数，则表示在各个空间维度的相同长度。
      * @param strides 单个整数或由两个整数构成的list/tuple，为卷积的步长。
      * @param padding 补0策略，为"valid", "same" 。
      *                "valid"不填充，eg:图像28*28，过滤器5*5，步长为5，最后三行三列舍弃，输出大小为：[（28-3-5）/5]+1=5，即输出图像是5*5的
@@ -68,12 +96,15 @@ public class Conv implements Layer {
      */
     public Conv(
             ThreeDimShape inputShape,
-            int filters, int kernelSize,
+            int filters,
+            int kernelWidth,
+            int kernelHeight,
             int strides, Padding padding,
             Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
         this.inputShape=inputShape;
         this.filters=filters;
-        this.kernelSize=kernelSize;
+        this.kernelWidth=kernelWidth;
+        this.kernelHeight=kernelHeight;
         this.strides=strides;
         this.padding=padding;
         this.activationCls=activationCls;
@@ -83,16 +114,13 @@ public class Conv implements Layer {
             this.activationSettingsMd=new MultiDim(Function.class,new Shape(new int[]{activationSettings.length}),activationSettings);
         }
         this.initParamsListener=initParamsListener;
-
-        //计算输入扩大的形状
-        this.inputShapeExpand=getInputExpandDim(inputShape,kernelSize,strides,padding);
-        this.unitShape=getOutDim(inputShapeExpand,filters,kernelSize,strides);
     }
 
     /**
      * 计算输出维度
      * @param inputShape 输入形状
-     * @param kernelSize 单个整数或由两个整数构成的list/tuple，卷积核（过滤器）的宽度和长度。（kernel n.核心，要点，[计]内核） 如为单个整数，则表示在各个空间维度的相同长度。
+     * @param kernelWidth
+     * @param kernelHeight 单个整数或由两个整数构成的list/tuple，卷积核（过滤器）的宽度和长度。（kernel n.核心，要点，[计]内核） 如为单个整数，则表示在各个空间维度的相同长度。
      * @param strides 单个整数或由两个整数构成的list/tuple，为卷积的步长。
      * @param padding 补0策略，为"valid", "same" 。
      *                "valid"不填充，eg:图像28*28，过滤器5*5，步长为5，最后三行三列舍弃，输出大小为：[（28-3-5）/5]+1=5，即输出图像是5*5的
@@ -103,15 +131,16 @@ public class Conv implements Layer {
      * 通常会导致输出shape与输入shape相同，因为卷积核移动时在边缘会出现大小不够的情况。
      * @return
      */
-    private ThreeDimShape getInputExpandDim(ThreeDimShape inputShape, int kernelSize,
-                                    int strides, Padding padding){
+    private ThreeDimShape getInputExpandDim(ThreeDimShape inputShape,
+                                            int kernelWidth,int kernelHeight,
+                                            int strides, Padding padding){
         ThreeDimShape ret=null;//经过padding后的维度
         switch (padding){
             case valid:
-                ret= ConvUtil.getConvNumValid(inputShape,kernelSize,strides);
+                ret= ConvUtil.getConvNumValid(inputShape,kernelWidth,kernelHeight,strides);
                 break;
             case same:
-                ret= ConvUtil.getConvNumSame(inputShape,kernelSize,strides);
+                ret= ConvUtil.getConvNumSame(inputShape,kernelWidth,kernelHeight,strides);
                 break;
         }
         return ret;
@@ -124,9 +153,9 @@ public class Conv implements Layer {
      * @param strides
      * @return
      */
-    private ThreeDimShape getOutDim(ThreeDimShape inputShape,int filters,int kernelSize,int strides){
-        int x=(inputShape.getX()-kernelSize)/strides+1;
-        int y=(inputShape.getY()-kernelSize)/strides+1;
+    private ThreeDimShape getOutDim(ThreeDimShape inputShape,int filters,int kernelWidth,int kernelHeight,int strides){
+        int x=(inputShape.getX()-kernelWidth)/strides+1;
+        int y=(inputShape.getY()-kernelHeight)/strides+1;
 
         return new ThreeDimShape(filters,x,y);
     }
@@ -136,7 +165,7 @@ public class Conv implements Layer {
     }
 
     public void setInputShape(Shape inputShape) {
-        this.inputShape = (ThreeDimShape) inputShape;
+        this.inputShape = new ThreeDimShape(inputShape);
     }
 
     public Shape getUnitShape() {
@@ -167,13 +196,17 @@ public class Conv implements Layer {
 
     @Override
     public void init() {
+        //计算输入扩大的形状
+        this.inputShapeExpand=getInputExpandDim(this.inputShape,kernelWidth,kernelHeight,strides,padding);
+        this.unitShape=getOutDim(inputShapeExpand,filters,kernelWidth,kernelHeight,strides);
+
         //w的过滤器、卷积核宽、卷积核高，输入的第3个维度
-        wmd=new MultiDim(Double.TYPE,new FourDimShape(filters,kernelSize,kernelSize,inputShape.getZ()));
+        wmd=new MultiDim(Double.TYPE,new FourDimShape(filters,kernelWidth,kernelHeight,inputShape.getZ()));
         bmd=new MultiDim(Double.TYPE,new OneDimShape(filters));
         w=(double[][][][]) wmd.getData();
         b=(double[]) bmd.getData();
 
-        diffW=new double[filters][kernelSize][kernelSize][inputShape.getZ()];
+        diffW=new double[filters][kernelWidth][kernelHeight][inputShape.getZ()];
         diffB=new double[filters];
 
         //初始化神经元函数
@@ -195,8 +228,8 @@ public class Conv implements Layer {
         ShapeIndex bsi=new ShapeIndex(new int[]{0});
 
         for(int i=0;i<filters;i++){
-            for(int j=0;j<kernelSize;j++){
-                for(int k=0;k<kernelSize;k++){
+            for(int j=0;j<kernelWidth;j++){
+                for(int k=0;k<kernelHeight;k++){
                     for(int l=0;l<inputShape.getZ();l++){
                         wsi.setDimIndexVal(0,i);
                         wsi.setDimIndexVal(1,j);
@@ -276,27 +309,6 @@ public class Conv implements Layer {
         }
     }
 
-    private double[][][] one2ThreeDim(double[] data,ThreeDimShape shape){
-        return one2ThreeDim(data,shape.getX(),shape.getY(),shape.getZ());
-    }
-
-    /**
-     * 1维数据转3维
-     * @param data
-     * @return
-     */
-    private double[][][] one2ThreeDim(double[] data,int height,int width,int rgb){
-        double[][][] ret=new double[height][width][rgb];
-        for(int x=0;x<height;x++){
-            for(int y=0;y<width;y++){
-                for(int z=0;z<rgb;z++){
-                    ret[x][y][z]=data[x*width*rgb+y*rgb+z];
-                }
-            }
-        }
-        return ret;
-    }
-
     @Override
     public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad) {
         input=ConvUtil.expand(input,inputShapeExpand);
@@ -316,17 +328,17 @@ public class Conv implements Layer {
 
         //计算（损失函数/激活函数）*（激活函数/b）的偏导梯度
         calcDLossDBs(dloss_dwxb,inputVal,diffB);
-//
-//        //累计输入参数的更新值
-//        if(currentPrtGrad!=null){
-//            double[] currentPrtGradVal=(double[])currentPrtGrad.getData();
-//
+
+        //累计输入参数的更新值
+        if(outFrontLayerPrtGrad!=null){
+            double[] outFrontLayerPrtGradVal=(double[])outFrontLayerPrtGrad.getData();
+
 //            //计算输入值的更新梯度
 //            double[] cpt=Linalg.inner(w,dloss_dwxb,true);
 //            for(int i=0;i<currentPrtGradVal.length;i++){
 //                currentPrtGradVal[i]+=cpt[i];
 //            }
-//        }
+        }
     }
 
     /**

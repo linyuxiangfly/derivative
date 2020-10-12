@@ -12,6 +12,13 @@ public class OneDimShape extends Shape{
         this.setDims(dimDataNum);
     }
 
+    public OneDimShape(Shape shape){
+        this(shape.getDim(0));
+        if(shape.getDims().length!=1){
+            throw new RuntimeException("Wrong dimension!");
+        }
+    }
+
     public int getX(){
         return getDim(X);
     }

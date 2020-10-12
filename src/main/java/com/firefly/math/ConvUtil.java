@@ -2,7 +2,6 @@ package com.firefly.math;
 
 import com.firefly.layers.data.FourDimShape;
 import com.firefly.layers.data.MultiDim;
-import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ThreeDimShape;
 
 public class ConvUtil {
@@ -21,16 +20,17 @@ public class ConvUtil {
     /**
      * 获取卷积滑窗的形状，不填充的
      * @param inputShape
-     * @param kernelSize
+     * @param kernelWidth
+     * @param kernelHeight
      * @param strides
      * @return
      */
     public static ThreeDimShape getConvNumValid(ThreeDimShape inputShape,
-                                                int kernelSize,
+                                                int kernelWidth,int kernelHeight,
                                                 int strides){
         ThreeDimShape threeDimShape =new ThreeDimShape(
-                getConvNumValid(inputShape.getX(),kernelSize,strides),
-                getConvNumValid(inputShape.getY(),kernelSize,strides),
+                getConvNumValid(inputShape.getX(),kernelWidth,strides),
+                getConvNumValid(inputShape.getY(),kernelHeight,strides),
                 inputShape.getZ()
         );
         return threeDimShape;
@@ -55,16 +55,17 @@ public class ConvUtil {
     /**
      * 获取卷积滑窗的形状，不填充的
      * @param inputShape
-     * @param kernelSize
+     * @param kernelWidth
+     * @param kernelHeight
      * @param strides
      * @return
      */
     public static ThreeDimShape getConvNumSame(ThreeDimShape inputShape,
-                                               int kernelSize,
+                                               int kernelWidth,int kernelHeight,
                                                int strides){
         ThreeDimShape threeDimShape =new ThreeDimShape(
-                getConvNumSame(inputShape.getX(),kernelSize,strides),
-                getConvNumSame(inputShape.getY(),kernelSize,strides),
+                getConvNumSame(inputShape.getX(),kernelWidth,strides),
+                getConvNumSame(inputShape.getY(),kernelHeight,strides),
                 inputShape.getZ()
         );
         return threeDimShape;
