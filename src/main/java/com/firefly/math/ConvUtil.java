@@ -134,8 +134,8 @@ public class ConvUtil {
         double[][][][] wData=(double[][][][])w.getData();
         double[] bData=b!=null?(double[])b.getData():null;
 
-        ThreeDimShape dataShape=(ThreeDimShape)data.getShape();
-        FourDimShape wShape=(FourDimShape)w.getShape();
+//        ThreeDimShape dataShape=(ThreeDimShape)data.getShape();
+//        FourDimShape wShape=(FourDimShape)w.getShape();
 
         //计算卷积
         conv(dataData,wData,bData,keepProb,strides,retData);
