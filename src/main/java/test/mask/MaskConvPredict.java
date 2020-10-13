@@ -1,8 +1,6 @@
 package test.mask;
 
 import com.firefly.derivative.activation.Relu;
-import com.firefly.derivative.activation.Sigmoid;
-import com.firefly.derivative.activation.Softmax;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
@@ -24,7 +22,7 @@ import test.mask.data.LoadData;
 import java.io.*;
 import java.util.List;
 
-public class MaskConvFit {
+public class MaskConvPredict {
 
     private static String modelFile="src/main/resources/model/mask-conv.ser";
 
@@ -37,43 +35,7 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.0000001);
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),4,3,1, Padding.same, Relu.class,null,new InitParamsRandomGaussian()));
-        model.add(new Pooling(PollingType.avg,2,2,false));
-        model.add(new Conv(8,3,1, Padding.same, Relu.class,null,new InitParamsRandomGaussian()));
-        model.add(new Pooling(PollingType.max,2,2,true));
-        model.add(new Dense(10, Relu.class,1.0f));
-        model.add(new Dense(1, Relu.class,1.0f));
-        //识差函数
-        model.setLossCls(Mse.class);
-        model.init();
-
-        model.fit(x, y, 10000, 10,
-                new LossCallBackListener() {
-                    @Override
-                    public void onLoss(double val) {
-//                        System.out.println(String.format("%.10f", val));
-                    }
-                },
-                new FitControl() {
-                    @Override
-                    public boolean onIsStop(int epoch, double loss) {
-                        if(loss<=0.0001){
-                            System.out.println("第"+epoch+"次训练，满足条件自动退出训练！");
-                            return true;
-                        }else{
-                            if(epoch%100==0){
-                                System.out.println("第"+epoch+"次训练！ loss:"+String.format("%.10f", loss));
-                            }
-                        }
-                        return false;
-                    }
-                }
-        );
-
         try{
-            //导出到文件
-            exportModel(model,modelFile);
             //导入并进行预测
             Model newModel=importModel(modelFile);
 
