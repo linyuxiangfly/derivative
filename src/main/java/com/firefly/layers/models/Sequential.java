@@ -104,9 +104,9 @@ public class Sequential implements Model {
             }
 
             if(li==layers.size()-1){
-                layer.addBackUpdateParamPrtGrad(lossPrtGrad,currentInput,y,layersInputPrtGrad.get(li));
+                layer.addBackUpdateParamPrtGrad(currentInput,y,layersInputPrtGrad.get(li),lossPrtGrad);
             }else{
-                layer.addBackUpdateParamPrtGrad(layersInputPrtGrad.get(li+1),currentInput,y,layersInputPrtGrad.get(li));
+                layer.addBackUpdateParamPrtGrad(currentInput,y,layersInputPrtGrad.get(li),layersInputPrtGrad.get(li+1));
             }
         }
     }
@@ -207,9 +207,6 @@ public class Sequential implements Model {
     }
 
     private void initLayers(List<Layer> layers,Class<? extends Loss> lossCls){
-        //初始化层输出中间结果
-        initLayersOut();
-
         //初始化层
         Shape lastUnits=null;
         for(int i=0;i<layers.size();i++){
@@ -239,6 +236,9 @@ public class Sequential implements Model {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+
+        //初始化层输出中间结果
+        initLayersOut();
     }
 
     /**

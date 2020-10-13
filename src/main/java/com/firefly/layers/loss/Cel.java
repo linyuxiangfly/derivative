@@ -1,10 +1,8 @@
 package com.firefly.layers.loss;
 
-import com.firefly.derivative.util.MathEx;
 import com.firefly.layers.core.Loss;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.ShapeIndex;
-import com.firefly.math.Linalg;
 import com.firefly.math.Statistics;
 
 /**

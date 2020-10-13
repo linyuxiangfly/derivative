@@ -11,34 +11,29 @@ import java.util.Random;
  * 标准正态随机分布
  */
 public class InitParamsRandomGaussian implements InitParamsListener {
-    private MultiDim randomW;
-    private MultiDim randomB;
+    private Random random;
+
+    public InitParamsRandomGaussian(){
+        random=new Random();
+    }
 
     @Override
     public void paramWSize(Shape shape) {
-        randomW=new MultiDim(Random.class,shape);
-        ShapeIndex i=new ShapeIndex(shape);
-        do{
-            randomW.setVal(i,new Random());
-        }while(i.next());
+
     }
 
     @Override
     public void paramBSize(Shape shape) {
-        randomB=new MultiDim(Random.class,shape);
-        ShapeIndex i=new ShapeIndex(shape);
-        do{
-            randomB.setVal(i,new Random());
-        }while(i.next());
+
     }
 
     @Override
     public double initParamW(ShapeIndex shapeIndex) {
-        return ((Random)randomW.getVal(shapeIndex)).nextGaussian();
+        return random.nextGaussian();
     }
 
     @Override
     public double initParamB(ShapeIndex shapeIndex) {
-        return ((Random)randomB.getVal(shapeIndex)).nextGaussian();
+        return random.nextGaussian();
     }
 }

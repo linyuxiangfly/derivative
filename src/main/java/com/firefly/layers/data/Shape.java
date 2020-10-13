@@ -5,6 +5,7 @@ package com.firefly.layers.data;
  */
 public class Shape implements java.io.Serializable{
     private int[] dims;//每个维度的数据数量
+    private int[] dimsNum;//每个维度转为1维的数量
 
     public int[] getDims() {
         return dims;
@@ -15,6 +16,15 @@ public class Shape implements java.io.Serializable{
 
     public void setDims(int[] dims) {
         this.dims = dims;
+
+        this.dimsNum=new int[dims.length];
+
+        int num=dims[dims.length-1];
+        this.dimsNum[dims.length-1]=num;
+        for(int i=dims.length-2;i>=0;i--){
+            num*=dims[i];
+            this.dimsNum[i]=num;
+        }
     }
 
     public Shape(){
@@ -22,15 +32,29 @@ public class Shape implements java.io.Serializable{
     }
 
     public Shape(int[] dims) {
-        this.dims = dims;
+        setDims(dims);
     }
 
     public int getNums(){
-        int ret=0;
-        for(int num:dims){
-            ret+=num;
+        return getNums(0);
+    }
+
+    /**
+     * 由1维下标获取多维下标
+     * @param index
+     * @return
+     */
+    public int[] getOneDim2MultDimIndex(int index){
+        int[] indexs=new int[dimsNum.length];//1维下标转多维的数组
+        int val=index;
+
+        for(int i=0;i<dimsNum.length-1;i++){
+            indexs[i]=val/dimsNum[i+1];//计算下标
+            val=val%dimsNum[i+1];//求剩余多少下标
         }
-        return ret;
+        indexs[indexs.length-1]=val;
+
+        return indexs;
     }
 
     /**
@@ -39,11 +63,7 @@ public class Shape implements java.io.Serializable{
      * @return
      */
     public int getNums(int dim){
-        int ret=dims[0];
-        for(int i=1;i<dim;i++){
-            ret*=dims[i];
-        }
-        return ret;
+        return this.dimsNum[dim];
     }
 
     /**

@@ -49,6 +49,17 @@ public class MultiDim implements java.io.Serializable{
     }
 
     /**
+     * 由1维下标获取多维下标
+     * @param index
+     * @return
+     */
+    public Object getOneDim2MultDimIndexVal(int index){
+        int[] dimIndex=this.getShape().getOneDim2MultDimIndex(index);
+
+        return getVal(data,dimIndex);
+    }
+
+    /**
      * 获取下标值
      * @param shapeIndex
      * @return
@@ -137,5 +148,16 @@ public class MultiDim implements java.io.Serializable{
             obj = Array.get(obj, dimIndex[i]);
         }
         Array.set(obj,dimIndex[dimIndex.length-1],val);
+    }
+
+    /**
+     * 设置所有值
+     * @param val
+     */
+    public void setAll(Object val){
+        ShapeIndex index=new ShapeIndex();
+        do{
+            setVal(index,val);
+        }while (index.next());
     }
 }

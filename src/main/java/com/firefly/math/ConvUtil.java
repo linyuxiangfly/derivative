@@ -1,7 +1,8 @@
 package com.firefly.math;
 
+import com.firefly.layers.data.FourDimShape;
+import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
-import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.data.ThreeDimShape;
 
 public class ConvUtil {
@@ -20,18 +21,18 @@ public class ConvUtil {
     /**
      * 获取卷积滑窗的形状，不填充的
      * @param inputShape
-     * @param filters
-     * @param kernelSize
+     * @param kernelWidth
+     * @param kernelHeight
      * @param strides
      * @return
      */
     public static ThreeDimShape getConvNumValid(ThreeDimShape inputShape,
-                                                int filters, ThreeDimShape kernelSize,
+                                                int kernelWidth,int kernelHeight,
                                                 int strides){
         ThreeDimShape threeDimShape =new ThreeDimShape(
-                getConvNumValid(inputShape.getDims()[0],kernelSize.getDims()[0],strides),
-                getConvNumValid(inputShape.getDims()[1],kernelSize.getDims()[1],strides),
-                filters
+                getConvNumValid(inputShape.getX(),kernelWidth,strides),
+                getConvNumValid(inputShape.getY(),kernelHeight,strides),
+                inputShape.getZ()
         );
         return threeDimShape;
     }
@@ -46,29 +47,139 @@ public class ConvUtil {
      */
     public static int getConvNumSame(int inputNum,int kernelNum,int strides){
         if(strides>1){
-            return kernelNum-inputNum%strides;
+            return inputNum+(kernelNum-inputNum%strides)*2;
         }else{
-            return kernelNum-1;
+            return inputNum+(kernelNum-1)*2;
         }
     }
 
     /**
      * 获取卷积滑窗的形状，不填充的
      * @param inputShape
-     * @param filters
-     * @param kernelSize
+     * @param kernelWidth
+     * @param kernelHeight
      * @param strides
      * @return
      */
     public static ThreeDimShape getConvNumSame(ThreeDimShape inputShape,
-                                               int filters, ThreeDimShape kernelSize,
+                                               int kernelWidth,int kernelHeight,
                                                int strides){
         ThreeDimShape threeDimShape =new ThreeDimShape(
-                getConvNumSame(inputShape.getDims()[0],kernelSize.getDims()[0],strides),
-                getConvNumSame(inputShape.getDims()[1],kernelSize.getDims()[1],strides),
-                filters
+                getConvNumSame(inputShape.getX(),kernelWidth,strides),
+                getConvNumSame(inputShape.getY(),kernelHeight,strides),
+                inputShape.getZ()
         );
         return threeDimShape;
     }
 
+    /**
+     * 扩大数据，将数据居中填充到扩大或缩小后的数组
+     * @param data
+     * @param destShape
+     * @return
+     */
+    public static MultiDim expand(MultiDim data, ThreeDimShape destShape){
+        MultiDim ret=null;
+        Shape srcShape=data.getShape();
+
+        if(srcShape.equals(destShape)){
+            return data;
+        }else{
+            ret=new MultiDim(destShape);
+            double[][][] retData=(double[][][])ret.getData();
+            double[][][] srcData=(double[][][])data.getData();
+
+            //计算填充的行开始、行长度、列开始、列长度位置
+            int rowStart,rowLen,colStart,colLen;
+            //如果目标形状的行比原形状的行小
+            if(srcShape.getDim(ThreeDimShape.X)>destShape.getX()){
+                rowStart=0;
+                rowLen=destShape.getX();
+            }else{
+                rowStart=(destShape.getX()-srcShape.getDim(ThreeDimShape.X))/2;
+                rowLen=srcShape.getDim(ThreeDimShape.X);
+            }
+            //如果目标形状的列比原形状的列小
+            if(srcShape.getDim(ThreeDimShape.Y)>destShape.getY()){
+                colStart=0;
+                colLen=destShape.getY();
+            }else{
+                colStart=(destShape.getY()-srcShape.getDim(ThreeDimShape.Y))/2;
+                colLen=srcShape.getDim(ThreeDimShape.Y);
+            }
+
+            //循环X，Y轴，填充数据到扩展后的数组
+            for(int x=rowStart;x<rowStart+rowLen;x++){
+                for(int y=colStart;y<colStart+colLen;y++){
+                    retData[x][y]=srcData[x-rowStart][y-colStart];
+                }
+            }
+
+            return ret;
+        }
+    }
+
+    /**
+     * 计算卷积
+     * @param data 输入数据
+     * @param w 过滤器
+     * @param b 偏置
+     * @param strides 步长
+     * @return
+     */
+    public static MultiDim conv(MultiDim data,MultiDim w,MultiDim b,float keepProb,int strides,ThreeDimShape outShape){
+        MultiDim ret=new MultiDim(outShape);
+        double[][][] retData=(double[][][])ret.getData();
+        double[][][] dataData=(double[][][])data.getData();
+        double[][][][] wData=(double[][][][])w.getData();
+        double[] bData=b!=null?(double[])b.getData():null;
+
+//        ThreeDimShape dataShape=(ThreeDimShape)data.getShape();
+//        FourDimShape wShape=(FourDimShape)w.getShape();
+
+        //计算卷积
+        conv(dataData,wData,bData,keepProb,strides,retData);
+        return ret;
+    }
+
+    /**
+     * 计算3维数据的卷积
+     * @param data
+     * @param w
+     * @param strides
+     * @return
+     */
+    public static void conv(double[][][] data,double[][][][] w,double[] b,float keepProb,int strides,double[][][] outData){
+        int width=(data.length-w.length)/strides+1;//计算卷积后的宽度
+        int height=(data[0].length-w[0].length)/strides+1;//计算卷积后的高度
+
+        for(int z=0;z<outData[0][0].length;z++){
+            for(int x=0;x<width;x++){
+                for(int y=0;y<height;y++){
+                    outData[x][y][z]=(inner(data,x*strides,y*strides,z,w)+b[z])/keepProb;
+                }
+
+            }
+        }
+    }
+
+    /**
+     * 计算内积
+     * @param data 数据
+     * @param xOffset x轴偏移
+     * @param yOffset y轴偏移
+     * @param weight 权重
+     * @return
+     */
+    public static double inner(double[][][] data,int xOffset,int yOffset,int filter,double[][][][] weight){
+        double ret=0;
+        for(int x=0;x<weight.length;x++){
+            for(int y=0;y<weight[x].length;y++){
+                for(int z=0;z<weight[x][y].length;z++){
+                    ret+=data[x+xOffset][y+yOffset][z]*weight[x][y][z][filter];
+                }
+            }
+        }
+        return ret;
+    }
 }
