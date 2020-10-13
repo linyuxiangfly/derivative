@@ -43,15 +43,32 @@ public class MaskFit {
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
-                        System.out.println(String.format("%.10f", val));
+//                        System.out.println(String.format("%.10f", val));
                     }
                 },
                 new FitControl() {
+                    private long countTime=0;
+                    private long processTime=0;
+
                     @Override
-                    public boolean onIsStop(int epoch, double loss) {
-                        if(loss<=0.0001){
-                            System.out.println("第"+epoch+"次训练，满足条件自动退出训练！");
+                    public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
+                        //累计执行时间
+                        countTime += takeUpTime;
+                        processTime += takeUpTime;
+
+                        if (loss <= 0.0001) {
+                            System.out.println("第" + process + "次训练，满足条件自动退出训练！");
                             return true;
+                        } else {
+                            if (process % 100 == 99) {
+                                double c = processTime / 1000.0;
+                                double processRate = (process + 1.0) / epoch;
+                                double sum = countTime / processRate / 60.0 / 1000.0;//按分钟计算
+
+                                System.out.println("第"+process+"次训练！ "+"    takeUpTime:"+String.format("%.2f 秒", c)+"    TotalTime:"+String.format("%.2f 分钟", sum)+"    loss:"+String.format("%.10f", loss));
+
+                                processTime = 0;
+                            }
                         }
                         return false;
                     }

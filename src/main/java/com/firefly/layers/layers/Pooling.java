@@ -20,6 +20,14 @@ public class Pooling implements Layer {
     private int kernelHeight;//池化核高度
     private boolean outOneDim;//多维转为1维输出
 
+    public Pooling(PollingType pollingType, int kernelSize){
+        this(pollingType,kernelSize,kernelSize,false);
+    }
+
+    public Pooling(PollingType pollingType, int kernelSize, boolean outOneDim){
+        this(pollingType,kernelSize,kernelSize,outOneDim);
+    }
+
     public Pooling(PollingType pollingType, int kernelWidth, int kernelHeight, boolean outOneDim){
         this(null,pollingType,kernelWidth,kernelHeight,outOneDim);
     }
