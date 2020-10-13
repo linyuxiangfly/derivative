@@ -41,14 +41,14 @@ public class Pooling implements Layer {
      * @return
      */
     private Shape calcOutShape(ThreeDimShape inputShape, int kernelWidth, int kernelHeight, boolean outOneDim){
-        int outWidth=inputShape.getY()/kernelWidth;
-        int outHeight=inputShape.getZ()/kernelHeight;
+        int outWidth=inputShape.getX()/kernelWidth;
+        int outHeight=inputShape.getY()/kernelHeight;
 
         //如果输出1维
         if(outOneDim){
-            return new Shape(new int[]{inputShape.getX()*outWidth*outHeight});
+            return new Shape(new int[]{outWidth*outHeight*inputShape.getZ()});
         }else{
-            return new Shape(new int[]{inputShape.getX(),outWidth,outHeight});
+            return new Shape(new int[]{outWidth,outHeight,inputShape.getZ()});
         }
     }
 
@@ -117,16 +117,16 @@ public class Pooling implements Layer {
 
     @Override
     public void calc(MultiDim input, MultiDim out) {
-        int outWidth=inputShape.getY()/kernelWidth;
-        int outHeight=inputShape.getZ()/kernelHeight;
+        int outWidth=inputShape.getX()/kernelWidth;
+        int outHeight=inputShape.getY()/kernelHeight;
 
-        for(int x=0;x<inputShape.getX();x++){
-            for(int y=0;y<outWidth;y++){
-                for(int z=0;z<outHeight;z++){
+        for(int z=0;z<inputShape.getZ();z++){
+            for(int x=0;x<outWidth;x++){
+                for(int y=0;y<outHeight;y++){
                     if(pollingType==PollingType.max){
-                        max(input,out,gradient,x,y,z,x,y*kernelWidth,kernelWidth,z*kernelHeight,kernelHeight,outOneDim);
+                        max(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z,outOneDim);
                     }else{
-                        avg(input,out,gradient,x,y,z,x,y*kernelWidth,kernelWidth,z*kernelHeight,kernelHeight,outOneDim);
+                        avg(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z,outOneDim);
                     }
                 }
             }
@@ -165,46 +165,46 @@ public class Pooling implements Layer {
      * @param px
      * @param py
      * @param pz
-     * @param x
+     * @param xStart
+     * @param xLen
      * @param yStart
      * @param yLen
-     * @param zStart
-     * @param zLen
+     * @param z
      * @param outOneDim
      */
-    private void max(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int x,int yStart,int yLen,int zStart,int zLen,boolean outOneDim){
+    private void max(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z,boolean outOneDim){
         //求最大值或平均值
+        int maxX=xStart;
         int maxY=yStart;
-        int maxZ=zStart;
 
         ShapeIndex index=new ShapeIndex(inputShape);
         ShapeIndex outIndex=new ShapeIndex(unitRealShape);
 
-        index.setDimIndexVal(ThreeDimShape.X,x);
+        index.setDimIndexVal(ThreeDimShape.X,xStart);
         index.setDimIndexVal(ThreeDimShape.Y,yStart);
-        index.setDimIndexVal(ThreeDimShape.Z,zStart);
+        index.setDimIndexVal(ThreeDimShape.Z,z);
         double maxVal=(double)input.getVal(index);
 
-        for(int yy=yStart;yy<yStart+yLen;yy++){
-            for(int zz=zStart;zz<zStart+zLen;zz++){
+        for(int xx=xStart;xx<xStart+xLen;xx++){
+            for(int yy=yStart;yy<yStart+yLen;yy++){
+                index.setDimIndexVal(ThreeDimShape.X,xx);
                 index.setDimIndexVal(ThreeDimShape.Y,yy);
-                index.setDimIndexVal(ThreeDimShape.Z,zz);
                 double tempVal=(double)input.getVal(index);
                 if(tempVal>maxVal){
+                    maxX=xx;
                     maxY=yy;
-                    maxZ=zz;
                     maxVal=tempVal;
                 }
             }
         }
 
         //记录梯度值
-        setGradientVal(gradient,x,1,yStart,yLen,zStart,zLen,0.0);//置零
+        setGradientVal(gradient,xStart,xLen,yStart,yLen,z,1,0.0);//置零
 
         //设置最大值的点梯度为1
-        index.setDimIndexVal(ThreeDimShape.X,x);
+        index.setDimIndexVal(ThreeDimShape.X,maxX);
         index.setDimIndexVal(ThreeDimShape.Y,maxY);
-        index.setDimIndexVal(ThreeDimShape.Z,maxZ);
+        index.setDimIndexVal(ThreeDimShape.Z,z);
         gradient.setVal(index,1.0);
 
         //设置最大值
@@ -226,34 +226,34 @@ public class Pooling implements Layer {
      * @param px
      * @param py
      * @param pz
-     * @param x
+     * @param xStart
+     * @param xLen
      * @param yStart
      * @param yLen
-     * @param zStart
-     * @param zLen
+     * @param z
      * @param outOneDim
      */
-    private void avg(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int x,int yStart,int yLen,int zStart,int zLen,boolean outOneDim){
+    private void avg(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z,boolean outOneDim){
         double sum=0;
-        double num=yLen*zLen;//计算数量
+        double num=xLen*yLen;//计算数量
         ShapeIndex index=new ShapeIndex(inputShape);
         ShapeIndex outIndex=new ShapeIndex(unitRealShape);
 
-        index.setDimIndexVal(ThreeDimShape.X,x);
+        index.setDimIndexVal(ThreeDimShape.X,xStart);
         index.setDimIndexVal(ThreeDimShape.Y,yStart);
-        index.setDimIndexVal(ThreeDimShape.Z,zStart);
+        index.setDimIndexVal(ThreeDimShape.Z,z);
 
-        for(int yy=yStart;yy<yStart+yLen;yy++){
-            for(int zz=zStart;zz<zStart+zLen;zz++){
+        for(int xx=xStart;xx<xStart+xLen;xx++){
+            for(int yy=yStart;yy<yStart+yLen;yy++){
+                index.setDimIndexVal(ThreeDimShape.X,xx);
                 index.setDimIndexVal(ThreeDimShape.Y,yy);
-                index.setDimIndexVal(ThreeDimShape.Z,zz);
                 double tempVal=(double)input.getVal(index);
                 sum+=tempVal;
             }
         }
 
         //记录梯度值
-        setGradientVal(gradient,x,1,yStart,yLen,zStart,zLen,1.0/num);//设置梯度
+        setGradientVal(gradient,xStart,xLen,yStart,yLen,z,1,1.0/num);//设置梯度
 
         //设置最大值
         outIndex.setDimIndexVal(ThreeDimShape.X,px);
@@ -287,16 +287,21 @@ public class Pooling implements Layer {
     private void setInputPrtGrad(MultiDim gradient,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad){
         ShapeIndex index=new ShapeIndex(unitRealShape);
         do{
-            double val=(double)backLayerPrtGrad.getVal(new int[]{index.getMultDim2OneDimIndex()});
+            double val;
+            if(backLayerPrtGrad.getShape().getDims().length==1){
+                val=(double)backLayerPrtGrad.getVal(new int[]{index.getMultDim2OneDimIndex()});
+            }else{
+                val=(double)backLayerPrtGrad.getVal(index);
+            }
             addGradientVal(
                     gradient,
                     outFrontLayerPrtGrad,
-                    index.getDimIndexVal(ThreeDimShape.X),
-                    1,
-                    index.getDimIndexVal(ThreeDimShape.Y)*kernelWidth,
+                    index.getDimIndexVal(ThreeDimShape.X)*kernelWidth,
                     kernelWidth,
-                    index.getDimIndexVal(ThreeDimShape.Z)*kernelHeight,
+                    index.getDimIndexVal(ThreeDimShape.Y)*kernelHeight,
                     kernelHeight,
+                    index.getDimIndexVal(ThreeDimShape.Z),
+                    1,
                     val
                     );
         }while (index.next());

@@ -2,6 +2,7 @@ package com.firefly.math;
 
 import com.firefly.layers.data.FourDimShape;
 import com.firefly.layers.data.MultiDim;
+import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ThreeDimShape;
 
 public class ConvUtil {
@@ -79,7 +80,7 @@ public class ConvUtil {
      */
     public static MultiDim expand(MultiDim data, ThreeDimShape destShape){
         MultiDim ret=null;
-        ThreeDimShape srcShape=(ThreeDimShape)data.getShape();
+        Shape srcShape=data.getShape();
 
         if(srcShape.equals(destShape)){
             return data;
@@ -91,20 +92,20 @@ public class ConvUtil {
             //计算填充的行开始、行长度、列开始、列长度位置
             int rowStart,rowLen,colStart,colLen;
             //如果目标形状的行比原形状的行小
-            if(srcShape.getX()>destShape.getX()){
+            if(srcShape.getDim(ThreeDimShape.X)>destShape.getX()){
                 rowStart=0;
                 rowLen=destShape.getX();
             }else{
-                rowStart=(destShape.getX()-srcShape.getX())/2;
-                rowLen=srcShape.getX();
+                rowStart=(destShape.getX()-srcShape.getDim(ThreeDimShape.X))/2;
+                rowLen=srcShape.getDim(ThreeDimShape.X);
             }
             //如果目标形状的列比原形状的列小
-            if(srcShape.getY()>destShape.getY()){
+            if(srcShape.getDim(ThreeDimShape.Y)>destShape.getY()){
                 colStart=0;
                 colLen=destShape.getY();
             }else{
-                colStart=(destShape.getY()-srcShape.getY())/2;
-                colLen=srcShape.getY();
+                colStart=(destShape.getY()-srcShape.getDim(ThreeDimShape.Y))/2;
+                colLen=srcShape.getDim(ThreeDimShape.Y);
             }
 
             //循环X，Y轴，填充数据到扩展后的数组
@@ -136,11 +137,8 @@ public class ConvUtil {
         ThreeDimShape dataShape=(ThreeDimShape)data.getShape();
         FourDimShape wShape=(FourDimShape)w.getShape();
 
-        //循环所有过滤器
-        for(int i = 0; i<wShape.getW(); i++){
-            //计算卷积
-            retData[i]=conv(dataData,wData[i],bData!=null?bData[i]:1,keepProb,strides);
-        }
+        //计算卷积
+        conv(dataData,wData,bData,keepProb,strides,retData);
         return ret;
     }
 
@@ -151,18 +149,18 @@ public class ConvUtil {
      * @param strides
      * @return
      */
-    public static double[][] conv(double[][][] data,double[][][] w,double b,float keepProb,int strides){
+    public static void conv(double[][][] data,double[][][][] w,double[] b,float keepProb,int strides,double[][][] outData){
         int width=(data.length-w.length)/strides+1;//计算卷积后的宽度
         int height=(data[0].length-w[0].length)/strides+1;//计算卷积后的高度
 
-        double[][] ret=new double[width][height];
+        for(int z=0;z<outData[0][0].length;z++){
+            for(int x=0;x<width;x++){
+                for(int y=0;y<height;y++){
+                    outData[x][y][z]=(inner(data,x*strides,y*strides,z,w)+b[z])/keepProb;
+                }
 
-        for(int x=0;x<width;x++){
-            for(int y=0;y<height;y++){
-                ret[x][y]=(inner(data,x*strides,y*strides,w)+b)/keepProb;
             }
         }
-        return ret;
     }
 
     /**
@@ -170,15 +168,15 @@ public class ConvUtil {
      * @param data 数据
      * @param xOffset x轴偏移
      * @param yOffset y轴偏移
-     * @param w 权重
+     * @param weight 权重
      * @return
      */
-    public static double inner(double[][][] data,int xOffset,int yOffset,double[][][] w){
+    public static double inner(double[][][] data,int xOffset,int yOffset,int filter,double[][][][] weight){
         double ret=0;
-        for(int x=0;x<w.length;x++){
-            for(int y=0;y<w[x].length;y++){
-                for(int z=0;z<w[x][y].length;z++){
-                    ret+=data[x+xOffset][y+yOffset][z]*w[x][y][z];
+        for(int x=0;x<weight.length;x++){
+            for(int y=0;y<weight[x].length;y++){
+                for(int z=0;z<weight[x][y].length;z++){
+                    ret+=data[x+xOffset][y+yOffset][z]*weight[x][y][z][filter];
                 }
             }
         }

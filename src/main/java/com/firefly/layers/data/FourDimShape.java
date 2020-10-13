@@ -4,10 +4,10 @@ package com.firefly.layers.data;
  * 4维
  */
 public class FourDimShape extends Shape{
-    public static final int W=0;//U轴
-    public static final int X=1;//X轴
-    public static final int Y=2;//Y轴
-    public static final int Z=3;//Z轴
+    public static final int X=0;//X轴
+    public static final int Y=1;//Y轴
+    public static final int Z=2;//Z轴
+    public static final int W=3;//U轴
 
     public FourDimShape(int oneDimDataNum, int twoDimDataNum, int threeDimDataNum, int fourDimDataNum) {
         int[] dimDataNum = new int[4];

@@ -53,8 +53,8 @@ public class Conv implements Layer {
             int filters,
             int kernelSize,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
-        this(filters,kernelSize,kernelSize,strides,padding,activationCls,keepProb,activationSettings,initParamsListener);
+            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
+        this(filters,kernelSize,kernelSize,strides,padding,activationCls,activationSettings,initParamsListener);
     }
 
     public Conv(
@@ -62,8 +62,8 @@ public class Conv implements Layer {
             int kernelWidth,
             int kernelHeight,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
-        this(null,filters,kernelWidth,kernelHeight,strides,padding,activationCls,keepProb,activationSettings,initParamsListener);
+            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
+        this(null,filters,kernelWidth,kernelHeight,strides,padding,activationCls,activationSettings,initParamsListener);
     }
 
     public Conv(
@@ -71,8 +71,8 @@ public class Conv implements Layer {
             int filters,
             int kernelSize,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
-        this(inputShape,filters,kernelSize,kernelSize,strides,padding,activationCls,keepProb,activationSettings,initParamsListener);
+            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
+        this(inputShape,filters,kernelSize,kernelSize,strides,padding,activationCls,activationSettings,initParamsListener);
     }
 
     /**
@@ -90,7 +90,6 @@ public class Conv implements Layer {
      * 代表保留边界处的卷积结果，
      * 通常会导致输出shape与输入shape相同，因为卷积核移动时在边缘会出现大小不够的情况。
      * @param activationCls
-     * @param keepProb
      * @param activationSettings
      * @param initParamsListener
      */
@@ -100,7 +99,7 @@ public class Conv implements Layer {
             int kernelWidth,
             int kernelHeight,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, float keepProb, Function[] activationSettings, InitParamsListener initParamsListener){
+            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
         this.inputShape=inputShape;
         this.filters=filters;
         this.kernelWidth=kernelWidth;
@@ -157,7 +156,7 @@ public class Conv implements Layer {
         int x=(inputShape.getX()-kernelWidth)/strides+1;
         int y=(inputShape.getY()-kernelHeight)/strides+1;
 
-        return new ThreeDimShape(filters,x,y);
+        return new ThreeDimShape(x,y,filters);
     }
 
     public Shape getInputShape() {
@@ -201,12 +200,12 @@ public class Conv implements Layer {
         this.unitShape=getOutDim(inputShapeExpand,filters,kernelWidth,kernelHeight,strides);
 
         //w的过滤器、卷积核宽、卷积核高，输入的第3个维度
-        wmd=new MultiDim(Double.TYPE,new FourDimShape(filters,kernelWidth,kernelHeight,inputShape.getZ()));
+        wmd=new MultiDim(Double.TYPE,new FourDimShape(kernelWidth,kernelHeight,inputShape.getZ(),filters));
         bmd=new MultiDim(Double.TYPE,new OneDimShape(filters));
         w=(double[][][][]) wmd.getData();
         b=(double[]) bmd.getData();
 
-        diffW=new double[filters][kernelWidth][kernelHeight][inputShape.getZ()];
+        diffW=new double[kernelWidth][kernelHeight][inputShape.getZ()][filters];
         diffB=new double[filters];
 
         //初始化神经元函数
@@ -231,18 +230,17 @@ public class Conv implements Layer {
             for(int j=0;j<kernelWidth;j++){
                 for(int k=0;k<kernelHeight;k++){
                     for(int l=0;l<inputShape.getZ();l++){
-                        wsi.setDimIndexVal(0,i);
-                        wsi.setDimIndexVal(1,j);
-                        wsi.setDimIndexVal(2,k);
-                        wsi.setDimIndexVal(3,l);
+                        wsi.setDimIndexVal(0,j);
+                        wsi.setDimIndexVal(1,k);
+                        wsi.setDimIndexVal(2,l);
+                        wsi.setDimIndexVal(3,i);
 
-                        this.w[i][j][k][l]=initParamsListener.initParamW(wsi);
+                        this.w[j][k][l][i]=initParamsListener.initParamW(wsi);
                     }
                 }
-
-                bsi.setDimIndexVal(0,i);
-                this.b[i]=initParamsListener.initParamB(bsi);
             }
+            bsi.setDimIndexVal(0,i);
+            this.b[i]=initParamsListener.initParamB(bsi);
         }
     }
 
@@ -311,8 +309,8 @@ public class Conv implements Layer {
 
     @Override
     public void addBackUpdateParamPrtGrad(MultiDim input,MultiDim targetVal,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad) {
-        input=ConvUtil.expand(input,inputShapeExpand);
-        double[][][]inputVal=(double[][][])input.getData();
+        MultiDim inputExpand=ConvUtil.expand(input,inputShapeExpand);
+        double[][][]inputExpandVal=(double[][][])inputExpand.getData();
 
         double[][][] backLayerPrtGradVal=(double[][][])backLayerPrtGrad.getData();
 
@@ -324,14 +322,25 @@ public class Conv implements Layer {
         calcDLossDWxb(backLayerPrtGradVal,outs,wxb,binomial,targetVal,dloss_dwxb);
 
         //计算（损失函数/激活函数）*（激活函数/w）的偏导梯度
-        calcDLossDWs(dloss_dwxb,inputVal,diffW,strides);
+        calcDLossDWs(dloss_dwxb,inputExpandVal,diffW,strides);
 
         //计算（损失函数/激活函数）*（激活函数/b）的偏导梯度
-        calcDLossDBs(dloss_dwxb,inputVal,diffB);
+        calcDLossDBs(dloss_dwxb,inputExpandVal,diffB);
 
         //累计输入参数的更新值
         if(outFrontLayerPrtGrad!=null){
-            double[] outFrontLayerPrtGradVal=(double[])outFrontLayerPrtGrad.getData();
+            double[][][] outFrontLayerPrtGradVal=(double[][][])outFrontLayerPrtGrad.getData();
+            //扩展后的宽高
+            int widthE=inputShapeExpand.getX();
+            int heightE=inputShapeExpand.getY();
+            //没扩展前的宽高
+            int width=outFrontLayerPrtGrad.getShape().getDim(ThreeDimShape.X);
+            int height=outFrontLayerPrtGrad.getShape().getDim(ThreeDimShape.Y);
+            //计算左边和上边的边界，如果扩展大后，左、右、上、下都加宽了
+            int leftBorder=widthE<width?0:(widthE-width)/2;
+            int topBorder=heightE<height?0:(heightE-height)/2;
+
+            calcDLossDX(dloss_dwxb,w,kernelWidth,kernelHeight,inputShape.getZ(),leftBorder,topBorder,strides,outFrontLayerPrtGradVal);
 
 //            //计算输入值的更新梯度
 //            double[] cpt=Linalg.inner(w,dloss_dwxb,true);
@@ -372,12 +381,12 @@ public class Conv implements Layer {
      */
     private void calcDLossDWs(double[][][] dloss_dwxb,double[][][] input,double[][][][] out_dloss_dw,int strides){
         //计算（损失函数/激活函数）*（激活函数/所有w）的偏导梯度
-        for(int w=0;w<out_dloss_dw.length;w++){
-            for(int x=0;x<out_dloss_dw[w].length;x++){
-                for(int y=0;y<out_dloss_dw[w][x].length;y++){
-                    for(int z=0;z<out_dloss_dw[w][x][y].length;z++){
+        for(int x=0;x<out_dloss_dw.length;x++){
+            for(int y=0;y<out_dloss_dw[x].length;y++){
+                for(int z=0;z<out_dloss_dw[x][y].length;z++){
+                    for(int w=0;w<out_dloss_dw[x][y][z].length;w++){
                         //计算单个损失函数/权重的梯度
-                        out_dloss_dw[w][x][y][z]+=calcDLossDW(dloss_dwxb,input,w,x,y,z,strides);
+                        out_dloss_dw[x][y][z][w]+=calcDLossDW(dloss_dwxb,input,x,y,z,w,strides);
                     }
                 }
             }
@@ -394,14 +403,13 @@ public class Conv implements Layer {
      * @param z
      * @return
      */
-    private double calcDLossDW(double[][][] dloss_dwxb,double[][][] input,int w,int x,int y,int z,int strides){
+    private double calcDLossDW(double[][][] dloss_dwxb,double[][][] input,int x,int y,int z,int w,int strides){
         double ret=0;
 
-        double[][] dloss_dwxb_filter=dloss_dwxb[w];//第几通道的梯度
         //循环指定过滤器的所有（损失函数/wxb）梯度
-        for(int i=0;i<dloss_dwxb_filter.length;i++){
-            for(int j=0;j<dloss_dwxb_filter[i].length;j++){
-                ret+=dloss_dwxb[w][i][j]*input[(i*strides)+x][(j*strides)+y][z];
+        for(int i=0;i<dloss_dwxb.length;i++){
+            for(int j=0;j<dloss_dwxb[i].length;j++){
+                ret+=dloss_dwxb[i][j][w]*input[(i*strides)+x][(j*strides)+y][z];
             }
         }
 
@@ -431,15 +439,63 @@ public class Conv implements Layer {
     private double calcDLossDB(double[][][] dloss_dwxb,double[][][] input,int w){
         double ret=0;
 
-        double[][] dloss_dwxb_filter=dloss_dwxb[w];//第几通道的梯度
         //循环指定过滤器的所有（损失函数/wxb）梯度
-        for(int i=0;i<dloss_dwxb_filter.length;i++){
-            for(int j=0;j<dloss_dwxb_filter[i].length;j++){
-                ret+=dloss_dwxb[w][i][j];
+        for(int i=0;i<dloss_dwxb.length;i++){
+            for(int j=0;j<dloss_dwxb[i].length;j++){
+                ret+=dloss_dwxb[i][j][w];
             }
         }
 
         return ret;
+    }
+
+    private void calcDLossDX(
+            double[][][] dloss_dwxb,
+            double[][][][] weight,
+            int kernelWidth, int kernelHeight, int kernelChannel,
+            int leftBorder,int topBorder,
+            int strides,
+            double[][][] out_dloss_db){
+
+        //计算（损失函数/激活函数）*（激活函数/所有x）的偏导梯度
+        for(int x=0;x<dloss_dwxb.length;x++){
+            for(int y=0;y<dloss_dwxb[x].length;y++){
+                for(int z=0;z<dloss_dwxb[x][y].length;z++){
+                    double loss=dloss_dwxb[x][y][z];//当前损失梯度
+                    //计算单个损失函数/输入值的梯度
+                    calcDLossDW(
+                            loss,
+                            z,
+                            weight,
+                            kernelWidth,kernelHeight,kernelChannel,
+                            (x*strides)-leftBorder,(y*strides)-topBorder,
+                            out_dloss_db);
+                }
+            }
+        }
+    }
+
+    private void calcDLossDW(
+            double dloss_dwxb,
+            int filter,
+            double[][][][] weight,
+            int kernelWidth, int kernelHeight, int kernelChannel,
+            int ox,int oy,
+            double[][][] out_dloss_db){
+        //如果梯度不为0
+        if(dloss_dwxb!=0){
+            //循环指定过滤器的所有（损失函数/wxb）梯度
+            for(int i=0;i<kernelWidth;i++){
+                for(int j=0;j<kernelHeight;j++){
+                    for(int k=0;k<kernelChannel;k++){
+                        if((ox+i>=0 && oy+j>=0) && (ox+i<out_dloss_db.length && oy+j<out_dloss_db[0].length)){
+                            //累计梯度
+                            out_dloss_db[ox+i][oy+j][k]+=dloss_dwxb*weight[i][j][k][filter];
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
