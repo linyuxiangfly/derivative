@@ -1,8 +1,11 @@
 package test.mask;
 
+import com.firefly.derivative.activation.LRelu;
 import com.firefly.derivative.activation.Relu;
 import com.firefly.derivative.activation.Sigmoid;
 import com.firefly.derivative.activation.Softmax;
+import com.firefly.derivative.core.Function;
+import com.firefly.derivative.operation.Const;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
@@ -37,18 +40,18 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.0000001);
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),4,3,1, Padding.same, Relu.class,null,new InitParamsRandomGaussian()));
-        model.add(new Pooling(PollingType.avg,2,2,false));
-        model.add(new Conv(8,3,1, Padding.same, Relu.class,null,new InitParamsRandomGaussian()));
+        Model model=new Sequential(0.00001);
+        model.add(new Conv((ThreeDimShape) x[0].getShape(),16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
+        model.add(new Pooling(PollingType.max,2,2,false));
+        model.add(new Conv(8,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
         model.add(new Pooling(PollingType.max,2,2,true));
-        model.add(new Dense(10, Relu.class,1.0f));
-        model.add(new Dense(1, Relu.class,1.0f));
+//        model.add(new Dense(10, Relu.class,1.0f));
+        model.add(new Dense(1, LRelu.class,0.7f,new Function[]{new Const(0.01)}));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
 
-        model.fit(x, y, 10000, 10,
+        model.fit(x, y, 1000, 1,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {

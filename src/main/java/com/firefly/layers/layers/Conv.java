@@ -302,8 +302,11 @@ public class Conv implements Layer {
                     }
                 }
             }
+        }
+
+        for(int x=0;x<diffB.length;x++){
             //计算b的更新梯度
-            diffB[w]=0;
+            diffB[x]=0;
         }
     }
 
@@ -528,8 +531,11 @@ public class Conv implements Layer {
                     }
                 }
             }
+        }
+
+        for(int x=0;x<diffB.length;x++){
             //计算b的更新梯度
-            b[w]-=rate*diffB[w];
+            b[x]-=rate*diffB[x];
         }
     }
 

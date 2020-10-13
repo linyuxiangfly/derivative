@@ -55,6 +55,6 @@ public class LRelu extends OperationActivation {
     public double calc() {
         double v=this.getVal().calc();
         //f(v)=max(0,v)
-        return v>=0?v:0;
+        return v>=0?v:v*getMinVal();
     }
 }
