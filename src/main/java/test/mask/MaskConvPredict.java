@@ -87,8 +87,8 @@ public class MaskConvPredict {
         List<double[]> maskList= LoadData.load(new File(maskFile));
         List<double[]> nomaskList= LoadData.load(new File(nomaskFile));
 
-        double[][] maskY=createArray(maskList.size(),new double[]{1.0});
-        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0});
+        double[][] maskY=createArray(maskList.size(),new double[]{100.0,0.0});
+        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,100.0});
 
         double[][] x=mergeArrays(maskList,nomaskList);
         double[][] y=mergeArrays(maskY,nomaskY);
@@ -170,12 +170,13 @@ public class MaskConvPredict {
             }while(j.next());
 
             j=new ShapeIndex(py.getShape());
-            do{
-                double diff=Math.abs((double)py.getVal(j)-(double)y[i].getVal(j));
-                if(diff>=0.1){
-                    System.out.print(String.format("diff:%.10f   ", diff));
-                }
-            }while(j.next());
+            double[] pyVal=(double[])py.getData();
+            double[] yVal=(double[])y[i].getData();
+            boolean pb=pyVal[0]>pyVal[1];
+            boolean yb=yVal[0]>yVal[1];
+            if(pb!=yb){
+                System.out.print("      error!");
+            }
 
             System.out.println();
         }

@@ -40,18 +40,18 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.001);
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.05)},new InitParamsRandomGaussian()));
+        Model model=new Sequential(0.0000001);
+        model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
         model.add(new Pooling(PollingType.max,2,2,true));
-//        model.add(new Conv(8,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
+//        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
 //        model.add(new Pooling(PollingType.max,2,2,true));
 //        model.add(new Dense(10, Relu.class,1.0f));
-        model.add(new Dense(1, LRelu.class,0.7f,new Function[]{new Const(0.05)}));
+        model.add(new Dense(2, LRelu.class,1.0f,new Function[]{new Const(0.01)}));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
 
-        model.fit(x, y, 10000, 1,
+        model.fit(x, y, 20000, 10,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
@@ -128,8 +128,8 @@ public class MaskConvFit {
         List<double[]> maskList= LoadData.load(new File(maskFile));
         List<double[]> nomaskList= LoadData.load(new File(nomaskFile));
 
-        double[][] maskY=createArray(maskList.size(),new double[]{1.0});
-        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0});
+        double[][] maskY=createArray(maskList.size(),new double[]{100.0,0.0});
+        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,100.0});
 
         double[][] x=mergeArrays(maskList,nomaskList);
         double[][] y=mergeArrays(maskY,nomaskY);
@@ -180,7 +180,7 @@ public class MaskConvFit {
         out.writeObject(model);
         out.close();
         fileOut.close();
-        System.out.printf("Serialized data is saved in /tmp/employee.ser\n");
+        System.out.printf("Serialized data is saved in "+file+"\n");
     }
 
     private static Model importModel(String file) throws IOException, ClassNotFoundException {
@@ -212,7 +212,7 @@ public class MaskConvFit {
 
             j=new ShapeIndex(py.getShape());
             do{
-                double diff=Math.abs((double)py.getVal(j)-(double)y[i].getVal(j));
+                double diff=Math.abs((double)py.getVal(j)-(double)y[i].getVal(j))/(double)y[i].getVal(j);
                 if(diff>=0.1){
                     System.out.print(String.format("diff:%.10f   ", diff));
                 }
