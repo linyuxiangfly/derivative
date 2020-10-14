@@ -149,7 +149,7 @@ public class TestNNSoftmax {
         });
 
         Model model=new Sequential(0.0001);
-        model.add(new Dense(12,2, Softmax.class,0.5f,new InitParamsRandomGaussian()));//使用softmax激活函数
+        model.add(new Dense(12,2, Softmax.class,new InitParamsRandomGaussian()));//使用softmax激活函数
         //识差函数
         model.setLossCls(Cel.class);
         model.init();

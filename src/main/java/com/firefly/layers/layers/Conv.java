@@ -8,15 +8,12 @@ import com.firefly.layers.data.*;
 import com.firefly.layers.enums.Padding;
 import com.firefly.layers.init.params.InitParamsRandomOrdinary;
 import com.firefly.layers.listeners.InitParamsListener;
-import com.firefly.math.Binomial;
 import com.firefly.math.ConvUtil;
 
 /**
  * 卷积层
  */
 public class Conv implements Layer {
-    private static float KEEP_PROB_DEFAULT=1.0F;
-
     private ThreeDimShape inputShape;//输入形状
     private ThreeDimShape inputShapeExpand;//输入参数扩大的形状
     private ThreeDimShape unitShape;//输出单元数
@@ -32,7 +29,6 @@ public class Conv implements Layer {
     private Function[] activationSettings;
 
     private InitParamsListener initParamsListener;//初始化参数事件
-    private float keepProb=KEEP_PROB_DEFAULT;//节点保留概率，dropout功能
 
     private MultiDim wmd;
     private MultiDim bmd;
@@ -107,7 +103,6 @@ public class Conv implements Layer {
         this.strides=strides;
         this.padding=padding;
         this.activationCls=activationCls;
-        this.keepProb=keepProb;
         this.activationSettings=activationSettings;
         if(activationSettings!=null){
             this.activationSettingsMd=new MultiDim(Function.class,new Shape(new int[]{activationSettings.length}),activationSettings);
@@ -276,7 +271,7 @@ public class Conv implements Layer {
 
         input=ConvUtil.expand(input,inputShapeExpand);
         //计算卷积
-        MultiDim conv=ConvUtil.conv(input,wmd,bmd,keepProb,strides,unitShape);
+        MultiDim conv=ConvUtil.conv(input,wmd,bmd,strides,unitShape);
         double[][][] convData=(double[][][])conv.getData();
 
         for(int x=0;x<convData.length;x++){
@@ -329,10 +324,9 @@ public class Conv implements Layer {
 
         MultiDim dloss_dwxb_md=new MultiDim(this.unitShape);
         double[][][] dloss_dwxb=(double[][][])dloss_dwxb_md.getData();
-        int[][][] binomial= (int[][][])Binomial.binomialOfInt(keepProb,this.unitShape).getData();//二项分布
 
         //计算（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
-        calcDLossDWxb(backLayerPrtGradVal,outs,wxb,binomial,targetVal,dloss_dwxb);
+        calcDLossDWxb(backLayerPrtGradVal,outs,wxb,targetVal,dloss_dwxb);
 
         //计算（损失函数/激活函数）*（激活函数/w）的偏导梯度
         calcDLossDWs(dloss_dwxb,inputExpandVal,kernelWidth,kernelHeight,inputShape.getZ(),leftBorder,topBorder,strides,diffW);
@@ -356,15 +350,13 @@ public class Conv implements Layer {
      * @param targetVal
      * @param out_dloss_dwxb
      */
-    private void calcDLossDWxb(double[][][] backLayerPrtGradVal,OperationActivation[][][] outs,Var[][][] wxb,int[][][] binomial,MultiDim targetVal,double[][][] out_dloss_dwxb){
+    private void calcDLossDWxb(double[][][] backLayerPrtGradVal,OperationActivation[][][] outs,Var[][][] wxb,MultiDim targetVal,double[][][] out_dloss_dwxb){
         //计算（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
         for(int x=0;x<out_dloss_dwxb.length;x++){
             for(int y=0;y<out_dloss_dwxb[x].length;y++){
                 for(int z=0;z<out_dloss_dwxb[x][y].length;z++){
                     if(backLayerPrtGradVal[x][y][z]!=0){
-                        if(binomial[x][y][z]!=0){
-                            out_dloss_dwxb[x][y][z]=backLayerPrtGradVal[x][y][z]*binomial[x][y][z]*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
-                        }
+                        out_dloss_dwxb[x][y][z]=backLayerPrtGradVal[x][y][z]*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
                     }
                 }
             }

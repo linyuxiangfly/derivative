@@ -8,6 +8,7 @@ import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.layers.Dropout;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -155,8 +156,10 @@ public class TestNNSigmoid {
         });
 
         Model model=new Sequential(0.1);
-        model.add(new Dense(12,6, Sigmoid.class,0.3f,new InitParamsRandomGaussian()));
-        model.add(new Dense(2, Sigmoid.class,0.5f));
+        model.add(new Dense(12,6, Sigmoid.class,new InitParamsRandomGaussian()));
+        model.add(new Dropout(0.8f));
+        model.add(new Dense(2, Sigmoid.class));
+//        model.add(new Dropout(0.9f));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
@@ -281,8 +284,10 @@ public class TestNNSigmoid {
 
         int i=0;
         for(Layer layer:model.getLayers()){
-            printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
-            printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            if(layer.getW()!=null && layer.getB()!=null){
+                printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
+                printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            }
             i++;
         }
     }

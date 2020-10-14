@@ -127,18 +127,15 @@ public class ConvUtil {
      * @param strides 步长
      * @return
      */
-    public static MultiDim conv(MultiDim data,MultiDim w,MultiDim b,float keepProb,int strides,ThreeDimShape outShape){
+    public static MultiDim conv(MultiDim data,MultiDim w,MultiDim b,int strides,ThreeDimShape outShape){
         MultiDim ret=new MultiDim(outShape);
         double[][][] retData=(double[][][])ret.getData();
         double[][][] dataData=(double[][][])data.getData();
         double[][][][] wData=(double[][][][])w.getData();
         double[] bData=b!=null?(double[])b.getData():null;
 
-//        ThreeDimShape dataShape=(ThreeDimShape)data.getShape();
-//        FourDimShape wShape=(FourDimShape)w.getShape();
-
         //计算卷积
-        conv(dataData,wData,bData,keepProb,strides,retData);
+        conv(dataData,wData,bData,strides,retData);
         return ret;
     }
 
@@ -149,14 +146,14 @@ public class ConvUtil {
      * @param strides
      * @return
      */
-    public static void conv(double[][][] data,double[][][][] w,double[] b,float keepProb,int strides,double[][][] outData){
+    public static void conv(double[][][] data,double[][][][] w,double[] b,int strides,double[][][] outData){
         int width=(data.length-w.length)/strides+1;//计算卷积后的宽度
         int height=(data[0].length-w[0].length)/strides+1;//计算卷积后的高度
 
         for(int z=0;z<outData[0][0].length;z++){
             for(int x=0;x<width;x++){
                 for(int y=0;y<height;y++){
-                    outData[x][y][z]=(inner(data,x*strides,y*strides,z,w)+b[z])/keepProb;
+                    outData[x][y][z]=(inner(data,x*strides,y*strides,z,w)+b[z]);
                 }
 
             }
