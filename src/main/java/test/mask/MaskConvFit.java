@@ -15,10 +15,7 @@ import com.firefly.layers.data.ThreeDimShape;
 import com.firefly.layers.enums.Padding;
 import com.firefly.layers.enums.PollingType;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
-import com.firefly.layers.layers.Conv;
-import com.firefly.layers.layers.Dense;
-import com.firefly.layers.layers.Dropout;
-import com.firefly.layers.layers.Pooling;
+import com.firefly.layers.layers.*;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -41,10 +38,11 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.00005);
+        Model model=new Sequential(0.005);
         model.add(new Conv((ThreeDimShape) x[0].getShape(),16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
         model.add(new Pooling(PollingType.max,2,true));
-        model.add(new Dropout(0.5f));
+        model.add(new Dropout(0.7f));
+        model.add(new Zoom(0f,1f));
 //        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
 //        model.add(new Pooling(PollingType.max,2,2,true));
 //        model.add(new Dense(10, Relu.class,1.0f));
@@ -143,8 +141,8 @@ public class MaskConvFit {
         List<double[]> maskList= LoadData.load(new File(maskFile));
         List<double[]> nomaskList= LoadData.load(new File(nomaskFile));
 
-        double[][] maskY=createArray(maskList.size(),new double[]{100.0,0.0});
-        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,100.0});
+        double[][] maskY=createArray(maskList.size(),new double[]{1.0,0.0});
+        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,1.0});
 
         double[][] x=mergeArrays(maskList,nomaskList);
         double[][] y=mergeArrays(maskY,nomaskY);

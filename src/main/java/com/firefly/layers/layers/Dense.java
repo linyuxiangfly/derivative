@@ -199,12 +199,13 @@ public class Dense implements Layer {
     @Override
     public void calc(MultiDim input,MultiDim out) {
         double[] outVal=(double[])out.getData();
+        double[] inputVal=(double[])input.getData();
 
         double val=0;
 
         for(int i=0;i<this.outs.length;i++){
             //sigmoid(wx+b)
-            val=Linalg.inner(w[i],input)+b[i];
+            val=Linalg.inner(w[i],inputVal)+b[i];
             wxb[i].setVal(val);
 
             outVal[i]=this.outs[i].calc();
