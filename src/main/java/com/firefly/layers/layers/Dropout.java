@@ -85,9 +85,14 @@ public class Dropout implements Layer {
         MultiDim binomial= Binomial.binomialOfInt(keepProb,input.getShape());//二项分布
         ShapeIndex index=new ShapeIndex(input.getShape());
         do{
-            double val=(double)backLayerPrtGrad.getVal(index);
             int b=(int)binomial.getVal(index);
-            outFrontLayerPrtGrad.setVal(index,val*b);
+            if(b!=0){
+                double outVal=(double)outFrontLayerPrtGrad.getVal(index);
+                double val=(double)backLayerPrtGrad.getVal(index);
+
+                //累加梯度
+                outFrontLayerPrtGrad.setVal(index,outVal+val*b);
+            }
         }while(index.next());
     }
 
