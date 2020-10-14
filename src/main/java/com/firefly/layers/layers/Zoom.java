@@ -31,6 +31,7 @@ public class Zoom implements Layer {
         this.outMin=outMin;
         this.outMax=outMax;
         hasInputMinMax=true;
+        scaling=calcScaling(inputMin,inputMax,outMin,outMax);
     }
 
     @Override

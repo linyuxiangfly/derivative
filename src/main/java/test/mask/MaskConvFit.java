@@ -38,11 +38,11 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.005);
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
+        Model model=new Sequential(0.00001);
+        model.add(new Conv((ThreeDimShape) x[0].getShape(),12,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
         model.add(new Pooling(PollingType.max,2,true));
-        model.add(new Dropout(0.7f));
-        model.add(new Zoom(0f,1f));
+//        model.add(new Dropout(0.7f));
+//        model.add(new Zoom(-10f,10f,0f,1f));
 //        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
 //        model.add(new Pooling(PollingType.max,2,2,true));
 //        model.add(new Dense(10, Relu.class,1.0f));
@@ -51,7 +51,7 @@ public class MaskConvFit {
         model.setLossCls(Mse.class);
         model.init();
 
-        model.fit(x, y, 100000, 10,
+        model.fit(x, y, 10000, 10,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
@@ -141,8 +141,8 @@ public class MaskConvFit {
         List<double[]> maskList= LoadData.load(new File(maskFile));
         List<double[]> nomaskList= LoadData.load(new File(nomaskFile));
 
-        double[][] maskY=createArray(maskList.size(),new double[]{1.0,0.0});
-        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,1.0});
+        double[][] maskY=createArray(maskList.size(),new double[]{100.0,0.0});
+        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,100.0});
 
         double[][] x=mergeArrays(maskList,nomaskList);
         double[][] y=mergeArrays(maskY,nomaskY);
