@@ -8,10 +8,12 @@ import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.layers.Dropout;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.utils.ModelUtil;
 import com.sun.jndi.toolkit.url.Uri;
 import test.mask.data.LoadData;
 
@@ -32,8 +34,9 @@ public class MaskFit {
         MultiDim[] xTest=arr2MultDim(xyTest[0]);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.1);
+        Model model=new Sequential(0.04);
         model.add(new Dense(300,10, Sigmoid.class,new InitParamsRandomGaussian()));
+        model.add(new Dropout(0.5f));
         model.add(new Dense(1, Sigmoid.class));
         //识差函数
         model.setLossCls(Mse.class);
@@ -77,9 +80,9 @@ public class MaskFit {
 
         try{
             //导出到文件
-            exportModel(model,modelFile);
+            ModelUtil.exportModel(model,modelFile);
             //导入并进行预测
-            Model newModel=importModel(modelFile);
+            Model newModel=ModelUtil.importModel(modelFile);
 
             showPredict(newModel,xTest,yTest);
 
@@ -145,33 +148,6 @@ public class MaskFit {
         return ret;
     }
 
-    /**
-     * 将mode导出文件
-     * @param model
-     */
-    private static void exportModel(Model model,String file) throws IOException {
-        FileOutputStream fileOut =
-                new FileOutputStream(new File(file));
-        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(model);
-        out.close();
-        fileOut.close();
-        System.out.printf("Serialized data is saved in /tmp/employee.ser\n");
-    }
-
-    private static Model importModel(String file) throws IOException, ClassNotFoundException {
-        //新建一个模型，将之前模型的参数导入再进行拟合
-        Model newModel=null;
-
-        FileInputStream fileIn = new FileInputStream(file);
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        newModel = (Model) in.readObject();
-        in.close();
-        fileIn.close();
-
-        return newModel;
-    }
-
     private static void showPredict(Model model,MultiDim[] x,MultiDim[] y){
         for(int i=0;i<x.length;i++){
             MultiDim py=model.predict(x[i]);
@@ -201,8 +177,10 @@ public class MaskFit {
     private static void showParams(Model model){
         int i=0;
         for(Layer layer:model.getLayers()){
-            printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
-            printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            if(layer.getW()!=null && layer.getB()!=null){
+                printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
+                printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            }
             i++;
         }
     }

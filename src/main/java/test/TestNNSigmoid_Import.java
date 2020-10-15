@@ -12,6 +12,7 @@ import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.utils.ModelUtil;
 
 import java.io.*;
 
@@ -156,7 +157,7 @@ public class TestNNSigmoid_Import {
 
         try{
             //导入并进行预测
-            Model newModel=importModel(modelFile);
+            Model newModel= ModelUtil.importModel(modelFile);
 
             showParams(newModel,x,y);
         }catch (Exception e){
@@ -173,33 +174,6 @@ public class TestNNSigmoid_Import {
             ret[i]=new MultiDim(Double.TYPE,new Shape(new int[]{datas[i].length}),datas[i]);
         }
         return ret;
-    }
-
-    /**
-     * 将mode导出文件
-     * @param model
-     */
-    private static void exportModel(Model model,String file) throws IOException {
-        FileOutputStream fileOut =
-                new FileOutputStream(file);
-        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(model);
-        out.close();
-        fileOut.close();
-        System.out.printf("Serialized data is saved in /tmp/employee.ser");
-    }
-
-    private static Model importModel(String file) throws IOException, ClassNotFoundException {
-        //新建一个模型，将之前模型的参数导入再进行拟合
-        Model newModel=null;
-
-        FileInputStream fileIn = new FileInputStream(file);
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        newModel = (Model) in.readObject();
-        in.close();
-        fileIn.close();
-
-        return newModel;
     }
 
     private static void showParams(Model model,MultiDim[] x,MultiDim[] y){

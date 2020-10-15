@@ -46,7 +46,7 @@ public class MaskPredict {
             }
 
             long end=System.currentTimeMillis();
-            System.out.println("time(ms):"+((end-start)/1000.0)+"   Accuracy:"+String.format("%.10f   ", error)+"   Accuracy2:"+String.format("%.10f   ", error2));
+            System.out.println("time(s):"+((end-start)/1000.0)+"   Accuracy:"+String.format("%.10f   ", error)+"   Accuracy2:"+String.format("%.10f   ", error2));
             System.out.println();
 
             showPredict(newModel,x,y);

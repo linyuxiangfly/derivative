@@ -1,7 +1,5 @@
 package test.mask.data;
 
-import org.jcp.xml.dsig.internal.dom.DOMUtils;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;

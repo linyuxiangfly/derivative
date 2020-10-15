@@ -20,6 +20,7 @@ import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.utils.ModelUtil;
 import test.mask.data.LoadData;
 
 import java.io.*;
@@ -38,15 +39,15 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.00002);
+        Model model=new Sequential(0.00001);
         model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
         model.add(new Pooling(PollingType.max,2));
-        model.add(new Flatten());
-        model.add(new Dropout(0.7f));
 //        model.add(new Zoom(-10f,10f,0f,1f));
 //        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
 //        model.add(new Pooling(PollingType.max,2,2,true));
-//        model.add(new Dense(10, Relu.class,1.0f));
+        model.add(new Flatten());
+        model.add(new Dropout(0.5f));
+//        model.add(new Dense(10, LRelu.class));
         model.add(new Dense(2, LRelu.class,new Function[]{new Const(0.01)}));
         //识差函数
         model.setLossCls(Mse.class);
@@ -90,9 +91,9 @@ public class MaskConvFit {
 
         try{
             //导出到文件
-            exportModel(model,modelFile);
+            ModelUtil.exportModel(model,modelFile);
             //导入并进行预测
-            Model newModel=importModel(modelFile);
+            Model newModel=ModelUtil.importModel(modelFile);
 
             showPredict(newModel,xTest,yTest);
 
@@ -181,33 +182,6 @@ public class MaskConvFit {
             ret[a.length+i]=b[i];
         }
         return ret;
-    }
-
-    /**
-     * 将mode导出文件
-     * @param model
-     */
-    private static void exportModel(Model model,String file) throws IOException {
-        FileOutputStream fileOut =
-                new FileOutputStream(new File(file));
-        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(model);
-        out.close();
-        fileOut.close();
-        System.out.printf("Serialized data is saved in "+file+"\n");
-    }
-
-    private static Model importModel(String file) throws IOException, ClassNotFoundException {
-        //新建一个模型，将之前模型的参数导入再进行拟合
-        Model newModel=null;
-
-        FileInputStream fileIn = new FileInputStream(file);
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        newModel = (Model) in.readObject();
-        in.close();
-        fileIn.close();
-
-        return newModel;
     }
 
     private static void showPredict(Model model,MultiDim[] x,MultiDim[] y){
