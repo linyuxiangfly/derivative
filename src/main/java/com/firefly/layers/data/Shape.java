@@ -7,6 +7,14 @@ public class Shape implements java.io.Serializable{
     private int[] dims;//每个维度的数据数量
     private int[] dimsNum;//每个维度转为1维的数量
 
+    /**
+     * 判断是多少维
+     * @return
+     */
+    public int howManyDim(){
+        return dims.length;
+    }
+
     public int[] getDims() {
         return dims;
     }

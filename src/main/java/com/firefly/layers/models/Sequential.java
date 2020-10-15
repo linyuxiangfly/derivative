@@ -256,7 +256,7 @@ public class Sequential implements Model {
             if(datas!=null){
                 ShapeIndex i=new ShapeIndex(datas.getShape());
                 do{
-                    datas.setVal(i,0);
+                    datas.setVal(i,0.0);
                 }while (i.next());
             }
         }

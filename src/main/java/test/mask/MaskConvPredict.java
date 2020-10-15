@@ -39,6 +39,7 @@ public class MaskConvPredict {
             //导入并进行预测
             Model newModel=importModel(modelFile);
 
+            showPredict(newModel,x,y);
             showPredict(newModel,xTest,yTest);
 
             showParams(newModel);

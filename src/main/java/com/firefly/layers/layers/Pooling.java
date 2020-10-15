@@ -14,30 +14,23 @@ public class Pooling implements Layer {
     private ThreeDimShape inputShape;//输入形状
     private PollingType pollingType;
     private Shape unitShape;//输出单元数
-    private Shape unitRealShape;//输入单元真实形状
     private MultiDim gradient;//当前输入的数据对应的梯度
     private int kernelWidth;//池化核宽度
     private int kernelHeight;//池化核高度
-    private boolean outOneDim;//多维转为1维输出
 
     public Pooling(PollingType pollingType, int kernelSize){
-        this(pollingType,kernelSize,kernelSize,false);
+        this(pollingType,kernelSize,kernelSize);
     }
 
-    public Pooling(PollingType pollingType, int kernelSize, boolean outOneDim){
-        this(pollingType,kernelSize,kernelSize,outOneDim);
+    public Pooling(PollingType pollingType, int kernelWidth, int kernelHeight){
+        this(null,pollingType,kernelWidth,kernelHeight);
     }
 
-    public Pooling(PollingType pollingType, int kernelWidth, int kernelHeight, boolean outOneDim){
-        this(null,pollingType,kernelWidth,kernelHeight,outOneDim);
-    }
-
-    public Pooling(ThreeDimShape inputShape, PollingType pollingType, int kernelWidth, int kernelHeight, boolean outOneDim){
+    public Pooling(ThreeDimShape inputShape, PollingType pollingType, int kernelWidth, int kernelHeight){
         this.inputShape=inputShape;
         this.pollingType=pollingType;
         this.kernelWidth=kernelWidth;
         this.kernelHeight=kernelHeight;
-        this.outOneDim=outOneDim;
     }
 
     /**
@@ -45,28 +38,13 @@ public class Pooling implements Layer {
      * @param inputShape
      * @param kernelWidth
      * @param kernelHeight
-     * @param outOneDim
      * @return
      */
-    private Shape calcOutShape(ThreeDimShape inputShape, int kernelWidth, int kernelHeight, boolean outOneDim){
+    private Shape calcOutShape(ThreeDimShape inputShape, int kernelWidth, int kernelHeight){
         int outWidth=inputShape.getX()/kernelWidth;
         int outHeight=inputShape.getY()/kernelHeight;
 
-        //如果输出1维
-        if(outOneDim){
-            return new Shape(new int[]{outWidth*outHeight*inputShape.getZ()});
-        }else{
-            return new Shape(new int[]{outWidth,outHeight,inputShape.getZ()});
-        }
-    }
-
-    /**
-     * 设置1维输出值
-     * @param val
-     * @param index
-     */
-    private void setOneDimOutVal(MultiDim md, ShapeIndex index,double val){
-        md.setVal(new int[]{index.getMultDim2OneDimIndex()},val);
+        return new Shape(new int[]{outWidth,outHeight,inputShape.getZ()});
     }
 
     /**
@@ -84,7 +62,7 @@ public class Pooling implements Layer {
 
     public void setInputShape(Shape inputShape) {
         this.inputShape = (ThreeDimShape) inputShape;
-        this.unitShape=calcOutShape(this.inputShape,kernelWidth,kernelHeight,outOneDim);
+        this.unitShape=calcOutShape(this.inputShape,kernelWidth,kernelHeight);
     }
 
     public Shape getUnitShape() {
@@ -118,8 +96,7 @@ public class Pooling implements Layer {
     @Override
     public void init() {
         //计算输入的形状
-        this.unitShape=calcOutShape(inputShape,kernelWidth,kernelHeight,outOneDim);
-        this.unitRealShape=calcOutShape(inputShape,kernelWidth,kernelHeight,false);
+        this.unitShape=calcOutShape(inputShape,kernelWidth,kernelHeight);
         this.gradient=new MultiDim(inputShape);
     }
 
@@ -132,9 +109,9 @@ public class Pooling implements Layer {
             for(int x=0;x<outWidth;x++){
                 for(int y=0;y<outHeight;y++){
                     if(pollingType==PollingType.max){
-                        max(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z,outOneDim);
+                        max(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z);
                     }else{
-                        avg(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z,outOneDim);
+                        avg(input,out,gradient,x,y,z,x*kernelWidth,kernelWidth,y*kernelHeight,kernelHeight,z);
                     }
                 }
             }
@@ -178,15 +155,14 @@ public class Pooling implements Layer {
      * @param yStart
      * @param yLen
      * @param z
-     * @param outOneDim
      */
-    private void max(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z,boolean outOneDim){
+    private void max(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z){
         //求最大值或平均值
         int maxX=xStart;
         int maxY=yStart;
 
         ShapeIndex index=new ShapeIndex(inputShape);
-        ShapeIndex outIndex=new ShapeIndex(unitRealShape);
+        ShapeIndex outIndex=new ShapeIndex(unitShape);
 
         index.setDimIndexVal(ThreeDimShape.X,xStart);
         index.setDimIndexVal(ThreeDimShape.Y,yStart);
@@ -219,11 +195,7 @@ public class Pooling implements Layer {
         outIndex.setDimIndexVal(ThreeDimShape.X,px);
         outIndex.setDimIndexVal(ThreeDimShape.Y,py);
         outIndex.setDimIndexVal(ThreeDimShape.Z,pz);
-        if(outOneDim){
-            setOneDimOutVal(out,outIndex,maxVal);
-        }else{
-            setThreeDimOutVal(out,outIndex,maxVal);
-        }
+        setThreeDimOutVal(out,outIndex,maxVal);
     }
 
     /**
@@ -239,13 +211,12 @@ public class Pooling implements Layer {
      * @param yStart
      * @param yLen
      * @param z
-     * @param outOneDim
      */
-    private void avg(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z,boolean outOneDim){
+    private void avg(MultiDim input,MultiDim out,MultiDim gradient,int px,int py,int pz,int xStart,int xLen,int yStart,int yLen,int z){
         double sum=0;
         double num=xLen*yLen;//计算数量
         ShapeIndex index=new ShapeIndex(inputShape);
-        ShapeIndex outIndex=new ShapeIndex(unitRealShape);
+        ShapeIndex outIndex=new ShapeIndex(unitShape);
 
         index.setDimIndexVal(ThreeDimShape.X,xStart);
         index.setDimIndexVal(ThreeDimShape.Y,yStart);
@@ -267,11 +238,8 @@ public class Pooling implements Layer {
         outIndex.setDimIndexVal(ThreeDimShape.X,px);
         outIndex.setDimIndexVal(ThreeDimShape.Y,py);
         outIndex.setDimIndexVal(ThreeDimShape.Z,pz);
-        if(outOneDim){
-            setOneDimOutVal(out,outIndex,sum/num);
-        }else{
-            setThreeDimOutVal(out,outIndex,sum/num);
-        }
+        //设置输出值
+        setThreeDimOutVal(out,outIndex,sum/num);
     }
 
     @Override
@@ -293,7 +261,7 @@ public class Pooling implements Layer {
     }
 
     private void setInputPrtGrad(MultiDim gradient,MultiDim outFrontLayerPrtGrad,MultiDim backLayerPrtGrad){
-        ShapeIndex index=new ShapeIndex(unitRealShape);
+        ShapeIndex index=new ShapeIndex(unitShape);
         do{
             double val;
             if(backLayerPrtGrad.getShape().getDims().length==1){
