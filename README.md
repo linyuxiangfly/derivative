@@ -1,4 +1,4 @@
-# 自动求偏导梯度
+# 自动求偏导梯度、BP神经网络
 1、JAVA语言实现了基本函数和复杂函数的自动求偏导的梯度
 2、实现了BP神经网络
 
@@ -437,191 +437,23 @@ y:43.0   y':43.217278859814535
 >***Loss***是损失函数接口，模型最后一层与损失函数进行连接
 
 ## 2.2 Model接口
-```
-/**
- * 模型
- */
-public interface Model extends java.io.Serializable{
-    /**
-     * 添加层
-     * @param layer 层对象
-     */
-    void add(Layer layer);
+>神经网络的模型统一操作接口
 
-    /**
-     * 移除层
-     * @param layer
-     */
-    void remove(Layer layer);
-
-    /**
-     * 获取所有层
-     * @return
-     */
-    List<Layer> getLayers();
-
-    /**
-     * 编译
-     * @param lossCls 损失函数
-     */
-    void setLossCls(Class<? extends Loss> lossCls);
-
-    /**
-     * 初始化
-     */
-    void init();
-
-
-    /**
-     * 预测
-     * @param x 输入数据进行预测
-     * @return 返回预测结果
-     */
-    double[] predict(double[] x);
-
-    /**
-     *
-     * @param x 需要训练的数据
-     * @param y 训练数据的标签
-     * @param epoch 训练次数
-     * @param batchSize 训练数据批量大小
-     */
-    void fit(double[][] x, double[][] y, int epoch, int batchSize);
-
-    /**
-     *
-     * @param x 需要训练的数据
-     * @param y 训练数据的标签
-     * @param epoch 训练次数
-     * @param batchSize 训练数据批量大小
-     * @param lossCallBackListener 损失函数返回事件
-     */
-    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener);
-
-    /**
-     *
-     * @param x 需要训练的数据
-     * @param y 训练数据的标签
-     * @param epoch 训练次数
-     * @param batchSize 训练数据批量大小
-     * @param lossCallBackListener 损失函数返回事件
-     * @param fitControl 拟合过程控制，可以设置达到某个条件退出训练
-     */
-    void fit(double[][] x, double[][] y, int epoch, int batchSize, LossCallBackListener lossCallBackListener, FitControl fitControl);
-}
-```
+>模型实现类有：
+>Sequential（序贯模型）
 
 ## 2.3 Layer接口
-```
-/**
- * 网络层
- */
-public interface Layer extends java.io.Serializable{
-    /**
-     * 获取层的输入数量
-     * @return
-     */
-    int getInputs();
+>神经网络的层统一操作接口
 
-    /**
-     * 设置层的输入数量
-     * @param inputs
-     */
-    void setInputs(int inputs);
-
-    /**
-     * 获取层的输出数量，即是神经元数
-     * @return
-     */
-    int getUnits();
-
-    /**
-     * 设置层的输出数量，即是神经元数
-     * @param units
-     */
-    void setUnits(int units);
-
-    /**
-     * 获取层的W参数
-     * @return
-     */
-    double[][] getW();
-
-    /**
-     * 设置层的W参数
-     * @param w
-     */
-    void setW(double[][] w);
-
-    /**
-     * 获取层的B参数
-     * @return
-     */
-    double[] getB();
-
-    /**
-     * 设置层的B参数
-     * @param b
-     */
-    void setB(double[] b);
-
-    /**
-     * 初始化层
-     */
-    void init();
-
-    /**
-     * 正向计算
-     * @param input 输入数量
-     * @param out 计算后并输出数据
-     */
-    void calc(double[] input,double[] out);
-
-    /**
-     * 重置反向更新参数梯度
-     */
-    void resetBackUpdateParamPrtGrad();
-
-    /**
-     * 累加反向更新参数梯度
-     * @param prtGrad 下一层的梯度
-     * @param input 输入值
-     * @param currentPrtGrad 识差函数/当前层的输入的梯度
-     */
-    void addBackUpdateParamPrtGrad(double[] prtGrad,double[] input,double[] currentPrtGrad);
-
-    /**
-     * 更新参数梯度
-     * @param rate 更新比例
-     */
-    void flushBackUpdateParamPrtGrad(double rate);
-
-}
-```
+>层实现类有：
+>Dense（全连接层）
 
 ## 2.4 Loss接口
-```
-/**
- * 损失函数
- */
-public interface Loss extends java.io.Serializable{
-    /**
-     * 偏梯度
-     * @param input 输入要训练的数据
-     * @param targetVal 标签数据
-     * @return
-     */
-    double[] prtGrad(double[] input,double[] targetVal);
+>神经网络的损失统一操作接口
 
-    /**
-     * 正向计算
-     * @param input 输入要训练的数据
-     * @param targetVal 标签数据
-     * @param out 输出计算结果
-     */
-    void calc(double[] input,double[] targetVal,double[] out);
-}
-```
+>损失函数实现类有：
+>Mse（均方误差（MSE，mean squared error））
+>Cel（交叉熵损失函数）
 
 ## 2.5 BP神经网络例子
 
