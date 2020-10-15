@@ -8,6 +8,7 @@ import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.layers.Dropout;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -33,8 +34,9 @@ public class MaskFit {
         MultiDim[] xTest=arr2MultDim(xyTest[0]);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.1);
+        Model model=new Sequential(0.04);
         model.add(new Dense(300,10, Sigmoid.class,new InitParamsRandomGaussian()));
+        model.add(new Dropout(0.5f));
         model.add(new Dense(1, Sigmoid.class));
         //识差函数
         model.setLossCls(Mse.class);
@@ -175,8 +177,10 @@ public class MaskFit {
     private static void showParams(Model model){
         int i=0;
         for(Layer layer:model.getLayers()){
-            printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
-            printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            if(layer.getW()!=null && layer.getB()!=null){
+                printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
+                printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            }
             i++;
         }
     }

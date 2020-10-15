@@ -1,22 +1,11 @@
 package test.mask;
 
-import com.firefly.derivative.activation.Relu;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.data.ThreeDimShape;
-import com.firefly.layers.enums.Padding;
-import com.firefly.layers.enums.PollingType;
-import com.firefly.layers.init.params.InitParamsRandomGaussian;
-import com.firefly.layers.layers.Conv;
-import com.firefly.layers.layers.Dense;
-import com.firefly.layers.layers.Pooling;
-import com.firefly.layers.listeners.FitControl;
-import com.firefly.layers.listeners.LossCallBackListener;
-import com.firefly.layers.loss.Mse;
-import com.firefly.layers.models.Sequential;
 import com.firefly.utils.ModelUtil;
 import test.mask.data.LoadData;
 
