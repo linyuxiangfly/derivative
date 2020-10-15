@@ -1,100 +1,35 @@
 package test.mask;
 
-import com.firefly.derivative.activation.LRelu;
-import com.firefly.derivative.activation.Relu;
-import com.firefly.derivative.activation.Sigmoid;
-import com.firefly.derivative.activation.Softmax;
-import com.firefly.derivative.core.Function;
-import com.firefly.derivative.operation.Const;
 import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.data.ThreeDimShape;
-import com.firefly.layers.enums.Padding;
-import com.firefly.layers.enums.PollingType;
-import com.firefly.layers.init.params.InitParamsRandomGaussian;
-import com.firefly.layers.layers.*;
-import com.firefly.layers.listeners.FitControl;
-import com.firefly.layers.listeners.LossCallBackListener;
-import com.firefly.layers.loss.Mse;
-import com.firefly.layers.models.Sequential;
 import com.firefly.utils.ModelUtil;
 import test.mask.data.LoadData;
 
 import java.io.*;
 import java.util.List;
 
-public class MaskConvFit {
+public class MaskConvPredict {
 
-    private static String modelFile="src/main/resources/model/mask-conv.ser";
+    private static String modelFile="src/test/resources/model/mask-conv.ser";
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        double[][][] xy=loadXY("src/main/resources/datas/train/mask.txt","src/main/resources/datas/train/nomask.txt");
+        double[][][] xy=loadXY("src/test/resources/datas/train/mask.txt","src/test/resources/datas/train/nomask.txt");
         MultiDim[] x=arr2Image(xy[0],10,10,3);
         MultiDim[] y=arr2MultDim(xy[1]);
 
-        double[][][] xyTest=loadXY("src/main/resources/datas/test/mask.txt","src/main/resources/datas/test/nomask.txt");
+        double[][][] xyTest=loadXY("src/test/resources/datas/test/mask.txt","src/test/resources/datas/test/nomask.txt");
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.00001);
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
-        model.add(new Pooling(PollingType.max,2));
-//        model.add(new Zoom(-10f,10f,0f,1f));
-//        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
-//        model.add(new Pooling(PollingType.max,2,2,true));
-        model.add(new Flatten());
-        model.add(new Dropout(0.5f));
-//        model.add(new Dense(10, LRelu.class));
-        model.add(new Dense(2, LRelu.class,new Function[]{new Const(0.01)}));
-        //识差函数
-        model.setLossCls(Mse.class);
-        model.init();
-
-        model.fit(x, y, 10000, 4,
-                new LossCallBackListener() {
-                    @Override
-                    public void onLoss(double val) {
-//                        System.out.println(String.format("%.10f", val));
-                    }
-                },
-                new FitControl() {
-                    private long countTime=0;
-                    private long processTime=0;
-
-                    @Override
-                    public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
-                        //累计执行时间
-                        countTime+=takeUpTime;
-                        processTime+=takeUpTime;
-
-                        if(loss<=0.0001){
-                            System.out.println("第"+process+"次训练，满足条件自动退出训练！");
-                            return true;
-                        }else{
-                            if(process%1==0){
-                                double c=processTime/1000.0;
-                                double processRate=(process+1.0)/epoch;
-                                double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
-
-                                System.out.println(process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+"    剩下时间:"+String.format("%.2f 分钟", left)+"    误差:"+String.format("%.10f", loss));
-
-                                processTime=0;
-                            }
-                        }
-                        return false;
-                    }
-                }
-        );
-
         try{
-            //导出到文件
-            ModelUtil.exportModel(model,modelFile);
             //导入并进行预测
-            Model newModel=ModelUtil.importModel(modelFile);
+            Model newModel= ModelUtil.importModel(modelFile);
 
+            showPredict(newModel,x,y);
             showPredict(newModel,xTest,yTest);
 
             showParams(newModel);
@@ -199,12 +134,13 @@ public class MaskConvFit {
             }while(j.next());
 
             j=new ShapeIndex(py.getShape());
-            do{
-                double diff=Math.abs((double)py.getVal(j)-(double)y[i].getVal(j));
-                if(diff>=0.1){
-                    System.out.print(String.format("diff:%.10f   ", diff));
-                }
-            }while(j.next());
+            double[] pyVal=(double[])py.getData();
+            double[] yVal=(double[])y[i].getData();
+            boolean pb=pyVal[0]>pyVal[1];
+            boolean yb=yVal[0]>yVal[1];
+            if(pb!=yb){
+                System.out.print("      error!");
+            }
 
             System.out.println();
         }

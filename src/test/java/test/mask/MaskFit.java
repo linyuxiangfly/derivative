@@ -23,14 +23,14 @@ import java.util.List;
 
 public class MaskFit {
 
-    private static String modelFile="src/main/resources/model/mask.ser";
+    private static String modelFile="src/test/resources/model/mask.ser";
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        double[][][] xy=loadXY("src/main/resources/datas/train/mask.txt","src/main/resources/datas/train/nomask.txt");
+        double[][][] xy=loadXY("src/test/resources/datas/train/mask.txt","src/test/resources/datas/train/nomask.txt");
         MultiDim[] x=arr2MultDim(xy[0]);
         MultiDim[] y=arr2MultDim(xy[1]);
 
-        double[][][] xyTest=loadXY("src/main/resources/datas/test/mask.txt","src/main/resources/datas/test/nomask.txt");
+        double[][][] xyTest=loadXY("src/test/resources/datas/test/mask.txt","src/test/resources/datas/test/nomask.txt");
         MultiDim[] xTest=arr2MultDim(xyTest[0]);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
