@@ -15,9 +15,7 @@ import com.firefly.layers.data.ThreeDimShape;
 import com.firefly.layers.enums.Padding;
 import com.firefly.layers.enums.PollingType;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
-import com.firefly.layers.layers.Conv;
-import com.firefly.layers.layers.Dense;
-import com.firefly.layers.layers.Pooling;
+import com.firefly.layers.layers.*;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -40,18 +38,21 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.0000001);
+        Model model=new Sequential(0.00002);
         model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
-        model.add(new Pooling(PollingType.max,2,2,true));
+        model.add(new Pooling(PollingType.max,2));
+        model.add(new Flatten());
+        model.add(new Dropout(0.7f));
+//        model.add(new Zoom(-10f,10f,0f,1f));
 //        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
 //        model.add(new Pooling(PollingType.max,2,2,true));
 //        model.add(new Dense(10, Relu.class,1.0f));
-        model.add(new Dense(2, LRelu.class,1.0f,new Function[]{new Const(0.01)}));
+        model.add(new Dense(2, LRelu.class,new Function[]{new Const(0.01)}));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
 
-        model.fit(x, y, 20000, 10,
+        model.fit(x, y, 10000, 4,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
@@ -59,14 +60,27 @@ public class MaskConvFit {
                     }
                 },
                 new FitControl() {
+                    private long countTime=0;
+                    private long processTime=0;
+
                     @Override
-                    public boolean onIsStop(int epoch, double loss) {
+                    public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
+                        //累计执行时间
+                        countTime+=takeUpTime;
+                        processTime+=takeUpTime;
+
                         if(loss<=0.0001){
-                            System.out.println("第"+epoch+"次训练，满足条件自动退出训练！");
+                            System.out.println("第"+process+"次训练，满足条件自动退出训练！");
                             return true;
                         }else{
-                            if(epoch%100==0){
-                                System.out.println("第"+epoch+"次训练！ loss:"+String.format("%.10f", loss));
+                            if(process%1==0){
+                                double c=processTime/1000.0;
+                                double processRate=(process+1.0)/epoch;
+                                double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
+
+                                System.out.println(process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+"    剩下时间:"+String.format("%.2f 分钟", left)+"    误差:"+String.format("%.10f", loss));
+
+                                processTime=0;
                             }
                         }
                         return false;
@@ -212,7 +226,7 @@ public class MaskConvFit {
 
             j=new ShapeIndex(py.getShape());
             do{
-                double diff=Math.abs((double)py.getVal(j)-(double)y[i].getVal(j))/(double)y[i].getVal(j);
+                double diff=Math.abs((double)py.getVal(j)-(double)y[i].getVal(j));
                 if(diff>=0.1){
                     System.out.print(String.format("diff:%.10f   ", diff));
                 }

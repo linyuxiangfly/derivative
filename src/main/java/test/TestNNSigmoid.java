@@ -8,6 +8,7 @@ import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.layers.Dropout;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
@@ -155,8 +156,10 @@ public class TestNNSigmoid {
         });
 
         Model model=new Sequential(0.1);
-        model.add(new Dense(12,6, Sigmoid.class,0.3f,new InitParamsRandomGaussian()));
-        model.add(new Dense(2, Sigmoid.class,0.5f));
+        model.add(new Dense(12,6, Sigmoid.class,new InitParamsRandomGaussian()));
+        model.add(new Dropout(0.8f));
+        model.add(new Dense(2, Sigmoid.class));
+//        model.add(new Dropout(0.9f));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
@@ -165,15 +168,32 @@ public class TestNNSigmoid {
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
-                        System.out.println(String.format("%.10f", val));
+//                        System.out.println(String.format("%.10f", val));
                     }
                 },
                 new FitControl() {
+                    private long countTime=0;
+                    private long processTime=0;
+
                     @Override
-                    public boolean onIsStop(int epoch, double loss) {
-                        if(loss<=0.001){
-                            System.out.println("第"+epoch+"次训练，满足条件自动退出训练！");
+                    public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
+                        //累计执行时间
+                        countTime+=takeUpTime;
+                        processTime+=takeUpTime;
+
+                        if(loss<=0.0001){
+                            System.out.println("第"+process+"次训练，满足条件自动退出训练！");
                             return true;
+                        }else{
+                            if(process%100==99){
+                                double c=processTime/1000.0;
+                                double processRate=(process+1.0)/epoch;
+                                double sum=countTime/processRate/60.0/1000.0;//按分钟计算
+
+                                System.out.println("第"+process+"次训练！ "+"    takeUpTime:"+String.format("%.2f 秒", c)+"    TotalTime:"+String.format("%.2f 分钟", sum)+"    loss:"+String.format("%.10f", loss));
+
+                                processTime=0;
+                            }
                         }
                         return false;
                     }
@@ -264,8 +284,10 @@ public class TestNNSigmoid {
 
         int i=0;
         for(Layer layer:model.getLayers()){
-            printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
-            printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            if(layer.getW()!=null && layer.getB()!=null){
+                printArray("第"+(i+1)+"层的W",(double[][])layer.getW().getData());
+                printArray("第"+(i+1)+"层的B",(double[])layer.getB().getData());
+            }
             i++;
         }
     }

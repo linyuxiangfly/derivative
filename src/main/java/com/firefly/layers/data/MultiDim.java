@@ -85,6 +85,16 @@ public class MultiDim implements java.io.Serializable{
     }
 
     private Object getVal(Object data,int[] dimIndex){
+        try{
+            if(type==Double.TYPE){
+                return getDoubleVal(data,shape.howManyDim(),dimIndex);
+            }else if(type==Integer.TYPE){
+                return getIntVal(data,shape.howManyDim(),dimIndex);
+            }
+        }catch (Exception e){
+
+        }
+
         Object obj=data;
         for(int index: dimIndex){
             obj = Array.get(obj, index);
@@ -98,11 +108,7 @@ public class MultiDim implements java.io.Serializable{
      * @return
      */
     public Object getVal(int[] dimIndex){
-        Object obj=data;
-        for(int index: dimIndex){
-            obj = Array.get(obj, index);
-        }
-        return obj;
+        return getVal(data,dimIndex);
     }
 
     /**
@@ -115,13 +121,22 @@ public class MultiDim implements java.io.Serializable{
     }
 
     private void setVal(Object data,int[] dimIndex, Object val){
-        Object obj=data;
-
-        //循环到倒数第2个维
-        for(int i=0;i<dimIndex.length-1;i++){
-            obj = Array.get(obj, dimIndex[i]);
+        boolean success=false;
+        if(type==Double.TYPE){
+            success=setDoubleVal(data,shape.howManyDim(),dimIndex,(double)val);
+        }else if(type==Integer.TYPE){
+            success=setIntVal(data,shape.howManyDim(),dimIndex,(int)val);
         }
-        Array.set(obj,dimIndex[dimIndex.length-1],val);
+
+        if(!success){
+            Object obj=data;
+
+            //循环到倒数第2个维
+            for(int i=0;i<dimIndex.length-1;i++){
+                obj = Array.get(obj, dimIndex[i]);
+            }
+            Array.set(obj,dimIndex[dimIndex.length-1],val);
+        }
     }
 
     public void setVal(ShapeIndex[] indices, Object val){
@@ -141,13 +156,87 @@ public class MultiDim implements java.io.Serializable{
      * @param val
      */
     public void setVal(int[] dimIndex, Object val){
-        Object obj=data;
+        setVal(data,dimIndex,val);
+    }
 
-        //循环到倒数第2个维
-        for(int i=0;i<dimIndex.length-1;i++){
-            obj = Array.get(obj, dimIndex[i]);
+    private boolean setIntVal(Object data,int howManyDim,int[] dimIndex,int val){
+        switch (howManyDim){
+            case 1:
+                ((int[])data)[dimIndex[0]]=val;
+                break;
+            case 2:
+                ((int[][])data)[dimIndex[0]][dimIndex[1]]=val;
+                break;
+            case 3:
+                ((int[][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]]=val;
+                break;
+            case 4:
+                ((int[][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]]=val;
+                break;
+            case 5:
+                ((int[][][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]][dimIndex[4]]=val;
+                break;
+            default:
+                return false;
         }
-        Array.set(obj,dimIndex[dimIndex.length-1],val);
+        return true;
+    }
+
+    private int getIntVal(Object data,int howManyDim,int[] dimIndex){
+        switch (howManyDim){
+            case 1:
+                return ((int[])data)[dimIndex[0]];
+            case 2:
+                return ((int[][])data)[dimIndex[0]][dimIndex[1]];
+            case 3:
+                return ((int[][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]];
+            case 4:
+                return ((int[][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]];
+            case 5:
+                return ((int[][][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]][dimIndex[4]];
+            default:
+                throw new RuntimeException("default");
+        }
+    }
+
+    private boolean setDoubleVal(Object data,int howManyDim,int[] dimIndex,double val){
+        switch (howManyDim){
+            case 1:
+                ((double[])data)[dimIndex[0]]=val;
+                break;
+            case 2:
+                ((double[][])data)[dimIndex[0]][dimIndex[1]]=val;
+                break;
+            case 3:
+                ((double[][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]]=val;
+                break;
+            case 4:
+                ((double[][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]]=val;
+                break;
+            case 5:
+                ((double[][][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]][dimIndex[4]]=val;
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    private double getDoubleVal(Object data,int howManyDim,int[] dimIndex){
+        switch (howManyDim){
+            case 1:
+                return ((double[])data)[dimIndex[0]];
+            case 2:
+                return ((double[][])data)[dimIndex[0]][dimIndex[1]];
+            case 3:
+                return ((double[][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]];
+            case 4:
+                return ((double[][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]];
+            case 5:
+                return ((double[][][][][])data)[dimIndex[0]][dimIndex[1]][dimIndex[2]][dimIndex[3]][dimIndex[4]];
+            default:
+                throw new RuntimeException("default");
+        }
     }
 
     /**

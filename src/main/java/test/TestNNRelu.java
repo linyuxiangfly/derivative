@@ -6,6 +6,7 @@ import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.layers.Dropout;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
@@ -48,7 +49,8 @@ public class TestNNRelu {
         MultiDim[] y=arr2MultDim(yy);
 
         Model model=new Sequential(0.04);
-        model.add(new Dense(1,1, Relu.class,0.5f));
+        model.add(new Dense(1,1, Relu.class));
+        model.add(new Dropout(0.5f));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();

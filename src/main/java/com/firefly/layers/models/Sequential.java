@@ -143,10 +143,14 @@ public class Sequential implements Model {
         num+=mod>0?1:0;
         int lastSize=mod==0?batchSize:mod;
 
+        long startTime,endTime;
         //训练次数
         for(int en=0;en<epoch;en++){
             //损失结果
             double lossVal=0;
+
+            //记录当前时间
+            startTime=System.currentTimeMillis();
 
             //分批训练，分成多少批
             for(int n=0;n<num;n++){
@@ -187,8 +191,11 @@ public class Sequential implements Model {
             }
             //拟合过程控制
             if(fitControl!=null){
+                //记录当前时间
+                endTime=System.currentTimeMillis();
+
                 //如果要停止则退出循环
-                if(fitControl.onIsStop(en,lossVal)){
+                if(fitControl.onIsStop(en,epoch,lossVal,endTime-startTime)){
                     break;
                 }
             }
@@ -249,7 +256,7 @@ public class Sequential implements Model {
             if(datas!=null){
                 ShapeIndex i=new ShapeIndex(datas.getShape());
                 do{
-                    datas.setVal(i,0);
+                    datas.setVal(i,0.0);
                 }while (i.next());
             }
         }
