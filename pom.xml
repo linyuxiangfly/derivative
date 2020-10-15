@@ -6,7 +6,7 @@
 
     <groupId>com.firefly</groupId>
     <artifactId>derivative</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.2.5-SNAPSHOT</version>
 
     <build>
         <plugins>
