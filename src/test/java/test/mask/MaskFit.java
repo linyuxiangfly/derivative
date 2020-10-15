@@ -14,7 +14,6 @@ import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 import com.firefly.utils.ModelUtil;
-import com.sun.jndi.toolkit.url.Uri;
 import test.mask.data.LoadData;
 
 import java.io.*;
