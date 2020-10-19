@@ -203,11 +203,16 @@ public class Dense implements Layer {
 
         double val=0;
 
+        //计算wxb
         for(int i=0;i<this.outs.length;i++){
             //sigmoid(wx+b)
             val=Linalg.inner(w[i],inputVal)+b[i];
-            wxb[i].setVal(val);
 
+            wxb[i].setVal(val);
+        }
+
+        //计算 激活函数（wxb）
+        for(int i=0;i<this.outs.length;i++){
             outVal[i]=this.outs[i].calc();
         }
     }
@@ -232,16 +237,20 @@ public class Dense implements Layer {
         double[] dloss_dwxb=new double[outs.length];
 
         for(int i=0;i<this.outs.length;i++){
-            dloss_dwxb[i]=backLayerPrtGradVal[i]*outs[i].prtGrad(wxb[i],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
-
-            //计算w的更新梯度
-            for(int j=0;j<diffW[i].length;j++){
-                //累计参数w的更新值
-                diffW[i][j]+=dloss_dwxb[i]*inputVal[j];
+            if(backLayerPrtGradVal[i]!=0){
+                dloss_dwxb[i]=backLayerPrtGradVal[i]*outs[i].prtGrad(wxb[i],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
             }
 
-            //累计参数b的更新值
-            diffB[i]+=dloss_dwxb[i];
+            if(dloss_dwxb[i]!=0){
+                //计算w的更新梯度
+                for(int j=0;j<diffW[i].length;j++){
+                    //累计参数w的更新值
+                    diffW[i][j]+=dloss_dwxb[i]*inputVal[j];
+                }
+
+                //累计参数b的更新值
+                diffB[i]+=dloss_dwxb[i];
+            }
         }
 
         //累计输入参数的更新值

@@ -35,16 +35,16 @@ public class MnistFit {
         MultiDim[] test_x=arr2MultDim(test_images);
         MultiDim[] test_y=arr2MultDim(testlabels);
 
-        Model model=new Sequential(0.001);
-        model.add(new Dense(train_images[0].length,32, LRelu.class,new InitParamsRandomGaussian()));
+        Model model=new Sequential(0.00001);
+        model.add(new Dense(train_images[0].length,10, Softmax.class,new InitParamsRandomGaussian()));
 //        model.add(new Dropout(0.8f));
-        model.add(new Dense(10, LRelu.class));
+//        model.add(new Dense(10, LRelu.class));
 //        model.add(new Dropout(0.9f));
         //识差函数
-        model.setLossCls(Mse.class);
+        model.setLossCls(Cel.class);
         model.init();
 
-        model.fit(train_x, train_y, 1000, 200,
+        model.fit(train_x, train_y, 1000, 30,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {

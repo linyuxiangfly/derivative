@@ -15,11 +15,14 @@ public class Cel implements Loss {
 //        double si=sumInput(input);//累计所有输入的和
         ShapeIndex i=new ShapeIndex(input.getShape());
         do{
-            ret+=(double)targetVal.getVal(i)*Math.log((double)input.getVal(i));
+            double tv=(double)targetVal.getVal(i);
+            if(tv!=0){
+                ret-=tv*Math.log((double)input.getVal(i));
+            }
         }while (i.next());
 
         ShapeIndex oi=new ShapeIndex(out.getShape());
-        out.setVal(oi,-ret);
+        out.setVal(oi,ret);
     }
 
     /**
@@ -36,7 +39,8 @@ public class Cel implements Loss {
         MultiDim ret=new MultiDim(input.getShape());
         ShapeIndex i=new ShapeIndex(input.getShape());
         do{
-            ret.setVal(i,-(double)targetVal.getVal(i)/(double)input.getVal(i));
+            double val=-(double)targetVal.getVal(i)/(double)input.getVal(i);
+            ret.setVal(i,val);
         }while (i.next());
 
         return ret;
