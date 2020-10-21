@@ -97,7 +97,7 @@ public class Dropout implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad(double rate) {
+    public void flushBackUpdateParamPrtGrad() {
 
     }
 }

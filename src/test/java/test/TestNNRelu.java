@@ -10,6 +10,7 @@ import com.firefly.layers.layers.Dropout;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Sgd;
 
 public class TestNNRelu {
     public static void main(String[] args){
@@ -48,8 +49,8 @@ public class TestNNRelu {
         MultiDim[] x=arr2MultDim(xx);
         MultiDim[] y=arr2MultDim(yy);
 
-        Model model=new Sequential(0.04);
-        model.add(new Dense(1,1, ()->new Relu()));
+        Model model=new Sequential();
+        model.add(new Dense(1,1,new Sgd(0.04), ()->new Relu()));
         model.add(new Dropout(0.5f));
         //识差函数
         model.setLossCls(Mse.class);

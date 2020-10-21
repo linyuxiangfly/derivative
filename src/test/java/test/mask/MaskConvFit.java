@@ -17,6 +17,7 @@ import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 import test.mask.data.LoadData;
 
@@ -36,8 +37,8 @@ public class MaskConvFit {
         MultiDim[] xTest=arr2Image(xyTest[0],10,10,3);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.00001);
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same, () -> {
+        Model model=new Sequential();
+        model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same,new Sgd(0.00001), () -> {
             LRelu a=new LRelu();
             a.setMinVal(0.01);
             return a;
@@ -49,7 +50,7 @@ public class MaskConvFit {
         model.add(new Flatten());
         model.add(new Dropout(0.5f));
 //        model.add(new Dense(10, LRelu.class));
-        model.add(new Dense(2, () -> {
+        model.add(new Dense(2, new Sgd(0.00001),() -> {
             LRelu a=new LRelu();
             a.setMinVal(0.01);
             return a;

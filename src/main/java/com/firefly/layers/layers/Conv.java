@@ -4,6 +4,7 @@ import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
+import com.firefly.layers.core.Optimizer;
 import com.firefly.layers.data.*;
 import com.firefly.layers.enums.Padding;
 import com.firefly.layers.init.params.InitParamsRandomOrdinary;
@@ -24,14 +25,17 @@ public class Conv implements Layer {
     private int strides;
     private Padding padding;
 
+    private Optimizer optimizer;
     private InitActivationListener initActivationListener;
-
     private InitParamsListener initParamsListener;//初始化参数事件
 
     private MultiDim wmd;
     private MultiDim bmd;
     private double[][][][] w;
     private double[] b;
+
+    private MultiDim diffWmd;
+    private MultiDim diffBmd;
     private double[][][][] diffW;
     private double[] diffB;
 
@@ -47,8 +51,9 @@ public class Conv implements Layer {
             int filters,
             int kernelSize,
             int strides, Padding padding,
+            Optimizer optimizer,
             InitActivationListener initActivationListener, InitParamsListener initParamsListener){
-        this(filters,kernelSize,kernelSize,strides,padding,initActivationListener,initParamsListener);
+        this(filters,kernelSize,kernelSize,strides,padding,optimizer,initActivationListener,initParamsListener);
     }
 
     public Conv(
@@ -56,8 +61,9 @@ public class Conv implements Layer {
             int kernelWidth,
             int kernelHeight,
             int strides, Padding padding,
+            Optimizer optimizer,
             InitActivationListener initActivationListener, InitParamsListener initParamsListener){
-        this(null,filters,kernelWidth,kernelHeight,strides,padding,initActivationListener,initParamsListener);
+        this(null,filters,kernelWidth,kernelHeight,strides,padding,optimizer,initActivationListener,initParamsListener);
     }
 
     public Conv(
@@ -65,8 +71,9 @@ public class Conv implements Layer {
             int filters,
             int kernelSize,
             int strides, Padding padding,
+            Optimizer optimizer,
             InitActivationListener initActivationListener, InitParamsListener initParamsListener){
-        this(inputShape,filters,kernelSize,kernelSize,strides,padding,initActivationListener,initParamsListener);
+        this(inputShape,filters,kernelSize,kernelSize,strides,padding,optimizer,initActivationListener,initParamsListener);
     }
 
     /**
@@ -92,6 +99,7 @@ public class Conv implements Layer {
             int kernelWidth,
             int kernelHeight,
             int strides, Padding padding,
+            Optimizer optimizer,
             InitActivationListener initActivationListener, InitParamsListener initParamsListener){
         this.inputShape=inputShape;
         this.filters=filters;
@@ -99,6 +107,7 @@ public class Conv implements Layer {
         this.kernelHeight=kernelHeight;
         this.strides=strides;
         this.padding=padding;
+        this.optimizer=optimizer;
         this.initActivationListener=initActivationListener;
         this.initParamsListener=initParamsListener;
     }
@@ -195,6 +204,8 @@ public class Conv implements Layer {
 
         diffW=new double[kernelWidth][kernelHeight][inputShape.getZ()][filters];
         diffB=new double[filters];
+        diffWmd=new MultiDim(Double.TYPE,new FourDimShape(kernelWidth,kernelHeight,inputShape.getZ(),filters),diffW);
+        diffBmd=new MultiDim(Double.TYPE,new OneDimShape(filters),diffB);
 
         //初始化神经元函数
         initFunc();
@@ -504,22 +515,24 @@ public class Conv implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad(double rate) {
-        //计算（损失函数/激活函数）*（激活函数/所有w）的偏导梯度
-        for(int w=0;w<diffW.length;w++){
-            for(int x=0;x<diffW[w].length;x++){
-                for(int y=0;y<diffW[w][x].length;y++){
-                    for(int z=0;z<diffW[w][x][y].length;z++){
-                        this.w[w][x][y][z]-=rate*diffW[w][x][y][z];
-                    }
-                }
-            }
-        }
-
-        for(int x=0;x<diffB.length;x++){
-            //计算b的更新梯度
-            b[x]-=rate*diffB[x];
-        }
+    public void flushBackUpdateParamPrtGrad() {
+        optimizer.update(wmd,diffWmd);
+        optimizer.update(bmd,diffBmd);
+//        //计算（损失函数/激活函数）*（激活函数/所有w）的偏导梯度
+//        for(int w=0;w<diffW.length;w++){
+//            for(int x=0;x<diffW[w].length;x++){
+//                for(int y=0;y<diffW[w][x].length;y++){
+//                    for(int z=0;z<diffW[w][x][y].length;z++){
+//                        this.w[w][x][y][z]-=rate*diffW[w][x][y][z];
+//                    }
+//                }
+//            }
+//        }
+//
+//        for(int x=0;x<diffB.length;x++){
+//            //计算b的更新梯度
+//            b[x]-=rate*diffB[x];
+//        }
     }
 
 }

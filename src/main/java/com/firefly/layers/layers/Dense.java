@@ -4,6 +4,7 @@ import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.operation.Var;
 import com.firefly.layers.core.Layer;
+import com.firefly.layers.core.Optimizer;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
@@ -22,14 +23,17 @@ public class Dense implements Layer {
     private int inputs;//输出单元数
     private int units;//输出单元数
 
+    private Optimizer optimizer;
     private InitActivationListener initActivationListener;//初始化激活函数事件
-
     private InitParamsListener initParamsListener;//初始化参数事件
 
     private MultiDim wmd;
     private MultiDim bmd;
     private double[][] w;
     private double[] b;
+
+    private MultiDim diffWmd;
+    private MultiDim diffBmd;
     private double[][] diffW;
     private double[] diffB;
 
@@ -41,24 +45,25 @@ public class Dense implements Layer {
 
     }
 
-    public Dense(int units,InitActivationListener initActivationListener){
-        this(0,units,initActivationListener,null);
+    public Dense(int units,Optimizer optimizer,InitActivationListener initActivationListener){
+        this(0,units,optimizer,initActivationListener,null);
     }
 
-    public Dense(int inputs,int units,InitActivationListener initActivationListener){
-        this(inputs,units,initActivationListener,null);
+    public Dense(int inputs,int units,Optimizer optimizer,InitActivationListener initActivationListener){
+        this(inputs,units,optimizer,initActivationListener,null);
     }
 
-    public Dense(int units,InitActivationListener initActivationListener, InitParamsListener initParamsListener){
-        this(0,units,initActivationListener,initParamsListener);
+    public Dense(int units,Optimizer optimizer,InitActivationListener initActivationListener, InitParamsListener initParamsListener){
+        this(0,units,optimizer,initActivationListener,initParamsListener);
     }
 
-    public Dense(int inputs, int units, InitActivationListener initActivationListener, InitParamsListener initParamsListener){
+    public Dense(int inputs, int units, Optimizer optimizer, InitActivationListener initActivationListener, InitParamsListener initParamsListener){
         this.inputs=inputs;
         this.units=units;
         this.inputShape=new Shape(new int[]{inputs});
         this.unitShape=new Shape(new int[]{units});
 
+        this.optimizer=optimizer;
         this.initActivationListener=initActivationListener;
         this.initParamsListener=initParamsListener;
     }
@@ -121,6 +126,8 @@ public class Dense implements Layer {
 
         diffW=new double[units][inputs];
         diffB=new double[units];
+        diffWmd=new MultiDim(Double.TYPE,new Shape(new int[]{units,inputs}),diffW);
+        diffBmd=new MultiDim(Double.TYPE,new Shape(new int[]{units,inputs}),diffB);
 
         //初始化神经元函数
         initFunc();
@@ -241,15 +248,18 @@ public class Dense implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad(double rate) {
-        for(int i=0;i<this.outs.length;i++){
-            //计算w的更新梯度
-            for(int j=0;j<diffW[i].length;j++){
-                w[i][j]-=rate*diffW[i][j];
-            }
-            //计算b的更新梯度
-            b[i]-=rate*diffB[i];
-        }
+    public void flushBackUpdateParamPrtGrad() {
+        optimizer.update(wmd,diffWmd);
+        optimizer.update(bmd,diffBmd);
+//        for(int i=0;i<this.outs.length;i++){
+//            //计算w的更新梯度
+//            for(int j=0;j<diffW[i].length;j++){
+//                optimizer.update(wmd,diffWmd);
+//                w[i][j]-=rate*diffW[i][j];
+//            }
+//            //计算b的更新梯度
+//            b[i]-=rate*diffB[i];
+//        }
     }
 
 }

@@ -306,7 +306,7 @@ public class Pooling implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad(double rate) {
+    public void flushBackUpdateParamPrtGrad() {
 
     }
 }

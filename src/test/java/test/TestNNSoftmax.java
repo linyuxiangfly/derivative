@@ -11,6 +11,7 @@ import com.firefly.layers.layers.Softmax;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Cel;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Sgd;
 
 public class TestNNSoftmax {
     public static void main(String[] args){
@@ -148,8 +149,8 @@ public class TestNNSoftmax {
                 {0,1}
         });
 
-        Model model=new Sequential(0.0001);
-        model.add(new Dense(12,2, () -> new NoneActivation(),new InitParamsRandomGaussian()));//使用softmax激活函数
+        Model model=new Sequential();
+        model.add(new Dense(12,2,new Sgd(0.0001), () -> new NoneActivation(),new InitParamsRandomGaussian()));//使用softmax激活函数
         model.add(new Softmax());
         //识差函数
         model.setLossCls(Cel.class);

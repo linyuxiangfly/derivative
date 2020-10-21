@@ -11,6 +11,7 @@ import com.firefly.layers.layers.Dense;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Sgd;
 
 public class TestNNTanh {
     public static void main(String[] args){
@@ -148,8 +149,8 @@ public class TestNNTanh {
                 {0,1}
         });
 
-        Model model=new Sequential(0.001);
-        model.add(new Dense(12,2, () -> new Tanh(),new InitParamsRandomGaussian()));//使用softmax激活函数
+        Model model=new Sequential();
+        model.add(new Dense(12,2,new Sgd(0.001), () -> new Tanh(),new InitParamsRandomGaussian()));//使用softmax激活函数
         //识差函数
         model.setLossCls(Mse.class);
         model.init();

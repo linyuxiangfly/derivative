@@ -14,6 +14,7 @@ import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Cel;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
 
@@ -33,8 +34,8 @@ public class MnistFit {
         MultiDim[] test_y=arr2MultDim(testlabels);
 
         try{
-            Model model=new Sequential(0.00001);
-            model.add(new Dense(train_images[0].length, 10, () -> new NoneActivation(), new InitParamsRandomGaussian()));
+            Model model=new Sequential();
+            model.add(new Dense(train_images[0].length, 10,new Sgd(0.00001), () -> new NoneActivation(), new InitParamsRandomGaussian()));
             model.add(new Softmax());
     //        model.add(new Dropout(0.8f));
     //        model.add(new Dense(10, LRelu.class));

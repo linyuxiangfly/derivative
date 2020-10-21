@@ -89,7 +89,7 @@ public class Flatten implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad(double rate) {
+    public void flushBackUpdateParamPrtGrad() {
 
     }
 }

@@ -83,8 +83,7 @@ public interface Layer extends java.io.Serializable{
 
     /**
      * 更新参数梯度
-     * @param rate 更新比例
      */
-    void flushBackUpdateParamPrtGrad(double rate);
+    void flushBackUpdateParamPrtGrad();
 
 }

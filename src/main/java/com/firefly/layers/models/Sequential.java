@@ -20,12 +20,10 @@ public class Sequential implements Model {
 
     private MultiDim lossOutMd=null;
     private double[] lossOut;
-    private double rate;
 
     private Class<? extends Loss> lossCls;
 
-    public Sequential(double rate){
-        this.rate=rate;
+    public Sequential(){
         layers=new ArrayList<>();
         layersOut=new ArrayList<>();
         layersInputPrtGrad=new ArrayList<>();
@@ -117,7 +115,7 @@ public class Sequential implements Model {
     private void flushBackPropagation(){
         for(int li=0;li<layers.size();li++){
             Layer layer=layers.get(li);
-            layer.flushBackUpdateParamPrtGrad(rate);
+            layer.flushBackUpdateParamPrtGrad();
         }
     }
 

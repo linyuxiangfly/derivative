@@ -141,7 +141,7 @@ public class Zoom implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad(double rate) {
+    public void flushBackUpdateParamPrtGrad() {
 
     }
 }

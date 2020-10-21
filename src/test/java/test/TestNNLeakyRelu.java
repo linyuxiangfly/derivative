@@ -13,6 +13,7 @@ import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Sgd;
 
 public class TestNNLeakyRelu {
     public static void main(String[] args){
@@ -51,8 +52,8 @@ public class TestNNLeakyRelu {
         MultiDim[] x=arr2MultDim(xx);
         MultiDim[] y=arr2MultDim(yy);
 
-        Model model=new Sequential(0.04);
-        model.add(new Dense(1, 1, () -> {
+        Model model=new Sequential();
+        model.add(new Dense(1, 1,new Sgd(0.04), () -> {
             LRelu a=new LRelu();
             a.setMinVal(0.01);
             return a;

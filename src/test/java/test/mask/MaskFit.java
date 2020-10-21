@@ -13,6 +13,7 @@ import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 import test.mask.data.LoadData;
 
@@ -33,10 +34,10 @@ public class MaskFit {
         MultiDim[] xTest=arr2MultDim(xyTest[0]);
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
-        Model model=new Sequential(0.04);
-        model.add(new Dense(300,10, ()->new Sigmoid(),new InitParamsRandomGaussian()));
+        Model model=new Sequential();
+        model.add(new Dense(300,10,new Sgd(0.04), ()->new Sigmoid(),new InitParamsRandomGaussian()));
         model.add(new Dropout(0.5f));
-        model.add(new Dense(1, ()->new Sigmoid()));
+        model.add(new Dense(1, new Sgd(0.04),()->new Sigmoid()));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
