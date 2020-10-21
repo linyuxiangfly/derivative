@@ -1,9 +1,6 @@
 package test.mask;
 
 import com.firefly.derivative.activation.LRelu;
-import com.firefly.derivative.activation.Relu;
-import com.firefly.derivative.activation.Sigmoid;
-import com.firefly.derivative.activation.Softmax;
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.operation.Const;
 import com.firefly.layers.core.Layer;

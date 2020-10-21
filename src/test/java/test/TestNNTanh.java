@@ -1,6 +1,5 @@
 package test;
 
-import com.firefly.derivative.activation.Softmax;
 import com.firefly.derivative.activation.Tanh;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;

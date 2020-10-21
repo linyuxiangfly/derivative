@@ -185,4 +185,27 @@ public class ShapeIndex implements java.io.Serializable {
             this.dimIndex[i]=val.getDimIndexVal(i);
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this==obj){
+            return true;
+        }else{
+            //任何对象不等于null，比较是否为同一类型
+            if (!(obj instanceof ShapeIndex)) return false;
+
+            ShapeIndex b=(ShapeIndex)obj;
+
+            if(dimIndex.length==b.getDimIndex().length){
+                for(int i=0;i<dimIndex.length;i++){
+                    if(dimIndex[i]!=b.getDimIndex()[i]){
+                        return false;
+                    }
+                }
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
 }

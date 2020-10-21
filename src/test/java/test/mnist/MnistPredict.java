@@ -107,6 +107,7 @@ public class MnistPredict {
 //            nl.setB(ol.getB());
 //        }
 
+        int errorNum=0;
         for(int i=0;i<x.length;i++){
             MultiDim py=model.predict(x[i]);
             int pi=maxIndex((double[])py.getData());
@@ -114,9 +115,12 @@ public class MnistPredict {
             if(pi==yi){
                 System.out.println(yi+"     "+pi+"     ");
             }else{
+                errorNum++;
                 System.out.println(yi+"     "+pi+"     "+"      error");
             }
         }
+        double rate=((double)(x.length-errorNum))/x.length;
+        System.out.println(String.format("准确率：%.4f",rate));
 
 //        int i=0;
 //        for(Layer layer:model.getLayers()){

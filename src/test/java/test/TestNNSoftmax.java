@@ -1,15 +1,15 @@
 package test;
 
-import com.firefly.derivative.activation.Softmax;
+import com.firefly.derivative.activation.NoneActivation;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.layers.Softmax;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Cel;
-import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 
 public class TestNNSoftmax {
@@ -149,7 +149,8 @@ public class TestNNSoftmax {
         });
 
         Model model=new Sequential(0.0001);
-        model.add(new Dense(12,2, Softmax.class,new InitParamsRandomGaussian()));//使用softmax激活函数
+        model.add(new Dense(12,2, NoneActivation.class,new InitParamsRandomGaussian()));//使用softmax激活函数
+        model.add(new Softmax());
         //识差函数
         model.setLossCls(Cel.class);
         model.init();

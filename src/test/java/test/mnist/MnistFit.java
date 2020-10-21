@@ -1,21 +1,16 @@
 package test.mnist;
 
-import com.firefly.derivative.activation.LRelu;
-import com.firefly.derivative.activation.Relu;
-import com.firefly.derivative.activation.Sigmoid;
-import com.firefly.derivative.activation.Softmax;
-import com.firefly.layers.core.Layer;
+
+import com.firefly.derivative.activation.NoneActivation;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
-import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
-import com.firefly.layers.layers.Dropout;
+import com.firefly.layers.layers.Softmax;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Cel;
-import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
@@ -35,8 +30,9 @@ public class MnistFit {
         MultiDim[] test_x=arr2MultDim(test_images);
         MultiDim[] test_y=arr2MultDim(testlabels);
 
-        Model model=new Sequential(0.00001);
-        model.add(new Dense(train_images[0].length,10, Softmax.class,new InitParamsRandomGaussian()));
+        Model model=new Sequential(0.00002);
+        model.add(new Dense(train_images[0].length,10, NoneActivation.class,new InitParamsRandomGaussian()));
+        model.add(new Softmax());
 //        model.add(new Dropout(0.8f));
 //        model.add(new Dense(10, LRelu.class));
 //        model.add(new Dropout(0.9f));
@@ -44,7 +40,7 @@ public class MnistFit {
         model.setLossCls(Cel.class);
         model.init();
 
-        model.fit(train_x, train_y, 1000, 30,
+        model.fit(train_x, train_y, 1000, 200,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
@@ -159,6 +155,7 @@ public class MnistFit {
 //            nl.setB(ol.getB());
 //        }
 
+        int errorNum=0;
         for(int i=0;i<x.length;i++){
             MultiDim py=model.predict(x[i]);
             int pi=maxIndex((double[])py.getData());
@@ -166,9 +163,12 @@ public class MnistFit {
             if(pi==yi){
                 System.out.println(yi+"     "+pi+"     ");
             }else{
+                errorNum++;
                 System.out.println(yi+"     "+pi+"     "+"      error");
             }
         }
+        double rate=((double)(x.length-errorNum))/x.length;
+        System.out.println(String.format("准确率：%.4f",rate));
     }
 
     private static void printArray(String title,double[][] vals){
