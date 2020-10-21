@@ -32,7 +32,7 @@ public class Cel implements Loss {
         do{
             double tv=(double)targetVal.getVal(i);
             if(tv!=0){
-                double val=-(double)targetVal.getVal(i)/(double)input.getVal(i);
+                double val=-tv/(double)input.getVal(i);
                 ret.setVal(i,val);
             }
         }while (i.next());
