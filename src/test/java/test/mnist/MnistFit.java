@@ -44,7 +44,7 @@ public class MnistFit {
             //导入并进行预测
             Model model=ModelUtil.importModel(modelFile);
 
-            model.fit(train_x, train_y, 100, 10,
+            model.fit(train_x, train_y, 100, 1,
                     new LossCallBackListener() {
                         @Override
                         public void onLoss(double val) {

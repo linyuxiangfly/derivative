@@ -25,6 +25,7 @@ public class MnistPredict {
             //导入并进行预测
             Model newModel=ModelUtil.importModel(modelFile);
 
+//            showParams(newModel,train_x,train_y);
             showParams(newModel,test_x,test_y);
         }catch (Exception e){
             e.printStackTrace();
