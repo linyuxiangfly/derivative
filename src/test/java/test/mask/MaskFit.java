@@ -34,9 +34,9 @@ public class MaskFit {
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
         Model model=new Sequential(0.04);
-        model.add(new Dense(300,10, Sigmoid.class,new InitParamsRandomGaussian()));
+        model.add(new Dense(300,10, ()->new Sigmoid(),new InitParamsRandomGaussian()));
         model.add(new Dropout(0.5f));
-        model.add(new Dense(1, Sigmoid.class));
+        model.add(new Dense(1, ()->new Sigmoid()));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();

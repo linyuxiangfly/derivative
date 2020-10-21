@@ -25,8 +25,13 @@ public class MnistPredict {
             //导入并进行预测
             Model newModel=ModelUtil.importModel(modelFile);
 
+            long start=System.currentTimeMillis();
 //            showParams(newModel,train_x,train_y);
             showParams(newModel,test_x,test_y);
+
+            long end=System.currentTimeMillis();
+            System.out.println("time(s):"+((end-start)/1000.0));
+            System.out.println();
         }catch (Exception e){
             e.printStackTrace();
         }

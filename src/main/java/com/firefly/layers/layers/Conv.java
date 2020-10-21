@@ -7,6 +7,7 @@ import com.firefly.layers.core.Layer;
 import com.firefly.layers.data.*;
 import com.firefly.layers.enums.Padding;
 import com.firefly.layers.init.params.InitParamsRandomOrdinary;
+import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.InitParamsListener;
 import com.firefly.math.ConvUtil;
 
@@ -23,10 +24,7 @@ public class Conv implements Layer {
     private int strides;
     private Padding padding;
 
-    private Class<? extends OperationActivation> activationCls;//激活函数类
-
-    private MultiDim activationSettingsMd;
-    private Function[] activationSettings;
+    private InitActivationListener initActivationListener;
 
     private InitParamsListener initParamsListener;//初始化参数事件
 
@@ -49,8 +47,8 @@ public class Conv implements Layer {
             int filters,
             int kernelSize,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
-        this(filters,kernelSize,kernelSize,strides,padding,activationCls,activationSettings,initParamsListener);
+            InitActivationListener initActivationListener, InitParamsListener initParamsListener){
+        this(filters,kernelSize,kernelSize,strides,padding,initActivationListener,initParamsListener);
     }
 
     public Conv(
@@ -58,8 +56,8 @@ public class Conv implements Layer {
             int kernelWidth,
             int kernelHeight,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
-        this(null,filters,kernelWidth,kernelHeight,strides,padding,activationCls,activationSettings,initParamsListener);
+            InitActivationListener initActivationListener, InitParamsListener initParamsListener){
+        this(null,filters,kernelWidth,kernelHeight,strides,padding,initActivationListener,initParamsListener);
     }
 
     public Conv(
@@ -67,8 +65,8 @@ public class Conv implements Layer {
             int filters,
             int kernelSize,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
-        this(inputShape,filters,kernelSize,kernelSize,strides,padding,activationCls,activationSettings,initParamsListener);
+            InitActivationListener initActivationListener, InitParamsListener initParamsListener){
+        this(inputShape,filters,kernelSize,kernelSize,strides,padding,initActivationListener,initParamsListener);
     }
 
     /**
@@ -85,8 +83,7 @@ public class Conv implements Layer {
      * 滑动步长为1时，填充数是卷积核边长减1，eg:5*5的图用3*3的核，步长为1时same填充之后是7*7
      * 代表保留边界处的卷积结果，
      * 通常会导致输出shape与输入shape相同，因为卷积核移动时在边缘会出现大小不够的情况。
-     * @param activationCls
-     * @param activationSettings
+     * @param initActivationListener
      * @param initParamsListener
      */
     public Conv(
@@ -95,18 +92,14 @@ public class Conv implements Layer {
             int kernelWidth,
             int kernelHeight,
             int strides, Padding padding,
-            Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
+            InitActivationListener initActivationListener, InitParamsListener initParamsListener){
         this.inputShape=inputShape;
         this.filters=filters;
         this.kernelWidth=kernelWidth;
         this.kernelHeight=kernelHeight;
         this.strides=strides;
         this.padding=padding;
-        this.activationCls=activationCls;
-        this.activationSettings=activationSettings;
-        if(activationSettings!=null){
-            this.activationSettingsMd=new MultiDim(Function.class,new Shape(new int[]{activationSettings.length}),activationSettings);
-        }
+        this.initActivationListener=initActivationListener;
         this.initParamsListener=initParamsListener;
     }
 
@@ -250,9 +243,7 @@ public class Conv implements Layer {
                 for(int k=0;k<outs[i][j].length;k++){
                     try {
                         wxb[i][j][k]=new Var();
-                        outs[i][j][k]=activationCls.newInstance();
-                        //激活函数设置值
-                        outs[i][j][k].setSettings(activationSettingsMd);
+                        outs[i][j][k]=initActivationListener.newActivation();
                         //设置当前数据
                         outs[i][j][k].setVal(wxb[i][j][k]);
                         //设置相关的数据

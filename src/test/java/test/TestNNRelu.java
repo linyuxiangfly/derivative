@@ -49,7 +49,7 @@ public class TestNNRelu {
         MultiDim[] y=arr2MultDim(yy);
 
         Model model=new Sequential(0.04);
-        model.add(new Dense(1,1, Relu.class));
+        model.add(new Dense(1,1, ()->new Relu()));
         model.add(new Dropout(0.5f));
         //识差函数
         model.setLossCls(Mse.class);

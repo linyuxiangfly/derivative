@@ -8,6 +8,7 @@ import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.init.params.InitParamsRandomOrdinary;
+import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.InitParamsListener;
 import com.firefly.math.Binomial;
 import com.firefly.math.Linalg;
@@ -21,10 +22,8 @@ public class Dense implements Layer {
     private int inputs;//输出单元数
     private int units;//输出单元数
 
-    private Class<? extends OperationActivation> activationCls;//激活函数类
+    private InitActivationListener initActivationListener;//初始化激活函数事件
 
-    private MultiDim activationSettingsMd;
-    private Function[] activationSettings;
     private InitParamsListener initParamsListener;//初始化参数事件
 
     private MultiDim wmd;
@@ -42,47 +41,25 @@ public class Dense implements Layer {
 
     }
 
-    public Dense(int units, Class<? extends OperationActivation> activationCls){
-        this(units,activationCls,(InitParamsListener)null);
+    public Dense(int units,InitActivationListener initActivationListener){
+        this(0,units,initActivationListener,null);
     }
 
-    public Dense(int units, Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
-        this(0,units,activationCls,initParamsListener);
+    public Dense(int inputs,int units,InitActivationListener initActivationListener){
+        this(inputs,units,initActivationListener,null);
     }
 
-    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls){
-        this(inputs,units,activationCls,(Function[])null);
+    public Dense(int units,InitActivationListener initActivationListener, InitParamsListener initParamsListener){
+        this(0,units,initActivationListener,initParamsListener);
     }
 
-    public Dense(int units,Class<? extends OperationActivation> activationCls, Function[] activationSettings){
-        this(0,units,activationCls,activationSettings,null);
-    }
-
-    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, Function[] activationSettings){
-        this(inputs,units,activationCls,activationSettings,null);
-    }
-
-    public Dense(int units,Class<? extends OperationActivation> activationCls,Function[] activationSettings, InitParamsListener initParamsListener){
-        this(0,units,activationCls,activationSettings,initParamsListener);
-    }
-
-    public Dense(int inputs,int units,Class<? extends OperationActivation> activationCls, InitParamsListener initParamsListener){
-        this(inputs,units,activationCls,null,initParamsListener);
-    }
-
-    public Dense(int inputs, int units, Class<? extends OperationActivation> activationCls, Function[] activationSettings, InitParamsListener initParamsListener){
+    public Dense(int inputs, int units, InitActivationListener initActivationListener, InitParamsListener initParamsListener){
         this.inputs=inputs;
         this.units=units;
         this.inputShape=new Shape(new int[]{inputs});
         this.unitShape=new Shape(new int[]{units});
 
-        this.activationCls=activationCls;
-
-        this.activationSettings=activationSettings;
-        if(activationSettings!=null){
-            this.activationSettingsMd=new MultiDim(Function.class,new Shape(new int[]{activationSettings.length}),activationSettings);
-        }
-
+        this.initActivationListener=initActivationListener;
         this.initParamsListener=initParamsListener;
     }
 
@@ -183,9 +160,7 @@ public class Dense implements Layer {
         for(int i=0;i<units;i++){
             try {
                 wxb[i]=new Var();
-                outs[i]=activationCls.newInstance();
-                //激活函数设置值
-                outs[i].setSettings(activationSettingsMd);
+                outs[i]=initActivationListener.newActivation();
                 //设置当前数据
                 outs[i].setVal(wxb[i]);
                 //设置相关的数据

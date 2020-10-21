@@ -2,6 +2,7 @@ package test.mnist;
 
 
 import com.firefly.derivative.activation.NoneActivation;
+import com.firefly.derivative.core.OperationActivation;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
@@ -9,6 +10,7 @@ import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.Dense;
 import com.firefly.layers.layers.Softmax;
 import com.firefly.layers.listeners.FitControl;
+import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Cel;
 import com.firefly.layers.models.Sequential;
@@ -31,18 +33,18 @@ public class MnistFit {
         MultiDim[] test_y=arr2MultDim(testlabels);
 
         try{
-//            Model model=new Sequential(0.00001);
-//            model.add(new Dense(train_images[0].length,10, NoneActivation.class,new InitParamsRandomGaussian()));
-//            model.add(new Softmax());
-//    //        model.add(new Dropout(0.8f));
-//    //        model.add(new Dense(10, LRelu.class));
-//    //        model.add(new Dropout(0.9f));
-//            //识差函数
-//            model.setLossCls(Cel.class);
-//            model.init();
+            Model model=new Sequential(0.00001);
+            model.add(new Dense(train_images[0].length, 10, () -> new NoneActivation(), new InitParamsRandomGaussian()));
+            model.add(new Softmax());
+    //        model.add(new Dropout(0.8f));
+    //        model.add(new Dense(10, LRelu.class));
+    //        model.add(new Dropout(0.9f));
+            //识差函数
+            model.setLossCls(Cel.class);
+            model.init();
 
             //导入并进行预测
-            Model model=ModelUtil.importModel(modelFile);
+//            Model model=ModelUtil.importModel(modelFile);
 
             model.fit(train_x, train_y, 100, 1,
                     new LossCallBackListener() {

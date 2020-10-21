@@ -157,9 +157,9 @@ public class TestNNSigmoid {
         });
 
         Model model=new Sequential(0.1);
-        model.add(new Dense(12,6, Sigmoid.class,new InitParamsRandomGaussian()));
+        model.add(new Dense(12,6, ()-> new Sigmoid(),new InitParamsRandomGaussian()));
         model.add(new Dropout(0.8f));
-        model.add(new Dense(2, Sigmoid.class));
+        model.add(new Dense(2, ()->new Sigmoid()));
 //        model.add(new Dropout(0.9f));
         //识差函数
         model.setLossCls(Mse.class);

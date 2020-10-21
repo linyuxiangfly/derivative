@@ -37,7 +37,11 @@ public class MaskConvFit {
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
         Model model=new Sequential(0.00001);
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
+        model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same, () -> {
+            LRelu a=new LRelu();
+            a.setMinVal(0.01);
+            return a;
+        },new InitParamsRandomGaussian()));
         model.add(new Pooling(PollingType.max,2));
 //        model.add(new Zoom(-10f,10f,0f,1f));
 //        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
@@ -45,7 +49,11 @@ public class MaskConvFit {
         model.add(new Flatten());
         model.add(new Dropout(0.5f));
 //        model.add(new Dense(10, LRelu.class));
-        model.add(new Dense(2, LRelu.class,new Function[]{new Const(0.01)}));
+        model.add(new Dense(2, () -> {
+            LRelu a=new LRelu();
+            a.setMinVal(0.01);
+            return a;
+        }));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();

@@ -1,5 +1,6 @@
 package test;
 
+import com.firefly.derivative.activation.NoneActivation;
 import com.firefly.derivative.activation.Tanh;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
@@ -148,7 +149,7 @@ public class TestNNTanh {
         });
 
         Model model=new Sequential(0.001);
-        model.add(new Dense(12,2, Tanh.class,new InitParamsRandomGaussian()));//使用softmax激活函数
+        model.add(new Dense(12,2, () -> new Tanh(),new InitParamsRandomGaussian()));//使用softmax激活函数
         //识差函数
         model.setLossCls(Mse.class);
         model.init();

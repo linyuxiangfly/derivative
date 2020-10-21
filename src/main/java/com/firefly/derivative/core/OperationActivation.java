@@ -9,7 +9,6 @@ import com.firefly.layers.data.ShapeIndex;
  */
 public class OperationActivation extends OperationUnary {
     private MultiDim relations;//关联的参数
-    private MultiDim settings;//设置参数
 
     public OperationActivation(){
 
@@ -40,14 +39,6 @@ public class OperationActivation extends OperationUnary {
 
     public void setRelations(MultiDim relations) {
         this.relations = relations;
-    }
-
-    public MultiDim getSettings() {
-        return settings;
-    }
-
-    public void setSettings(MultiDim settings) {
-        this.settings = settings;
     }
 
     /**

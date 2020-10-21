@@ -2,6 +2,8 @@ package com.firefly.derivative.activation;
 
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.core.OperationActivation;
+import com.firefly.derivative.operation.Const;
+import com.firefly.derivative.operation.Var;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.ShapeIndex;
 
@@ -11,15 +13,23 @@ import com.firefly.layers.data.ShapeIndex;
 public class LRelu extends OperationActivation {
     private Function minVal=null;
 
-    private double getMinVal(){
-        if(minVal==null && this.getSettings()!=null){
-            ShapeIndex si=new ShapeIndex(this.getSettings().getShape());
-            minVal=(Function)this.getSettings().getVal(si);
-        }
-        if(minVal!=null){
-            return minVal.calc();
-        }else{
+    public Function getMinVal() {
+        return minVal;
+    }
+
+    public void setMinVal(Function minVal) {
+        this.minVal = minVal;
+    }
+
+    public void setMinVal(double minVal) {
+        this.minVal = new Const(minVal);
+    }
+
+    private double getMinValDouble(){
+        if(minVal==null){
             return 0;
+        }else{
+            return minVal.calc();
         }
     }
 
@@ -35,7 +45,7 @@ public class LRelu extends OperationActivation {
                 if(v>=0){
                     val=1;
                 }else{
-                    val=getMinVal();//获取参数
+                    val=getMinValDouble();//获取参数
                 }
                 val=prtGradEx(
                         dx,
@@ -55,6 +65,6 @@ public class LRelu extends OperationActivation {
     public double calc() {
         double v=this.getVal().calc();
         //f(v)=max(0,v)
-        return v>=0?v:v*getMinVal();
+        return v>=0?v:v*getMinValDouble();
     }
 }

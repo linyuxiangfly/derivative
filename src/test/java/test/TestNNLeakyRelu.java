@@ -2,12 +2,14 @@ package test;
 
 import com.firefly.derivative.activation.LRelu;
 import com.firefly.derivative.core.Function;
+import com.firefly.derivative.core.OperationActivation;
 import com.firefly.derivative.operation.Const;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.layers.layers.Dense;
+import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
@@ -50,7 +52,11 @@ public class TestNNLeakyRelu {
         MultiDim[] y=arr2MultDim(yy);
 
         Model model=new Sequential(0.04);
-        model.add(new Dense(1,1, LRelu.class,new Function[]{new Const(0.01)}));
+        model.add(new Dense(1, 1, () -> {
+            LRelu a=new LRelu();
+            a.setMinVal(0.01);
+            return a;
+        }));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
