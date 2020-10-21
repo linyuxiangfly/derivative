@@ -25,22 +25,16 @@ public class Cel implements Loss {
         out.setVal(oi,ret);
     }
 
-    /**
-     * 累计所有输入的值
-     * @param input
-     * @return
-     */
-    private double sumInput(double[] input){
-        return Statistics.sum(input);
-    }
-
     @Override
     public MultiDim prtGrad(MultiDim input, MultiDim targetVal) {
         MultiDim ret=new MultiDim(input.getShape());
         ShapeIndex i=new ShapeIndex(input.getShape());
         do{
-            double val=-(double)targetVal.getVal(i)/(double)input.getVal(i);
-            ret.setVal(i,val);
+            double tv=(double)targetVal.getVal(i);
+            if(tv!=0){
+                double val=-(double)targetVal.getVal(i)/(double)input.getVal(i);
+                ret.setVal(i,val);
+            }
         }while (i.next());
 
         return ret;

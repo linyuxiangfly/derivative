@@ -30,54 +30,57 @@ public class MnistFit {
         MultiDim[] test_x=arr2MultDim(test_images);
         MultiDim[] test_y=arr2MultDim(testlabels);
 
-        Model model=new Sequential(0.00002);
-        model.add(new Dense(train_images[0].length,10, NoneActivation.class,new InitParamsRandomGaussian()));
-        model.add(new Softmax());
-//        model.add(new Dropout(0.8f));
-//        model.add(new Dense(10, LRelu.class));
-//        model.add(new Dropout(0.9f));
-        //识差函数
-        model.setLossCls(Cel.class);
-        model.init();
-
-        model.fit(train_x, train_y, 1000, 200,
-                new LossCallBackListener() {
-                    @Override
-                    public void onLoss(double val) {
-//                        System.out.println(String.format("%.10f", val));
-                    }
-                },
-                new FitControl() {
-                    private long countTime=0;
-                    private long processTime=0;
-
-                    @Override
-                    public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
-                        //累计执行时间
-                        countTime+=takeUpTime;
-                        processTime+=takeUpTime;
-
-                        if(loss<=0.0001){
-                            System.out.println("第"+process+"次训练，满足条件自动退出训练！");
-                            return true;
-                        }else{
-//                            if(process%100==99){
-                            if(true){
-                                double c=processTime/1000.0;
-                                double processRate=(process+1.0)/epoch;
-                                double sum=countTime/processRate/60.0/1000.0;//按分钟计算
-
-                                System.out.println("第"+process+"次训练！ "+"    takeUpTime:"+String.format("%.2f 秒", c)+"    TotalTime:"+String.format("%.2f 分钟", sum)+"    loss:"+String.format("%.10f", loss));
-
-                                processTime=0;
-                            }
-                        }
-                        return false;
-                    }
-                }
-        );
-
         try{
+//            Model model=new Sequential(0.00001);
+//            model.add(new Dense(train_images[0].length,10, NoneActivation.class,new InitParamsRandomGaussian()));
+//            model.add(new Softmax());
+//    //        model.add(new Dropout(0.8f));
+//    //        model.add(new Dense(10, LRelu.class));
+//    //        model.add(new Dropout(0.9f));
+//            //识差函数
+//            model.setLossCls(Cel.class);
+//            model.init();
+
+            //导入并进行预测
+            Model model=ModelUtil.importModel(modelFile);
+
+            model.fit(train_x, train_y, 1000, 10,
+                    new LossCallBackListener() {
+                        @Override
+                        public void onLoss(double val) {
+//                        System.out.println(String.format("%.10f", val));
+                        }
+                    },
+                    new FitControl() {
+                        private long countTime=0;
+                        private long processTime=0;
+
+                        @Override
+                        public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
+                            //累计执行时间
+                            countTime+=takeUpTime;
+                            processTime+=takeUpTime;
+
+                            if(loss<=0.0001){
+                                System.out.println("第"+process+"次训练，满足条件自动退出训练！");
+                                return true;
+                            }else{
+//                            if(process%100==99){
+                                if(true){
+                                    double c=processTime/1000.0;
+                                    double processRate=(process+1.0)/epoch;
+                                    double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
+
+                                    System.out.println(process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+"    剩下时间:"+String.format("%.2f 分钟", left)+"    误差:"+String.format("%.10f", loss));
+
+                                    processTime=0;
+                                }
+                            }
+                            return false;
+                        }
+                    }
+            );
+
             //导出到文件
             ModelUtil.exportModel(model,modelFile);
             //导入并进行预测

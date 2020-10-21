@@ -1,18 +1,8 @@
 package test.mnist;
 
-import com.firefly.derivative.activation.Sigmoid;
-import com.firefly.layers.core.Layer;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
-import com.firefly.layers.data.ShapeIndex;
-import com.firefly.layers.init.params.InitParamsRandomGaussian;
-import com.firefly.layers.layers.Dense;
-import com.firefly.layers.layers.Dropout;
-import com.firefly.layers.listeners.FitControl;
-import com.firefly.layers.listeners.LossCallBackListener;
-import com.firefly.layers.loss.Mse;
-import com.firefly.layers.models.Sequential;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
 
