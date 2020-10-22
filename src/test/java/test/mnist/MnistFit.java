@@ -14,6 +14,7 @@ import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Cel;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Momentum;
 import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
@@ -42,7 +43,7 @@ public class MnistFit {
                 Model model=null;
                 if(num==-1){
                     model=new Sequential();
-                    model.add(new Dense(train_images[0].length, 10,new Sgd(0.00001), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+                    model.add(new Dense(train_images[0].length, 10,new Momentum(0.00001,0.1), () -> new NoneActivation(), new InitParamsRandomGaussian()));
                     model.add(new Softmax());
                     //        model.add(new Dropout(0.8f));
                     //        model.add(new Dense(10, LRelu.class));

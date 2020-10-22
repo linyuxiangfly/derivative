@@ -127,7 +127,7 @@ public class Dense implements Layer {
         diffW=new double[units][inputs];
         diffB=new double[units];
         diffWmd=new MultiDim(Double.TYPE,new Shape(new int[]{units,inputs}),diffW);
-        diffBmd=new MultiDim(Double.TYPE,new Shape(new int[]{units,inputs}),diffB);
+        diffBmd=new MultiDim(Double.TYPE,new Shape(new int[]{units}),diffB);
 
         //初始化神经元函数
         initFunc();
