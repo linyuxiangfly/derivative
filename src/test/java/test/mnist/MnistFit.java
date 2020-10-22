@@ -44,6 +44,8 @@ public class MnistFit {
                 Model model=null;
                 if(num==-1){
                     model=new Sequential();
+//                    model.add(new Dense(train_images[0].length, 10,new Sgd(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+//                    model.add(new Dense(train_images[0].length, 10,new Momentum(0.01,0.1), () -> new NoneActivation(), new InitParamsRandomGaussian()));
                     model.add(new Dense(train_images[0].length, 10,new AdaGrad(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
                     model.add(new Softmax());
                     //        model.add(new Dropout(0.8f));

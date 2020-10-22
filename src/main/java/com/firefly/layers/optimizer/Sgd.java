@@ -4,6 +4,7 @@ import com.firefly.layers.core.Optimizer;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.ShapeIndex;
 import com.firefly.utils.MultiDimUtil;
+import com.firefly.utils.SgdUtil;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -37,5 +38,6 @@ public class Sgd implements Optimizer {
         MultiDimUtil.mcl(prtGrad,rate,temp);
         //参数=参数-历史梯度
         MultiDimUtil.sub(params,temp,params);
+//        SgdUtil.calc(prtGrad,params,rate);
     }
 }

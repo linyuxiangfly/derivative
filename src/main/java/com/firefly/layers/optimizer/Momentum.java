@@ -3,6 +3,7 @@ package com.firefly.layers.optimizer;
 import com.firefly.layers.core.Optimizer;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.ShapeIndex;
+import com.firefly.utils.MomentumUtil;
 import com.firefly.utils.MultiDimUtil;
 
 import java.util.Hashtable;
@@ -51,19 +52,20 @@ public class Momentum implements Optimizer {
     @Override
     public void update(MultiDim params, MultiDim prtGrad) {
         MultiDim historyPrtGrad=getHistoryPrtGrad(params);
-        //临时变量
-        MultiDim temp=getTemp(params);
-        //历史梯度临时变量
-        MultiDim historyPrtGradTemp=getTemp(historyPrtGrad);
-
-        //temp=rate*梯度
-        MultiDimUtil.mcl(prtGrad,rate,temp);
-        //historyPrtGradTemp=decay*historyPrtGrad
-        MultiDimUtil.mcl(historyPrtGrad,decay,historyPrtGradTemp);
-
-        //历史梯度=梯度-历史梯度
-        MultiDimUtil.sub(temp,historyPrtGradTemp,historyPrtGrad);
-        //参数=参数-历史梯度
-        MultiDimUtil.sub(params,historyPrtGrad,params);
+//        //临时变量
+//        MultiDim temp=getTemp(params);
+//        //历史梯度临时变量
+//        MultiDim historyPrtGradTemp=getTemp(historyPrtGrad);
+//
+//        //temp=rate*梯度
+//        MultiDimUtil.mcl(prtGrad,rate,temp);
+//        //historyPrtGradTemp=decay*historyPrtGrad
+//        MultiDimUtil.mcl(historyPrtGrad,decay,historyPrtGradTemp);
+//
+//        //历史梯度=梯度-历史梯度
+//        MultiDimUtil.sub(temp,historyPrtGradTemp,historyPrtGrad);
+//        //参数=参数-历史梯度
+//        MultiDimUtil.sub(params,historyPrtGrad,params);
+        MomentumUtil.calc(prtGrad,historyPrtGrad,params,rate,decay);
     }
 }

@@ -2,6 +2,7 @@ package com.firefly.layers.optimizer;
 
 import com.firefly.layers.core.Optimizer;
 import com.firefly.layers.data.MultiDim;
+import com.firefly.utils.AdaGradUtil;
 import com.firefly.utils.MultiDimUtil;
 
 import java.util.Hashtable;
@@ -49,27 +50,29 @@ public class AdaGrad implements Optimizer {
     public void update(MultiDim params, MultiDim prtGrad) {
         //获取历史变量
         MultiDim h=getHistoryPrtGrad(params);
-        //临时变量
-        MultiDim temp=getTemp(params);
-        //历史梯度临时变量
-        MultiDim hTemp=getTemp(h);
+//        //临时变量
+//        MultiDim temp=getTemp(params);
+//        //历史梯度临时变量
+//        MultiDim hTemp=getTemp(h);
+//
+//        //求梯度的平方
+//        MultiDimUtil.mcl(prtGrad,prtGrad,temp);
+//        //historyPrtGrad+=梯度的平方
+//        MultiDimUtil.add(h,temp,h);
+//
+//        //sqrt(historyPrtGrad),平均开根
+//        MultiDimUtil.sqrt(h,hTemp);
+//        //另上一个极小的值
+//        MultiDimUtil.add(hTemp,0.00000001,hTemp);
+//
+//        //temp=rate*梯度
+//        MultiDimUtil.mcl(prtGrad,rate,temp);
+//        //historyPrtGradTemp=decay*historyPrtGrad
+//        MultiDimUtil.div(temp,hTemp,temp);
+//
+//        //参数=参数-历史梯度
+//        MultiDimUtil.sub(params,temp,params);
 
-        //求梯度的平方
-        MultiDimUtil.mcl(prtGrad,prtGrad,temp);
-        //historyPrtGrad+=梯度的平方
-        MultiDimUtil.add(h,temp,h);
-
-        //sqrt(historyPrtGrad),平均开根
-        MultiDimUtil.sqrt(h,hTemp);
-        //另上一个极小的值
-        MultiDimUtil.add(hTemp,0.00000001,hTemp);
-
-        //temp=rate*梯度
-        MultiDimUtil.mcl(prtGrad,rate,temp);
-        //historyPrtGradTemp=decay*historyPrtGrad
-        MultiDimUtil.div(temp,hTemp,temp);
-
-        //参数=参数-历史梯度
-        MultiDimUtil.sub(params,temp,params);
+        AdaGradUtil.calc(prtGrad,h,params,rate);
     }
 }
