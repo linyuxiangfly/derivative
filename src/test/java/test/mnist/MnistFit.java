@@ -18,8 +18,10 @@ import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
 
+import java.io.File;
+
 public class MnistFit {
-    private static String modelFile="src/test/resources/mnist_model/mnist_model.ser";
+    private static String modelFile="src/test/resources/mnist_model/dense/";
 
     public static void main(String[] args) {
         double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
@@ -34,68 +36,95 @@ public class MnistFit {
         MultiDim[] test_y=arr2MultDim(testlabels);
 
         try{
-            Model model=new Sequential();
-            model.add(new Dense(train_images[0].length, 10,new Sgd(0.00001), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-            model.add(new Softmax());
-    //        model.add(new Dropout(0.8f));
-    //        model.add(new Dense(10, LRelu.class));
-    //        model.add(new Dropout(0.9f));
-            //识差函数
-            model.setLossCls(Cel.class);
-            model.init();
+            for(int i=0;i<100;i++){
+                int num=getLastModelFileNum(new File(modelFile));
+                System.out.println("加载第"+num+"次模型");
+                Model model=null;
+                if(num==-1){
+                    model=new Sequential();
+                    model.add(new Dense(train_images[0].length, 10,new Sgd(0.00001), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+                    model.add(new Softmax());
+                    //        model.add(new Dropout(0.8f));
+                    //        model.add(new Dense(10, LRelu.class));
+                    //        model.add(new Dropout(0.9f));
+                    //识差函数
+                    model.setLossCls(Cel.class);
+                    model.init();
+                }else{
+                    //导入并进行预测
+                    String fileName=num+"";
+                    model=ModelUtil.importModel(modelFile+fileName);
+                }
 
-            //导入并进行预测
-//            Model model=ModelUtil.importModel(modelFile);
-
-            model.fit(train_x, train_y, 100, 1,
-                    new LossCallBackListener() {
-                        @Override
-                        public void onLoss(double val) {
+                model.fit(train_x, train_y, 100, 1,
+                        new LossCallBackListener() {
+                            @Override
+                            public void onLoss(double val) {
 //                        System.out.println(String.format("%.10f", val));
-                        }
-                    },
-                    new FitControl() {
-                        private long countTime=0;
-                        private long processTime=0;
-
-                        @Override
-                        public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
-                            //累计执行时间
-                            countTime+=takeUpTime;
-                            processTime+=takeUpTime;
-
-                            if(loss<=0.0001){
-                                System.out.println("第"+process+"次训练，满足条件自动退出训练！");
-                                return true;
-                            }else{
-//                            if(process%100==99){
-                                if(true){
-                                    double c=processTime/1000.0;
-                                    double processRate=(process+1.0)/epoch;
-                                    double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
-
-                                    System.out.println(process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+"    剩下时间:"+String.format("%.2f 分钟", left)+"    误差:"+String.format("%.10f", loss));
-
-                                    processTime=0;
-                                }
                             }
-                            return false;
+                        },
+                        new FitControl() {
+                            private long countTime=0;
+                            private long processTime=0;
+
+                            @Override
+                            public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
+                                //累计执行时间
+                                countTime+=takeUpTime;
+                                processTime+=takeUpTime;
+
+                                if(loss<=0.0001){
+                                    System.out.println("第"+process+"次训练，满足条件自动退出训练！");
+                                    return true;
+                                }else{
+//                            if(process%100==99){
+                                    if(true){
+                                        double c=processTime/1000.0;
+                                        double processRate=(process+1.0)/epoch;
+                                        double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
+
+                                        System.out.println(process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+"    剩下时间:"+String.format("%.2f 分钟", left)+"    误差:"+String.format("%.10f", loss));
+
+                                        processTime=0;
+                                    }
+                                }
+                                return false;
+                            }
                         }
-                    }
-            );
+                );
 
-            //导出到文件
-            ModelUtil.exportModel(model,modelFile);
-            //导入并进行预测
-            Model newModel=ModelUtil.importModel(modelFile);
+                //导入并进行预测
+                String fileName=(num+1)+"";
+                //导出到文件
+                ModelUtil.exportModel(model,modelFile+fileName);
 
-            showParams(newModel,test_x,test_y);
+                showParams(model,test_x,test_y);
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
 
         //将参数导入到新的模型里
 //        importParams(model,x,y);
+    }
+
+    private static int getLastModelFileNum(File dir){
+        int max=-1;
+        if (!dir.exists() || !dir.isDirectory()) {// 判断是否存在目录
+            throw new RuntimeException("dir is not exists");
+        }
+        String[] files = dir.list();// 读取目录下的所有目录文件信息
+        for (int i = 0; i < files.length; i++) {// 循环，添加文件名或回调自身
+            File file = new File(dir, files[i]);
+            if (file.isFile()) {// 如果文件
+                String name=file.getName();
+                Integer num=Integer.parseInt(name);
+                if(num>max){
+                    max=num;
+                }
+            }
+        }
+        return max;
     }
 
     private static double[] one_hot(int len,int val){

@@ -6,8 +6,10 @@ import com.firefly.layers.data.Shape;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
 
+import java.io.File;
+
 public class MnistPredict {
-    private static String modelFile="src/test/resources/mnist_model/mnist_model.ser";
+    private static String modelFile="src/test/resources/mnist_model/dense/";
 
     public static void main(String[] args) {
         double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
@@ -22,8 +24,11 @@ public class MnistPredict {
         MultiDim[] test_y=arr2MultDim(testlabels);
 
         try{
+            int num=getLastModelFileNum(new File(modelFile));
             //导入并进行预测
-            Model newModel=ModelUtil.importModel(modelFile);
+            String fileName=num+"";
+            //导入并进行预测
+            Model newModel=ModelUtil.importModel(modelFile+fileName);
 
             long start=System.currentTimeMillis();
 //            showParams(newModel,train_x,train_y);
@@ -38,6 +43,25 @@ public class MnistPredict {
 
         //将参数导入到新的模型里
 //        importParams(model,x,y);
+    }
+
+    private static int getLastModelFileNum(File dir){
+        int max=-1;
+        if (!dir.exists() || !dir.isDirectory()) {// 判断是否存在目录
+            throw new RuntimeException("dir is not exists");
+        }
+        String[] files = dir.list();// 读取目录下的所有目录文件信息
+        for (int i = 0; i < files.length; i++) {// 循环，添加文件名或回调自身
+            File file = new File(dir, files[i]);
+            if (file.isFile()) {// 如果文件
+                String name=file.getName();
+                Integer num=Integer.parseInt(name);
+                if(num>max){
+                    max=num;
+                }
+            }
+        }
+        return max;
     }
 
     private static double[] one_hot(int len,int val){
