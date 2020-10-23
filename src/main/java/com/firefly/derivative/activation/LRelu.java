@@ -13,6 +13,18 @@ import com.firefly.layers.data.ShapeIndex;
 public class LRelu extends OperationActivation {
     private Function minVal=null;
 
+    public LRelu(){
+
+    }
+
+    public LRelu(double minVal){
+        setMinVal(minVal);
+    }
+
+    public LRelu(Function minVal){
+        setMinVal(minVal);
+    }
+
     public Function getMinVal() {
         return minVal;
     }
