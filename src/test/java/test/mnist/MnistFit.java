@@ -37,36 +37,31 @@ public class MnistFit {
         MultiDim[] test_y=arr2MultDim(testlabels);
 
         try{
+            Model model=null;
             for(int i=0;i<100;i++){
                 int num=getLastModelFileNum(new File(modelFile));
                 System.out.println("加载第"+num+"次模型");
-                Model model=null;
-                if(num==-1){
-                    model=new Sequential();
+                if(model==null){
+                    if(num==-1){
+                        model=new Sequential();
 //                    model.add(new Dense(train_images[0].length, 10,new Sgd(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
 //                    model.add(new Dense(train_images[0].length, 10,new Momentum(0.01,0.1), () -> new NoneActivation(), new InitParamsRandomGaussian()));
 //                    model.add(new Dense(train_images[0].length, 10,new AdaGrad(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
 //                    model.add(new Dense(train_images[0].length, 10,new RMSProp(0.00001,0.9), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-                    model.add(new Dense(train_images[0].length, 100, new Adam(0.000007, 0.9, 0.999), new InitActivationListener() {
-                        @Override
-                        public OperationActivation newActivation() {
-                            LRelu activation=new LRelu();
-                            activation.setMinVal(0.1);
-                            return activation;
-                        }
-                    }, new InitParamsRandomGaussian()));
-                    model.add(new Dense(10,new Adam(0.000007,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-                    model.add(new Softmax());
-                    //        model.add(new Dropout(0.8f));
-                    //        model.add(new Dense(10, LRelu.class));
-                    //        model.add(new Dropout(0.9f));
-                    //识差函数
-                    model.setLossCls(Cel.class);
-                    model.init();
-                }else{
-                    //导入并进行预测
-                    String fileName=num+"";
-                    model=ModelUtil.importModel(modelFile+fileName);
+                        model.add(new Dense(train_images[0].length, 10,new Adam(0.0005,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+//                    model.add(new Dense(10,new Adam(0.000007,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+                        model.add(new Softmax());
+                        //        model.add(new Dropout(0.8f));
+                        //        model.add(new Dense(10, LRelu.class));
+                        //        model.add(new Dropout(0.9f));
+                        //识差函数
+                        model.setLossCls(Cel.class);
+                        model.init();
+                    }else{
+                        //导入并进行预测
+                        String fileName=num+"";
+                        model=ModelUtil.importModel(modelFile+fileName);
+                    }
                 }
 
                 Model finalModel = model;
@@ -98,7 +93,8 @@ public class MnistFit {
                                         double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
 
                                         //准确率
-                                        double acc=getAccuracy(finalModel,test_x,test_y);
+//                                        double acc=getAccuracy(finalModel,test_x,test_y);
+                                        double acc=getAccuracy(finalModel,train_x,train_y);
 
                                         System.out.println(
                                                 process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+
@@ -120,7 +116,7 @@ public class MnistFit {
                 //导出到文件
                 ModelUtil.exportModel(model,modelFile+fileName);
 
-                showParams(model,test_x,test_y);
+//                showParams(model,test_x,test_y);
             }
         }catch (Exception e){
             e.printStackTrace();
