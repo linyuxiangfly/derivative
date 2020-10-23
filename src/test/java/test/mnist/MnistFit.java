@@ -1,6 +1,7 @@
 package test.mnist;
 
 
+import com.firefly.derivative.activation.LRelu;
 import com.firefly.derivative.activation.NoneActivation;
 import com.firefly.derivative.core.OperationActivation;
 import com.firefly.layers.core.Model;
@@ -46,7 +47,15 @@ public class MnistFit {
 //                    model.add(new Dense(train_images[0].length, 10,new Momentum(0.01,0.1), () -> new NoneActivation(), new InitParamsRandomGaussian()));
 //                    model.add(new Dense(train_images[0].length, 10,new AdaGrad(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
 //                    model.add(new Dense(train_images[0].length, 10,new RMSProp(0.00001,0.9), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-                    model.add(new Dense(train_images[0].length, 10,new Adam(0.000007,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+                    model.add(new Dense(train_images[0].length, 100, new Adam(0.000007, 0.9, 0.999), new InitActivationListener() {
+                        @Override
+                        public OperationActivation newActivation() {
+                            LRelu activation=new LRelu();
+                            activation.setMinVal(0.1);
+                            return activation;
+                        }
+                    }, new InitParamsRandomGaussian()));
+                    model.add(new Dense(10,new Adam(0.000007,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
                     model.add(new Softmax());
                     //        model.add(new Dropout(0.8f));
                     //        model.add(new Dense(10, LRelu.class));
@@ -60,6 +69,7 @@ public class MnistFit {
                     model=ModelUtil.importModel(modelFile+fileName);
                 }
 
+                Model finalModel = model;
                 model.fit(train_x, train_y, 10, 1,
                         new LossCallBackListener() {
                             @Override
@@ -87,7 +97,15 @@ public class MnistFit {
                                         double processRate=(process+1.0)/epoch;
                                         double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
 
-                                        System.out.println(process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+"    剩下时间:"+String.format("%.2f 分钟", left)+"    误差:"+String.format("%.10f", loss));
+                                        //准确率
+                                        double acc=getAccuracy(finalModel,test_x,test_y);
+
+                                        System.out.println(
+                                                process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+
+                                                        "    剩下时间:"+String.format("%.2f 分钟", left)+
+                                                        "    误差:"+String.format("%.10f", loss)+
+                                                        "    准确率："+String.format("%.4f",acc)
+                                        );
 
                                         processTime=0;
                                     }
@@ -208,6 +226,21 @@ public class MnistFit {
         }
         double rate=((double)(x.length-errorNum))/x.length;
         System.out.println(String.format("准确率：%.4f",rate));
+    }
+
+    private static double getAccuracy(Model model,MultiDim[] x,MultiDim[] y){
+        int errorNum=0;
+        for(int i=0;i<x.length;i++){
+            MultiDim py=model.predict(x[i]);
+            int pi=maxIndex((double[])py.getData());
+            int yi=maxIndex((double[])y[i].getData());
+            if(pi==yi){
+            }else{
+                errorNum++;
+            }
+        }
+        double rate=((double)(x.length-errorNum))/x.length;
+        return rate;
     }
 
     private static void printArray(String title,double[][] vals){

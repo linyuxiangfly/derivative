@@ -13,6 +13,7 @@ import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Adam;
 import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 
@@ -158,15 +159,15 @@ public class TestNNSigmoid {
         });
 
         Model model=new Sequential();
-        model.add(new Dense(12,6,new Sgd(0.1), ()-> new Sigmoid(),new InitParamsRandomGaussian()));
+        model.add(new Dense(12,6,new Adam(0.1,0.9,0.999), ()-> new Sigmoid(),new InitParamsRandomGaussian()));
         model.add(new Dropout(0.8f));
-        model.add(new Dense(2, new Sgd(0.1),()->new Sigmoid()));
+        model.add(new Dense(2, new Adam(0.1,0.9,0.999),()->new Sigmoid()));
 //        model.add(new Dropout(0.9f));
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
 
-        model.fit(x, y, 10000, 10,
+        model.fit(x, y, 100, 10,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
