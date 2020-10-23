@@ -2,26 +2,32 @@ package com.firefly.layers.optimizer;
 
 import com.firefly.layers.core.Optimizer;
 import com.firefly.layers.data.MultiDim;
-import com.firefly.layers.data.ShapeIndex;
-import com.firefly.utils.MomentumUtil;
-import com.firefly.utils.MultiDimUtil;
+import com.firefly.utils.RMSPropUtil;
 
 import java.util.Hashtable;
 import java.util.Map;
 
 /**
- * Momentum（动量） 在 SGD 的基础上引入了一个变量 - 速度 v 和一个超参数 - 指数衰减平均 \alpha
+ * RMSprop（即均方根传播）是由Geoff Hinton开发的，
+ * 如《An Overview of Gradient Descent Optimization Algorithms》所述，
+ * 其目的是解决AdaGrad的学习率急剧下降的问题。
+ * 简而言之，RMSprop更改学习速率的速度比AdaGrad慢，
+ * 但是RMSprop仍可从AdaGrad（更快的收敛速度）中受益
  */
-public class Momentum implements Optimizer {
+public class RMSProp implements Optimizer {
     private double rate;
-    private double decay;
+    private double decay=0.9;
 
     //历史梯度
     private Map<MultiDim,MultiDim> historyPrtGrad=new Hashtable<>();
     //临时用的
     private Map<MultiDim,MultiDim> temp=new Hashtable<>();
 
-    public Momentum(double rate,double decay){
+    public RMSProp(double rate){
+        this(rate,0.9);
+    }
+
+    public RMSProp(double rate,double decay){
         this.rate=rate;
         this.decay=decay;
     }
@@ -51,21 +57,9 @@ public class Momentum implements Optimizer {
 
     @Override
     public void update(MultiDim params, MultiDim prtGrad) {
-        MultiDim historyPrtGrad=getHistoryPrtGrad(params);
-//        //临时变量
-//        MultiDim temp=getTemp(params);
-//        //历史梯度临时变量
-//        MultiDim historyPrtGradTemp=getTemp(historyPrtGrad);
-//
-//        //temp=rate*梯度
-//        MultiDimUtil.mcl(prtGrad,rate,temp);
-//        //historyPrtGradTemp=decay*historyPrtGrad
-//        MultiDimUtil.mcl(historyPrtGrad,decay,historyPrtGradTemp);
-//
-//        //历史梯度=梯度-历史梯度
-//        MultiDimUtil.sub(temp,historyPrtGradTemp,historyPrtGrad);
-//        //参数=参数-历史梯度
-//        MultiDimUtil.sub(params,historyPrtGrad,params);
-        MomentumUtil.calc(prtGrad,historyPrtGrad,params,rate,decay);
+        //获取历史变量
+        MultiDim h=getHistoryPrtGrad(params);
+
+        RMSPropUtil.calc(prtGrad,h,params,rate,decay);
     }
 }
