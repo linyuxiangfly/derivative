@@ -18,8 +18,8 @@ public class AdamUtil {
             double mVal=m[i];
             double vVal=v[i];
 
-            mVal+=(1-beta1)*(prtGradVal-mVal);
-            vVal+=(1-beta2)*(prtGradVal*prtGradVal-vVal);
+            mVal=beta1*mVal+(1-beta1)*prtGradVal;
+            vVal=beta2*vVal+(1-beta2)*prtGradVal*prtGradVal;
 
             paramsVal-=lrt*mVal/(Math.sqrt(vVal)+0.00000000001);
 
@@ -41,8 +41,8 @@ public class AdamUtil {
                 double mVal=m[i][j];
                 double vVal=v[i][j];
 
-                mVal+=(1-beta1)*(prtGradVal-mVal);
-                vVal+=(1-beta2)*(prtGradVal*prtGradVal-vVal);
+                mVal=beta1*mVal+(1-beta1)*prtGradVal;
+                vVal=beta2*vVal+(1-beta2)*prtGradVal*prtGradVal;
 
                 paramsVal-=lrt*mVal/(Math.sqrt(vVal)+0.00000000001);
 
@@ -66,8 +66,8 @@ public class AdamUtil {
                     double mVal=m[i][j][k];
                     double vVal=v[i][j][k];
 
-                    mVal+=(1-beta1)*(prtGradVal-mVal);
-                    vVal+=(1-beta2)*(prtGradVal*prtGradVal-vVal);
+                    mVal=beta1*mVal+(1-beta1)*prtGradVal;
+                    vVal=beta2*vVal+(1-beta2)*prtGradVal*prtGradVal;
 
                     paramsVal-=lrt*mVal/(Math.sqrt(vVal)+0.00000000001);
 
@@ -81,7 +81,8 @@ public class AdamUtil {
 
     public static void calc(double[][][][] prtGrad, double[][][][] m, double[][][][] v, double[][][][] params,double rate,double beta1,double beta2,int iter) {
         iter++;
-        double lrt  = rate * Math.sqrt(1.0 - Math.pow(beta2,iter)) / (1.0 - Math.pow(beta1,iter));
+//        double lrt  = rate * Math.sqrt(1.0 - Math.pow(beta2,iter)) / (1.0 - Math.pow(beta1,iter));
+        double lrt = rate * Math.sqrt(1.0 - Math.pow(beta2,iter)) / (1.0 - Math.pow(beta1,iter));
 
         for(int i=0;i<prtGrad.length;i++){
             for(int j=0;j<prtGrad[i].length;j++){
@@ -93,8 +94,10 @@ public class AdamUtil {
                         double mVal=m[i][j][k][l];
                         double vVal=v[i][j][k][l];
 
-                        mVal+=(1-beta1)*(prtGradVal-mVal);
-                        vVal+=(1-beta2)*(prtGradVal*prtGradVal-vVal);
+//                        mVal+=(1-beta1)*(prtGradVal-mVal);
+//                        vVal+=(1-beta2)*(prtGradVal*prtGradVal-vVal);
+                        mVal=beta1*mVal+(1-beta1)*prtGradVal;
+                        vVal=beta2*vVal+(1-beta2)*prtGradVal*prtGradVal;
 
                         paramsVal-=lrt*mVal/(Math.sqrt(vVal)+0.00000000001);
 
@@ -133,8 +136,8 @@ public class AdamUtil {
                     double mVal=(double)m.getVal(i);
                     double vVal=(double)v.getVal(i);
 
-                    mVal+=(1-beta1)*(prtGradVal-mVal);
-                    vVal+=(1-beta2)*(prtGradVal*prtGradVal-vVal);
+                    mVal=beta1*mVal+(1-beta1)*prtGradVal;
+                    vVal=beta2*vVal+(1-beta2)*prtGradVal*prtGradVal;
 
                     paramsVal-=lrt*mVal/(Math.sqrt(vVal)+0.00000000001);
 

@@ -183,6 +183,9 @@ public class Sequential implements Model {
                 flushBackPropagation();
             }
 
+            //求误差的平均值
+            lossVal/=num;
+
             //回调损失
             if(lossCallBackListener!=null){
                 lossCallBackListener.onLoss(lossVal);

@@ -22,6 +22,10 @@ public class Adam implements Optimizer {
     private Map<MultiDim,MultiDim> m=new Hashtable<>();
     private Map<MultiDim,MultiDim> v=new Hashtable<>();
 
+    public Adam(double rate){
+        this(rate,0.9,0.999);
+    }
+
     public Adam(double rate,double beta1,double beta2){
         this.rate=rate;
         this.beta1=beta1;

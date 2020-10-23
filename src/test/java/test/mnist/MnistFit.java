@@ -45,8 +45,8 @@ public class MnistFit {
 //                    model.add(new Dense(train_images[0].length, 10,new Sgd(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
 //                    model.add(new Dense(train_images[0].length, 10,new Momentum(0.01,0.1), () -> new NoneActivation(), new InitParamsRandomGaussian()));
 //                    model.add(new Dense(train_images[0].length, 10,new AdaGrad(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-                    model.add(new Dense(train_images[0].length, 10,new RMSProp(0.00001), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-//                    model.add(new Dense(train_images[0].length, 10,new Adam(0.01,0.1,0.1), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+//                    model.add(new Dense(train_images[0].length, 10,new RMSProp(0.00001,0.9), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+                    model.add(new Dense(train_images[0].length, 10,new Adam(0.000007,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
                     model.add(new Softmax());
                     //        model.add(new Dropout(0.8f));
                     //        model.add(new Dense(10, LRelu.class));
@@ -60,7 +60,7 @@ public class MnistFit {
                     model=ModelUtil.importModel(modelFile+fileName);
                 }
 
-                model.fit(train_x, train_y, 100, 1,
+                model.fit(train_x, train_y, 10, 1,
                         new LossCallBackListener() {
                             @Override
                             public void onLoss(double val) {
