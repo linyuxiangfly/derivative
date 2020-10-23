@@ -3,26 +3,28 @@ package test.mnist;
 
 import com.firefly.derivative.activation.LRelu;
 import com.firefly.derivative.activation.NoneActivation;
-import com.firefly.derivative.core.OperationActivation;
+import com.firefly.derivative.activation.Relu;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ThreeDimShape;
+import com.firefly.layers.enums.Padding;
+import com.firefly.layers.enums.PollingType;
 import com.firefly.layers.init.params.InitParamsRandomGaussian;
-import com.firefly.layers.layers.Dense;
-import com.firefly.layers.layers.Softmax;
+import com.firefly.layers.layers.*;
 import com.firefly.layers.listeners.FitControl;
-import com.firefly.layers.listeners.InitActivationListener;
 import com.firefly.layers.listeners.LossCallBackListener;
 import com.firefly.layers.loss.Cel;
 import com.firefly.layers.models.Sequential;
-import com.firefly.layers.optimizer.*;
+import com.firefly.layers.optimizer.Adam;
+import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
 
 import java.io.File;
 
-public class MnistFit {
-    private static String modelFile="src/test/resources/mnist_model/dense/";
+public class MnistConvFit {
+    private static String modelFile="src/test/resources/mnist_model/conv/";
 
     public static void main(String[] args) {
         double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
@@ -31,9 +33,9 @@ public class MnistFit {
         double[][] test_images = MnistRead.getImages(MnistRead.TEST_IMAGES_FILE);
         double[][] testlabels = one_hot(10,MnistRead.getLabels(MnistRead.TEST_LABELS_FILE));
 
-        MultiDim[] train_x=arr2MultDim(train_images);
+        MultiDim[] train_x=arr2MultDimThreeDim(train_images,new ThreeDimShape(28,28,1));
         MultiDim[] train_y=arr2MultDim(train_labels);
-        MultiDim[] test_x=arr2MultDim(test_images);
+        MultiDim[] test_x=arr2MultDimThreeDim(test_images,new ThreeDimShape(28,28,1));
         MultiDim[] test_y=arr2MultDim(testlabels);
 
         try{
@@ -44,16 +46,27 @@ public class MnistFit {
                 if(model==null){
                     if(num==-1){
                         model=new Sequential();
-//                    model.add(new Dense(train_images[0].length, 10,new Sgd(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-//                    model.add(new Dense(train_images[0].length, 10,new Momentum(0.01,0.1), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-//                    model.add(new Dense(train_images[0].length, 10,new AdaGrad(0.01), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-//                    model.add(new Dense(train_images[0].length, 10,new RMSProp(0.00001,0.9), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-                        model.add(new Dense(train_images[0].length, 10,new Adam(0.0005,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
-//                    model.add(new Dense(10,new Adam(0.000007,0.9,0.999), () -> new NoneActivation(), new InitParamsRandomGaussian()));
+
+                        model.add(new Conv(
+                                (ThreeDimShape)train_x[0].getShape(),
+                                32,
+                                5,
+                                1,
+                                Padding.same,
+                                new Adam(0.0005,0.9,0.999),
+                                () -> new Relu(),
+                                new InitParamsRandomGaussian()));
+
+                        model.add(new Pooling(PollingType.max,2));
+
+                        model.add(new Flatten());
+
+                        model.add(new Dense(
+                                10,
+                                new Adam(0.0005,0.9,0.999),
+                                () -> new Relu()));
+
                         model.add(new Softmax());
-                        //        model.add(new Dropout(0.8f));
-                        //        model.add(new Dense(10, LRelu.class));
-                        //        model.add(new Dropout(0.9f));
                         //识差函数
                         model.setLossCls(Cel.class);
                         model.init();
@@ -171,6 +184,27 @@ public class MnistFit {
             if(vals[i]>max){
                 ret=i;
                 max=vals[i];
+            }
+        }
+        return ret;
+    }
+
+    private static MultiDim[] arr2MultDimThreeDim(double[][] datas,ThreeDimShape shape){
+        MultiDim[] ret=new MultiDim[datas.length];
+        for(int i=0;i<ret.length;i++){
+            ret[i]=arr2MultDimThreeDim(datas[i],shape);
+        }
+        return ret;
+    }
+
+    private static MultiDim arr2MultDimThreeDim(double[] data,ThreeDimShape shape){
+        MultiDim ret=new MultiDim(Double.TYPE,shape);
+        double[][][] retData=(double[][][])ret.getData();
+        for(int x=0;x<shape.getX();x++){
+            for(int y=0;y<shape.getY();y++){
+                for(int z=0;z<shape.getZ();z++){
+                    retData[x][y][z]=data[x*shape.getNums(1)+y*shape.getNums(2)+z];
+                }
             }
         }
         return ret;
