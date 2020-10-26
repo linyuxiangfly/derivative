@@ -78,7 +78,7 @@ public class MnistConvFit {
                 }
 
                 Model finalModel = model;
-                model.fit(train_x, train_y, 1, 1,
+                model.fit(train_x, train_y, 1, 32,
                         new LossCallBackListener() {
                             @Override
                             public void onLoss(double val) {
@@ -89,6 +89,8 @@ public class MnistConvFit {
                             private long countTime=0;
                             private long processTime=0;
                             private String lastProcessStr=null;
+                            private double lastProgress;
+                            private double acc=0;
 
                             @Override
                             public void onProcess(int process, int epoch, double currentProgress, double loss,long takeUpTime) {
@@ -97,10 +99,28 @@ public class MnistConvFit {
                                         System.out.print("\b");
                                     }
                                 }
+
+                                //每个阶段保存一下模型
+                                if(currentProgress-lastProgress>0.01){
+                                    lastProgress=currentProgress;
+                                    try{
+                                        //导入并进行预测
+                                        String fileName=(num+1)+"";
+                                        //导出到文件
+                                        ModelUtil.exportModel(finalModel,modelFile+fileName);
+
+                                        acc=getAccuracy(finalModel,test_x,test_y);
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                }
+
                                 double c=takeUpTime/1000d;
                                 lastProcessStr=process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒",c)+
                                         "    进度:"+String.format("%.2f %%", currentProgress*100)+
-                                        "    误差:"+String.format("%.10f", loss);
+                                        "    误差:"+String.format("%.10f", loss)+
+                                        "    准确率："+String.format("%.4f",acc)
+                                ;
                                 System.out.print(lastProcessStr);
                             }
 

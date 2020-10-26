@@ -119,10 +119,10 @@ public class Sequential implements Model {
     /**
      * 更新反向计算后的参数
      */
-    private void flushBackPropagation(){
+    private void flushBackPropagation(int batchSize){
         for(int li=0;li<layers.size();li++){
             Layer layer=layers.get(li);
-            layer.flushBackUpdateParamPrtGrad();
+            layer.flushBackUpdateParamPrtGrad(batchSize);
         }
     }
 
@@ -151,10 +151,16 @@ public class Sequential implements Model {
         long startTime,endTime;
         long startTimeInner,endTimeInner;
 
+        MultiDim[] dx=new MultiDim[x.length];
+        MultiDim[] dy=new MultiDim[y.length];
+
         //训练次数
         for(int en=0;en<epoch;en++){
             //损失结果
             double lossVal=0;
+
+            //打乱X,Y
+            disorderXY(x,y,dx,dy);
 
             //记录当前时间
             startTime=System.currentTimeMillis();
@@ -173,24 +179,24 @@ public class Sequential implements Model {
                 //偏移每批的的位置进行训练
                 for(int i=n*batchSize;i<n*batchSize+bs;i++){
                     //计算所有层的值
-                    MultiDim lastLayerOut=calcAllLayers(x[i]);
+                    MultiDim lastLayerOut=calcAllLayers(dx[i]);
 
                     //如果要回调损失
                     if(lossCallBackListener!=null || fitControl!=null){
-                        loss.calc(lastLayerOut,y[i],lossOutMd);
+                        loss.calc(lastLayerOut,dy[i],lossOutMd);
                         //累计识差
                         lossVal+=lossOut[0];
                     }
 
                     //损失函数/计算结果的梯度
-                    MultiDim lossPrtGrad=loss.prtGrad(lastLayerOut,y[i]);
+                    MultiDim lossPrtGrad=loss.prtGrad(lastLayerOut,dy[i]);
 
                     //计算反向修正参数
-                    calcBackPropagation(x[i],y[i],lossPrtGrad);
+                    calcBackPropagation(dx[i],dy[i],lossPrtGrad);
                 }
 
                 //更新反向计算后的参数
-                flushBackPropagation();
+                flushBackPropagation(bs);
 
                 //拟合过程控制
                 if(fitControl!=null){
@@ -223,6 +229,33 @@ public class Sequential implements Model {
                     break;
                 }
             }
+        }
+    }
+
+    /**
+     * 打乱X,Y的顺序
+     * @param x
+     * @param y
+     * @param outX
+     * @param outY
+     */
+    private void disorderXY(MultiDim[] x, MultiDim[] y,MultiDim[] outX, MultiDim[] outY){
+        List<MultiDim> tx=new ArrayList<>();
+        List<MultiDim> ty=new ArrayList<>();
+        for(int i=0;i<x.length;i++){
+            tx.add(x[i]);
+            ty.add(y[i]);
+        }
+
+        int i=0;
+        while(tx.size()>0){
+            int index=(int)(Math.random()*tx.size());
+            outX[i]=tx.get(index);
+            outY[i]=ty.get(index);
+            //移除项目
+            tx.remove(index);
+            ty.remove(index);
+            i++;
         }
     }
 

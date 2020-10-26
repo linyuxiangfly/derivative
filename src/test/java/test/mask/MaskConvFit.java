@@ -75,7 +75,7 @@ public class MaskConvFit {
         model.setLossCls(Mse.class);
         model.init();
 
-        model.fit(x, y, 1000, 1,
+        model.fit(x, y, 1000, 4,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {

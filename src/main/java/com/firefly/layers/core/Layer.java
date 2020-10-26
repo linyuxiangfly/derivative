@@ -84,6 +84,6 @@ public interface Layer extends java.io.Serializable{
     /**
      * 更新参数梯度
      */
-    void flushBackUpdateParamPrtGrad();
+    void flushBackUpdateParamPrtGrad(int batchSize);
 
 }

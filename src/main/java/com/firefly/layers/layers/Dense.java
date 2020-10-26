@@ -248,7 +248,8 @@ public class Dense implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad() {
+    public void flushBackUpdateParamPrtGrad(int batchSize) {
+        calcDiffWDiffB(diffW,diffB,batchSize);
         optimizer.update(wmd,diffWmd);
         optimizer.update(bmd,diffBmd);
 //        for(int i=0;i<this.outs.length;i++){
@@ -260,6 +261,17 @@ public class Dense implements Layer {
 //            //计算b的更新梯度
 //            b[i]-=rate*diffB[i];
 //        }
+    }
+
+    private void calcDiffWDiffB(double[][] diffW,double[] diffB,int batchSize){
+        for (int i=0;i<diffW.length;i++){
+            for (int j=0;j<diffW[i].length;j++){
+                diffW[i][j]/=batchSize;
+            }
+        }
+        for(int i=0;i<diffB.length;i++){
+            diffB[i]/=batchSize;
+        }
     }
 
 }

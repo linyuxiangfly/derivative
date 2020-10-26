@@ -533,7 +533,8 @@ public class Conv implements Layer {
     }
 
     @Override
-    public void flushBackUpdateParamPrtGrad() {
+    public void flushBackUpdateParamPrtGrad(int batchSize) {
+        calcDiffWDiffB(diffW,diffB,batchSize);
         optimizer.update(wmd,diffWmd);
         optimizer.update(bmd,diffBmd);
 //        //计算（损失函数/激活函数）*（激活函数/所有w）的偏导梯度
@@ -551,6 +552,21 @@ public class Conv implements Layer {
 //            //计算b的更新梯度
 //            b[x]-=rate*diffB[x];
 //        }
+    }
+
+    private void calcDiffWDiffB(double[][][][] diffW,double[] diffB,int batchSize){
+        for (int i=0;i<diffW.length;i++){
+            for (int j=0;j<diffW[i].length;j++){
+                for(int k=0;k<diffW[i][j].length;k++){
+                    for(int l=0;l<diffW[i][j][k].length;l++){
+                        diffW[i][j][k][l]/=batchSize;
+                    }
+                }
+            }
+        }
+        for(int i=0;i<diffB.length;i++){
+            diffB[i]/=batchSize;
+        }
     }
 
 }
