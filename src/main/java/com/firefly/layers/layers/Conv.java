@@ -22,6 +22,7 @@ public class Conv implements Layer {
     private int filters;
     private int kernelWidth;
     private int kernelHeight;
+    private int kernelNum;//卷积核大小
     private int strides;
     private Padding padding;
 
@@ -42,6 +43,7 @@ public class Conv implements Layer {
     private MultiDim wxbmd;
     private Var[][][] wxb;
     private OperationActivation[][][] outs;
+    private double[][][] gradient;
 
     public Conv(){
 
@@ -197,6 +199,7 @@ public class Conv implements Layer {
         this.unitShape=getOutDim(inputShapeExpand,filters,kernelWidth,kernelHeight,strides);
 
         //w的过滤器、卷积核宽、卷积核高，输入的第3个维度
+        kernelNum=kernelWidth*kernelHeight*inputShape.getZ()+1;//卷积核个数+1个b
         wmd=new MultiDim(Double.TYPE,new FourDimShape(kernelWidth,kernelHeight,inputShape.getZ(),filters));
         bmd=new MultiDim(Double.TYPE,new OneDimShape(filters));
         w=(double[][][][]) wmd.getData();
@@ -282,7 +285,7 @@ public class Conv implements Layer {
                     //将值赋给变量
                     wxb[x][y][z].setVal(convData[x][y][z]);
                     //经过激活函数计算返回值
-                    outVal[x][y][z]=this.outs[x][y][z].calc();
+                    outVal[x][y][z]=this.outs[x][y][z].calc()/kernelNum;
                 }
             }
         }
@@ -359,7 +362,7 @@ public class Conv implements Layer {
             for(int y=0;y<out_dloss_dwxb[x].length;y++){
                 for(int z=0;z<out_dloss_dwxb[x][y].length;z++){
                     if(backLayerPrtGradVal[x][y][z]!=0){
-                        out_dloss_dwxb[x][y][z]=backLayerPrtGradVal[x][y][z]*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
+                        out_dloss_dwxb[x][y][z]=backLayerPrtGradVal[x][y][z]/kernelNum*outs[x][y][z].prtGrad(wxb[x][y][z],targetVal);//（损失函数/激活函数）*（激活函数/wx+b）的偏导梯度
                     }
                 }
             }
