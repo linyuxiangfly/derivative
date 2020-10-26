@@ -3,6 +3,7 @@ package test.mnist;
 import com.firefly.layers.core.Model;
 import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
+import com.firefly.layers.data.ThreeDimShape;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
 
@@ -12,15 +13,15 @@ public class MnistConvPredict {
     private static String modelFile="src/test/resources/mnist_model/conv/";
 
     public static void main(String[] args) {
-        double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
-        double[][] train_labels = one_hot(10,MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE));
+//        double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
+//        double[][] train_labels = one_hot(10,MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE));
 
         double[][] test_images = MnistRead.getImages(MnistRead.TEST_IMAGES_FILE);
         double[][] testlabels = one_hot(10,MnistRead.getLabels(MnistRead.TEST_LABELS_FILE));
 
-        MultiDim[] train_x=arr2MultDim(train_images);
-        MultiDim[] train_y=arr2MultDim(train_labels);
-        MultiDim[] test_x=arr2MultDim(test_images);
+//        MultiDim[] train_x=arr2MultDimThreeDim(train_images,new ThreeDimShape(28,28,1));
+//        MultiDim[] train_y=arr2MultDim(train_labels);
+        MultiDim[] test_x=arr2MultDimThreeDim(test_images,new ThreeDimShape(28,28,1));
         MultiDim[] test_y=arr2MultDim(testlabels);
 
         try{
@@ -95,6 +96,27 @@ public class MnistConvPredict {
         return ret;
     }
 
+    private static MultiDim[] arr2MultDimThreeDim(double[][] datas, ThreeDimShape shape){
+        MultiDim[] ret=new MultiDim[datas.length];
+        for(int i=0;i<ret.length;i++){
+            ret[i]=arr2MultDimThreeDim(datas[i],shape);
+        }
+        return ret;
+    }
+
+    private static MultiDim arr2MultDimThreeDim(double[] data,ThreeDimShape shape){
+        MultiDim ret=new MultiDim(Double.TYPE,shape);
+        double[][][] retData=(double[][][])ret.getData();
+        for(int x=0;x<shape.getX();x++){
+            for(int y=0;y<shape.getY();y++){
+                for(int z=0;z<shape.getZ();z++){
+                    retData[x][y][z]=data[x*shape.getNums(1)+y*shape.getNums(2)+z];
+                }
+            }
+        }
+        return ret;
+    }
+
     private static MultiDim[] arr2MultDim(double[][] datas){
         MultiDim[] ret=new MultiDim[datas.length];
         for(int i=0;i<ret.length;i++){
@@ -133,10 +155,10 @@ public class MnistConvPredict {
             int pi=maxIndex((double[])py.getData());
             int yi=maxIndex((double[])y[i].getData());
             if(pi==yi){
-                System.out.println(yi+"     "+pi+"     ");
+//                System.out.println(yi+"     "+pi+"     ");
             }else{
                 errorNum++;
-                System.out.println(yi+"     "+pi+"     "+"      error");
+//                System.out.println(yi+"     "+pi+"     "+"      error");
             }
         }
         double rate=((double)(x.length-errorNum))/x.length;

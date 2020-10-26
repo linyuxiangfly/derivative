@@ -1,6 +1,8 @@
 package test.mask;
 
 import com.firefly.derivative.activation.LRelu;
+import com.firefly.derivative.activation.NoneActivation;
+import com.firefly.derivative.activation.Sigmoid;
 import com.firefly.derivative.core.Function;
 import com.firefly.derivative.operation.Const;
 import com.firefly.layers.core.Layer;
@@ -15,8 +17,10 @@ import com.firefly.layers.init.params.InitParamsRandomGaussian;
 import com.firefly.layers.layers.*;
 import com.firefly.layers.listeners.FitControl;
 import com.firefly.layers.listeners.LossCallBackListener;
+import com.firefly.layers.loss.Cel;
 import com.firefly.layers.loss.Mse;
 import com.firefly.layers.models.Sequential;
+import com.firefly.layers.optimizer.Adam;
 import com.firefly.layers.optimizer.Sgd;
 import com.firefly.utils.ModelUtil;
 import test.mask.data.LoadData;
@@ -38,28 +42,40 @@ public class MaskConvFit {
         MultiDim[] yTest=arr2MultDim(xyTest[1]);
 
         Model model=new Sequential();
-        model.add(new Conv((ThreeDimShape) x[0].getShape(),32,3,1, Padding.same,new Sgd(0.00001), () -> {
-            LRelu a=new LRelu();
-            a.setMinVal(0.01);
-            return a;
-        },new InitParamsRandomGaussian()));
+        model.add(new Conv(
+                (ThreeDimShape) x[0].getShape(),
+                32,
+                3,
+                1,
+                Padding.same,
+                new Adam(0.001,0.9,0.999),
+                () -> {
+                    LRelu a=new LRelu();
+                    a.setMinVal(0.01);
+                    return a;
+                },
+                new InitParamsRandomGaussian()));
         model.add(new Pooling(PollingType.max,2));
 //        model.add(new Zoom(-10f,10f,0f,1f));
 //        model.add(new Conv(16,3,1, Padding.same, LRelu.class,new Function[]{new Const(0.01)},new InitParamsRandomGaussian()));
 //        model.add(new Pooling(PollingType.max,2,2,true));
         model.add(new Flatten());
-        model.add(new Dropout(0.5f));
+//        model.add(new Dropout(0.5f));
 //        model.add(new Dense(10, LRelu.class));
-        model.add(new Dense(2, new Sgd(0.00001),() -> {
-            LRelu a=new LRelu();
-            a.setMinVal(0.01);
-            return a;
-        }));
+        model.add(new Dense(
+                2,
+                new Adam(0.001,0.9,0.999),
+                () -> {
+                    Sigmoid a=new Sigmoid();
+                    return a;
+                }
+        ));
+//        model.add(new Softmax());
         //识差函数
         model.setLossCls(Mse.class);
         model.init();
 
-        model.fit(x, y, 10000, 4,
+        model.fit(x, y, 1000, 1,
                 new LossCallBackListener() {
                     @Override
                     public void onLoss(double val) {
@@ -71,6 +87,11 @@ public class MaskConvFit {
                     private long processTime=0;
 
                     @Override
+                    public void onProcess(int process, int epoch, double currentProgress, double loss,long takeUpTime) {
+
+                    }
+
+                    @Override
                     public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
                         //累计执行时间
                         countTime+=takeUpTime;
@@ -80,7 +101,7 @@ public class MaskConvFit {
                             System.out.println("第"+process+"次训练，满足条件自动退出训练！");
                             return true;
                         }else{
-                            if(process%1==0){
+                            if(process%99==0){
                                 double c=processTime/1000.0;
                                 double processRate=(process+1.0)/epoch;
                                 double left=(countTime/processRate-countTime)/60.0/1000.0;//按分钟计算
@@ -149,8 +170,8 @@ public class MaskConvFit {
         List<double[]> maskList= LoadData.load(new File(maskFile));
         List<double[]> nomaskList= LoadData.load(new File(nomaskFile));
 
-        double[][] maskY=createArray(maskList.size(),new double[]{100.0,0.0});
-        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,100.0});
+        double[][] maskY=createArray(maskList.size(),new double[]{1.0,0.0});
+        double[][] nomaskY=createArray(nomaskList.size(),new double[]{0.0,1.0});
 
         double[][] x=mergeArrays(maskList,nomaskList);
         double[][] y=mergeArrays(maskY,nomaskY);

@@ -179,12 +179,17 @@ public class TestNNSigmoid {
                     private long processTime=0;
 
                     @Override
+                    public void onProcess(int process, int epoch, double currentProgress, double loss,long takeUpTime) {
+
+                    }
+
+                    @Override
                     public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
                         //累计执行时间
                         countTime+=takeUpTime;
                         processTime+=takeUpTime;
 
-                        if(loss<=0.0001){
+                        if(loss<=0){
                             System.out.println("第"+process+"次训练，满足条件自动退出训练！");
                             return true;
                         }else{

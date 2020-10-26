@@ -17,6 +17,7 @@ public class Sequential implements Model {
     private List<MultiDim> layersOut;
     private List<MultiDim> layersInputPrtGrad;//每层的识差/输入的梯度
     private Loss loss;
+    private long updateProcessTime=0;//更新进度时间（毫秒）
 
     private MultiDim lossOutMd=null;
     private double[] lossOut;
@@ -24,9 +25,15 @@ public class Sequential implements Model {
     private Class<? extends Loss> lossCls;
 
     public Sequential(){
+        //更新进度时间（10秒）
+        this(10000);
+    }
+
+    public Sequential(long updateProcessTime){
         layers=new ArrayList<>();
         layersOut=new ArrayList<>();
         layersInputPrtGrad=new ArrayList<>();
+        this.updateProcessTime=updateProcessTime;
     }
 
     @Override
@@ -142,6 +149,8 @@ public class Sequential implements Model {
         int lastSize=mod==0?batchSize:mod;
 
         long startTime,endTime;
+        long startTimeInner,endTimeInner;
+
         //训练次数
         for(int en=0;en<epoch;en++){
             //损失结果
@@ -149,6 +158,7 @@ public class Sequential implements Model {
 
             //记录当前时间
             startTime=System.currentTimeMillis();
+            startTimeInner=startTime;
 
             //分批训练，分成多少批
             for(int n=0;n<num;n++){
@@ -181,6 +191,19 @@ public class Sequential implements Model {
 
                 //更新反向计算后的参数
                 flushBackPropagation();
+
+                //拟合过程控制
+                if(fitControl!=null){
+                    //记录当前时间
+                    endTimeInner=System.currentTimeMillis();
+
+                    //判断是否达到更新进度的时间
+                    if(endTimeInner-startTimeInner>=updateProcessTime){
+                        startTimeInner=System.currentTimeMillis();
+                        //当前进度
+                        fitControl.onProcess(en,epoch,(double)(n*batchSize+bs)/x.length,lossVal/(n*batchSize+bs),endTimeInner-startTime);
+                    }
+                }
             }
 
             //求误差的平均值

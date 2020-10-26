@@ -54,6 +54,11 @@ public class MaskFit {
                     private long processTime=0;
 
                     @Override
+                    public void onProcess(int process, int epoch, double currentProgress, double loss,long takeUpTime) {
+
+                    }
+
+                    @Override
                     public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
                         //累计执行时间
                         countTime += takeUpTime;

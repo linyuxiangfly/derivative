@@ -29,13 +29,17 @@ public class MnistRead {
         return sb.toString();
     }
 
+    public static double[][] getImages(String fileName){
+        return getImages(fileName,-1);
+    }
+
     /**
      * get images of 'train' or 'test'
      *
      * @param fileName the file of 'train' or 'test' about image
      * @return one row show a `picture`
      */
-    public static double[][] getImages(String fileName) {
+    public static double[][] getImages(String fileName,int size) {
         double[][] x = null;
         try (BufferedInputStream bin = new BufferedInputStream(new FileInputStream(fileName))) {
             byte[] bytes = new byte[4];
@@ -49,6 +53,11 @@ public class MnistRead {
                 int xPixel = Integer.parseInt(bytesToHex(bytes), 16);           // 读取每行所含像素点数
                 bin.read(bytes, 0, 4);
                 int yPixel = Integer.parseInt(bytesToHex(bytes), 16);           // 读取每列所含像素点数
+
+                if(size!=-1 && size<number){
+                    number=size;
+                }
+
                 x = new double[number][xPixel * yPixel];
                 for (int i = 0; i < number; i++) {
                     double[] element = new double[xPixel * yPixel];
@@ -66,13 +75,17 @@ public class MnistRead {
         return x;
     }
 
+    public static double[] getLabels(String fileName){
+        return getLabels(fileName,-1);
+    }
+
     /**
      * get labels of `train` or `test`
      *
      * @param fileName the file of 'train' or 'test' about label
      * @return
      */
-    public static double[] getLabels(String fileName) {
+    public static double[] getLabels(String fileName,int size) {
         double[] y = null;
         try (BufferedInputStream bin = new BufferedInputStream(new FileInputStream(fileName))) {
             byte[] bytes = new byte[4];
@@ -82,6 +95,11 @@ public class MnistRead {
             } else {
                 bin.read(bytes, 0, 4);
                 int number = Integer.parseInt(bytesToHex(bytes), 16);
+
+                if(size!=-1 && size<number){
+                    number=size;
+                }
+
                 y = new double[number];
                 for (int i = 0; i < number; i++) {
                     y[i] = bin.read();

@@ -30,8 +30,8 @@ public class MnistConvFit {
         double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
         double[][] train_labels = one_hot(10,MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE));
 
-        double[][] test_images = MnistRead.getImages(MnistRead.TEST_IMAGES_FILE);
-        double[][] testlabels = one_hot(10,MnistRead.getLabels(MnistRead.TEST_LABELS_FILE));
+        double[][] test_images = MnistRead.getImages(MnistRead.TEST_IMAGES_FILE,100);
+        double[][] testlabels = one_hot(10,MnistRead.getLabels(MnistRead.TEST_LABELS_FILE,100));
 
         MultiDim[] train_x=arr2MultDimThreeDim(train_images,new ThreeDimShape(28,28,1));
         MultiDim[] train_y=arr2MultDim(train_labels);
@@ -49,12 +49,12 @@ public class MnistConvFit {
 
                         model.add(new Conv(
                                 (ThreeDimShape)train_x[0].getShape(),
-                                32,
+                                128,
                                 5,
                                 1,
                                 Padding.same,
-                                new Adam(0.0005,0.9,0.999),
-                                () -> new Relu(),
+                                new Adam(0.001,0.9,0.999),
+                                () -> new LRelu(0.01),
                                 new InitParamsRandomGaussian()));
 
                         model.add(new Pooling(PollingType.max,2));
@@ -63,8 +63,8 @@ public class MnistConvFit {
 
                         model.add(new Dense(
                                 10,
-                                new Adam(0.0005,0.9,0.999),
-                                () -> new Relu()));
+                                new Adam(0.001,0.9,0.999),
+                                () -> new NoneActivation()));
 
                         model.add(new Softmax());
                         //识差函数
@@ -78,7 +78,7 @@ public class MnistConvFit {
                 }
 
                 Model finalModel = model;
-                model.fit(train_x, train_y, 10, 1,
+                model.fit(train_x, train_y, 1, 1,
                         new LossCallBackListener() {
                             @Override
                             public void onLoss(double val) {
@@ -88,6 +88,21 @@ public class MnistConvFit {
                         new FitControl() {
                             private long countTime=0;
                             private long processTime=0;
+                            private String lastProcessStr=null;
+
+                            @Override
+                            public void onProcess(int process, int epoch, double currentProgress, double loss,long takeUpTime) {
+                                if(lastProcessStr!=null){
+                                    for (int j = 0; j < lastProcessStr.length(); j++) {
+                                        System.out.print("\b");
+                                    }
+                                }
+                                double c=takeUpTime/1000d;
+                                lastProcessStr=process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒",c)+
+                                        "    进度:"+String.format("%.2f %%", currentProgress*100)+
+                                        "    误差:"+String.format("%.10f", loss);
+                                System.out.print(lastProcessStr);
+                            }
 
                             @Override
                             public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
@@ -95,7 +110,9 @@ public class MnistConvFit {
                                 countTime+=takeUpTime;
                                 processTime+=takeUpTime;
 
-                                if(loss<=0.0001){
+                                System.out.println();
+
+                                if(loss<=0){
                                     System.out.println("第"+process+"次训练，满足条件自动退出训练！");
                                     return true;
                                 }else{
@@ -113,7 +130,8 @@ public class MnistConvFit {
                                                 process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+
                                                         "    剩下时间:"+String.format("%.2f 分钟", left)+
                                                         "    误差:"+String.format("%.10f", loss)+
-                                                        "    准确率："+String.format("%.4f",acc)
+                                                        "    准确率："+String.format("%.4f",acc)+
+                                                        "\n"
                                         );
 
                                         processTime=0;
