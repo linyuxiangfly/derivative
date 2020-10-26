@@ -78,46 +78,46 @@ public class ConvUtil {
      * @param destShape
      * @return
      */
-    public static MultiDim expand(MultiDim data, ThreeDimShape destShape){
-        MultiDim ret=null;
-        Shape srcShape=data.getShape();
-
-        if(srcShape.equals(destShape)){
-            return data;
-        }else{
-            ret=new MultiDim(destShape);
-            double[][][] retData=(double[][][])ret.getData();
-            double[][][] srcData=(double[][][])data.getData();
-
-            //计算填充的行开始、行长度、列开始、列长度位置
-            int rowStart,rowLen,colStart,colLen;
-            //如果目标形状的行比原形状的行小
-            if(srcShape.getDim(ThreeDimShape.X)>destShape.getX()){
-                rowStart=0;
-                rowLen=destShape.getX();
-            }else{
-                rowStart=(destShape.getX()-srcShape.getDim(ThreeDimShape.X))/2;
-                rowLen=srcShape.getDim(ThreeDimShape.X);
-            }
-            //如果目标形状的列比原形状的列小
-            if(srcShape.getDim(ThreeDimShape.Y)>destShape.getY()){
-                colStart=0;
-                colLen=destShape.getY();
-            }else{
-                colStart=(destShape.getY()-srcShape.getDim(ThreeDimShape.Y))/2;
-                colLen=srcShape.getDim(ThreeDimShape.Y);
-            }
-
-            //循环X，Y轴，填充数据到扩展后的数组
-            for(int x=rowStart;x<rowStart+rowLen;x++){
-                for(int y=colStart;y<colStart+colLen;y++){
-                    retData[x][y]=srcData[x-rowStart][y-colStart];
-                }
-            }
-
-            return ret;
-        }
-    }
+//    public static MultiDim expand(MultiDim data, ThreeDimShape destShape){
+//        MultiDim ret=null;
+//        Shape srcShape=data.getShape();
+//
+//        if(srcShape.equals(destShape)){
+//            return data;
+//        }else{
+//            ret=new MultiDim(destShape);
+//            double[][][] retData=(double[][][])ret.getData();
+//            double[][][] srcData=(double[][][])data.getData();
+//
+//            //计算填充的行开始、行长度、列开始、列长度位置
+//            int rowStart,rowLen,colStart,colLen;
+//            //如果目标形状的行比原形状的行小
+//            if(srcShape.getDim(ThreeDimShape.X)>destShape.getX()){
+//                rowStart=0;
+//                rowLen=destShape.getX();
+//            }else{
+//                rowStart=(destShape.getX()-srcShape.getDim(ThreeDimShape.X))/2;
+//                rowLen=srcShape.getDim(ThreeDimShape.X);
+//            }
+//            //如果目标形状的列比原形状的列小
+//            if(srcShape.getDim(ThreeDimShape.Y)>destShape.getY()){
+//                colStart=0;
+//                colLen=destShape.getY();
+//            }else{
+//                colStart=(destShape.getY()-srcShape.getDim(ThreeDimShape.Y))/2;
+//                colLen=srcShape.getDim(ThreeDimShape.Y);
+//            }
+//
+//            //循环X，Y轴，填充数据到扩展后的数组
+//            for(int x=rowStart;x<rowStart+rowLen;x++){
+//                for(int y=colStart;y<colStart+colLen;y++){
+//                    retData[x][y]=srcData[x-rowStart][y-colStart];
+//                }
+//            }
+//
+//            return ret;
+//        }
+//    }
 
     /**
      * 计算卷积
@@ -127,7 +127,7 @@ public class ConvUtil {
      * @param strides 步长
      * @return
      */
-    public static MultiDim conv(MultiDim data,MultiDim w,MultiDim b,int strides,ThreeDimShape outShape){
+    public static MultiDim conv(MultiDim data,ThreeDimShape inputShapeExpand,MultiDim w,MultiDim b,int strides,ThreeDimShape outShape){
         MultiDim ret=new MultiDim(outShape);
         double[][][] retData=(double[][][])ret.getData();
         double[][][] dataData=(double[][][])data.getData();
@@ -135,7 +135,7 @@ public class ConvUtil {
         double[] bData=b!=null?(double[])b.getData():null;
 
         //计算卷积
-        conv(dataData,wData,bData,strides,retData);
+        conv(dataData,inputShapeExpand,wData,bData,strides,retData);
         return ret;
     }
 
@@ -146,14 +146,29 @@ public class ConvUtil {
      * @param strides
      * @return
      */
-    public static void conv(double[][][] data,double[][][][] w,double[] b,int strides,double[][][] outData){
-        int width=(data.length-w.length)/strides+1;//计算卷积后的宽度
-        int height=(data[0].length-w[0].length)/strides+1;//计算卷积后的高度
+    public static void conv(double[][][] data,ThreeDimShape inputShapeExpand,double[][][][] w,double[] b,int strides,double[][][] outData){
+        int width=(inputShapeExpand.getX()-w.length)/strides+1;//计算卷积后的宽度
+        int height=(inputShapeExpand.getY()-w[0].length)/strides+1;//计算卷积后的高度
+
+        //计算填充的行开始、行长度、列开始、列长度位置
+        int rowStart,colStart;
+        //如果目标形状的行比原形状的行小
+        if(data.length>inputShapeExpand.getX()){
+            rowStart=0;
+        }else{
+            rowStart=(inputShapeExpand.getX()-data.length)/2;
+        }
+        //如果目标形状的列比原形状的列小
+        if(data[0].length>inputShapeExpand.getY()){
+            colStart=0;
+        }else{
+            colStart=(inputShapeExpand.getY()-data[0].length)/2;
+        }
 
         for(int z=0;z<outData[0][0].length;z++){
             for(int x=0;x<width;x++){
                 for(int y=0;y<height;y++){
-                    outData[x][y][z]=(inner(data,x*strides,y*strides,z,w)+b[z]);
+                    outData[x][y][z]=(inner(data,x*strides-rowStart,y*strides-colStart,z,w)+b[z]);
                 }
 
             }
@@ -172,8 +187,13 @@ public class ConvUtil {
         double ret=0;
         for(int x=0;x<weight.length;x++){
             for(int y=0;y<weight[x].length;y++){
-                for(int z=0;z<weight[x][y].length;z++){
-                    ret+=data[x+xOffset][y+yOffset][z]*weight[x][y][z][filter];
+                if(
+                        (x+xOffset>=0 && x+xOffset<data.length) &&
+                                (y+yOffset>=0 && y+yOffset<data[0].length)
+                ){
+                    for(int z=0;z<weight[x][y].length;z++){
+                        ret+=data[x+xOffset][y+yOffset][z]*weight[x][y][z][filter];
+                    }
                 }
             }
         }
