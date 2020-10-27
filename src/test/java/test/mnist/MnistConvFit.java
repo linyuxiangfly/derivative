@@ -116,7 +116,9 @@ public class MnistConvFit {
                                 }
 
                                 double c=takeUpTime/1000d;
-                                lastProcessStr=process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒",c)+
+                                lastProcessStr=process+"/"+epoch+
+                                        "    当次执行:"+String.format("%.2f 秒",c)+
+                                        "    预计执行:"+String.format("%.2f 秒",c/currentProgress)+
                                         "    进度:"+String.format("%.2f %%", currentProgress*100)+
                                         "    误差:"+String.format("%.10f", loss)+
                                         "    准确率："+String.format("%.4f",acc)
@@ -148,7 +150,7 @@ public class MnistConvFit {
 
                                         System.out.println(
                                                 process+"/"+epoch+"    当次执行时间:"+String.format("%.2f 秒", c)+
-                                                        "    剩下时间:"+String.format("%.2f 分钟", left)+
+//                                                        "    剩下时间:"+String.format("%.2f 分钟", left)+
                                                         "    误差:"+String.format("%.10f", loss)+
                                                         "    准确率："+String.format("%.4f",acc)+
                                                         "\n"
