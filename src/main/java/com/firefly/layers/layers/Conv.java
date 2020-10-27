@@ -45,7 +45,6 @@ public class Conv implements Layer {
     private MultiDim wxbmd;
     private Var[][][] wxb;
     private OperationActivation[][][] outs;
-    private double[][][] gradient;
 
     public Conv(){
 
@@ -277,8 +276,12 @@ public class Conv implements Layer {
         double[][][] outVal=(double[][][])out.getData();
 
 //        input=ConvUtil.expand(input,inputShapeExpand);
+//        long startTime=System.currentTimeMillis();
         //计算卷积
         MultiDim conv=ConvUtil.conv(input,inputShapeExpand,wmd,bmd,strides,unitShape);
+//        long endTime=System.currentTimeMillis();
+//        System.out.println("time(s):"+((endTime-startTime)/1000.0));
+
         double[][][] convData=(double[][][])conv.getData();
 
         for(int x=0;x<convData.length;x++){
@@ -402,8 +405,8 @@ public class Conv implements Layer {
         }
 
         //循环指定过滤器的所有（损失函数/所有w）梯度
-        for(int x=0;x<dloss_dwxb.length;x++){
-            for(int y=0;y<dloss_dwxb[x].length;y++){
+        for(int x=rowStart-leftBorder;x<dloss_dwxb.length;x++){
+            for(int y=colStart-topBorder;y<dloss_dwxb[x].length;y++){
                 for(int z=0;z<dloss_dwxb[x][y].length;z++){
                     double loss=dloss_dwxb[x][y][z];//当前损失梯度
                     //计算单个损失函数/输入值的梯度
@@ -439,16 +442,43 @@ public class Conv implements Layer {
             int ox,int oy,
             double[][][][] out_dloss_dw){
         //如果梯度不为0
-        if(dloss_dwxb!=0){
+        if(dloss_dwxb!=0 && -ox<kernelWidth && -oy<kernelHeight){
+            int startI,endI;
+            int startJ,endJ;
+
+            startI=ox<0?
+                    -ox
+                    :
+                    0;
+
+            endI=kernelWidth+ox>input.length?
+                    -ox+input.length
+                    :
+                    kernelWidth;
+
+            startJ=oy<0?
+                    -oy
+                    :
+                    0;
+
+            endJ=kernelHeight+oy>input[0].length?
+                    -oy+input[0].length
+                    :
+                    kernelHeight;
+
+            if(startI>=endI || startJ>=endJ){
+                return;
+            }
+
             //循环指定过滤器的所有（损失函数/wxb）梯度
-            for(int i=0;i<kernelWidth;i++){
-                for(int j=0;j<kernelHeight;j++){
-                    if((ox+i>=0 && oy+j>=0) && (ox+i<input.length && oy+j<input[0].length)){
+            for(int i=startI;i<endI;i++){
+                for(int j=startJ;j<endJ;j++){
+//                    if((ox+i>=0 && oy+j>=0) && (ox+i<input.length && oy+j<input[0].length)){
                         for(int k=0;k<kernelChannel;k++){
                             //累计梯度
                             out_dloss_dw[i][j][k][filter]+=dloss_dwxb*input[ox+i][oy+j][k];
                         }
-                    }
+//                    }
                 }
             }
         }
@@ -494,8 +524,8 @@ public class Conv implements Layer {
             double[][][] out_dloss_db){
 
         //计算（损失函数/激活函数）*（激活函数/所有x）的偏导梯度
-        for(int x=0;x<dloss_dwxb.length;x++){
-            for(int y=0;y<dloss_dwxb[x].length;y++){
+        for(int x=-leftBorder;x<dloss_dwxb.length;x++){
+            for(int y=-topBorder;y<dloss_dwxb[x].length;y++){
                 for(int z=0;z<dloss_dwxb[x][y].length;z++){
                     double loss=dloss_dwxb[x][y][z];//当前损失梯度
                     //计算单个损失函数/输入值的梯度
@@ -519,15 +549,42 @@ public class Conv implements Layer {
             int ox,int oy,
             double[][][] out_dloss_db){
         //如果梯度不为0
-        if(dloss_dwxb!=0){
+        if(dloss_dwxb!=0 && -ox<kernelWidth && -oy<kernelHeight){
+            int startI,endI;
+            int startJ,endJ;
+
+            startI=ox<0?
+                    -ox
+                    :
+                    0;
+
+            endI=kernelWidth+ox>out_dloss_db.length?
+                    -ox+out_dloss_db.length
+                    :
+                    kernelWidth;
+
+            startJ=oy<0?
+                    -oy
+                    :
+                    0;
+
+            endJ=kernelHeight+oy>out_dloss_db[0].length?
+                    -oy+out_dloss_db[0].length
+                    :
+                    kernelHeight;
+
+            if(startI>=endI || startJ>=endJ){
+                return;
+            }
+
             //循环指定过滤器的所有（损失函数/wxb）梯度
-            for(int i=0;i<kernelWidth;i++){
-                for(int j=0;j<kernelHeight;j++){
+            for(int i=startI;i<endI;i++){
+                for(int j=startJ;j<endJ;j++){
                     for(int k=0;k<kernelChannel;k++){
-                        if((ox+i>=0 && oy+j>=0) && (ox+i<out_dloss_db.length && oy+j<out_dloss_db[0].length)){
+//                        if((ox+i>=0 && oy+j>=0) && (ox+i<out_dloss_db.length && oy+j<out_dloss_db[0].length)){
                             //累计梯度
                             out_dloss_db[ox+i][oy+j][k]+=dloss_dwxb*weight[i][j][k][filter];
-                        }
+//                        }
                     }
                 }
             }

@@ -183,15 +183,33 @@ public class ConvUtil {
      */
     public static double inner(double[][][] data,int xOffset,int yOffset,int filter,double[][][][] weight){
         double ret=0;
-        for(int x=0;x<weight.length;x++){
-            for(int y=0;y<weight[x].length;y++){
-                if(
-                        (x+xOffset>=0 && x+xOffset<data.length) &&
-                                (y+yOffset>=0 && y+yOffset<data[0].length)
-                ){
-                    for(int z=0;z<weight[x][y].length;z++){
-                        ret+=data[x+xOffset][y+yOffset][z]*weight[x][y][z][filter];
-                    }
+        int startX,endX;
+        int startY,endY;
+
+        startX=xOffset<0?
+                -xOffset
+                :
+                0;
+
+        endX=weight.length+xOffset>data.length?
+                -xOffset+data.length
+                :
+                weight.length;
+
+        startY=yOffset<0?
+                -yOffset
+                :
+                0;
+
+        endY=weight[0].length+yOffset>data[0].length?
+                -yOffset+data[0].length
+                :
+                weight[0].length;
+
+        for(int x=startX;x<endX;x++){
+            for(int y=startY;y<endY;y++){
+                for(int z=0;z<weight[0][0].length;z++){
+                    ret+=data[x+xOffset][y+yOffset][z]*weight[x][y][z][filter];
                 }
             }
         }
