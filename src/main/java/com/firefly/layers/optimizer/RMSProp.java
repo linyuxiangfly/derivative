@@ -15,6 +15,8 @@ import java.util.Map;
  * 但是RMSprop仍可从AdaGrad（更快的收敛速度）中受益
  */
 public class RMSProp implements Optimizer {
+    private static final long serialVersionUID = 1L;
+
     private double rate;
     private double decay=0.9;
 

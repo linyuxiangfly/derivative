@@ -6,6 +6,8 @@ import com.firefly.derivative.core.Function;
  * 变量
  */
 public class Var implements Function {
+    private static final long serialVersionUID = 1L;
+
     double val;
 
     public Var(){

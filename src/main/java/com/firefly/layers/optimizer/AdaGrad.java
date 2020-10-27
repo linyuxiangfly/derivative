@@ -12,6 +12,8 @@ import java.util.Map;
  * 学习率衰减方法（learning rate decay），也就是说随着学习的进行，使学习率逐渐减少。AdaGrade 进一步发展了这个想法，它会为参数的每一个元素设当的调整学习率。
  */
 public class AdaGrad implements Optimizer {
+    private static final long serialVersionUID = 1L;
+
     private double rate;
 
     //历史梯度

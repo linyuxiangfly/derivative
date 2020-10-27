@@ -4,6 +4,8 @@ package com.firefly.layers.data;
  * 1维
  */
 public class OneDimShape extends Shape{
+    private static final long serialVersionUID = 1L;
+
     public static final int X=0;//X轴
 
     public OneDimShape(int oneDimDataNum) {

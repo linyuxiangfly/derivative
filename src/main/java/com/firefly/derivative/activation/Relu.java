@@ -8,6 +8,8 @@ import com.firefly.layers.data.MultiDim;
  * relu
  */
 public class Relu extends OperationActivation {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public double prtGrad(Function dx) {
         double val=0;

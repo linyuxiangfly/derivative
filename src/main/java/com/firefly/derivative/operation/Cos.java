@@ -7,6 +7,8 @@ import com.firefly.derivative.core.OperationUnary;
  * cos
  */
 public class Cos extends OperationUnary {
+    private static final long serialVersionUID = 1L;
+
     private double val=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Cos(){

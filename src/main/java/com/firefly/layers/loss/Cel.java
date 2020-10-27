@@ -9,6 +9,8 @@ import com.firefly.math.Statistics;
  * 交叉熵损失函数
  */
 public class Cel implements Loss {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public void calc(MultiDim input,MultiDim targetVal,MultiDim out) {
         double ret=0;

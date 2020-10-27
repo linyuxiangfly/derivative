@@ -7,6 +7,8 @@ import com.firefly.derivative.core.OperationBinary;
  * 加法
  */
 public class Add extends OperationBinary {
+    private static final long serialVersionUID = 1L;
+
     private double calcA=Double.MAX_VALUE,calcB=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Add(){

@@ -7,6 +7,8 @@ import com.firefly.derivative.core.OperationBinary;
  * 减法
  */
 public class Sub extends OperationBinary {
+    private static final long serialVersionUID = 1L;
+
     private double calcA=Double.MAX_VALUE,calcB=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Sub(){

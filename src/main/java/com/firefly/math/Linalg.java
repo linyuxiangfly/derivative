@@ -1,7 +1,6 @@
 package com.firefly.math;
 
 import com.firefly.layers.data.MultiDim;
-import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ShapeIndex;
 
 /**

@@ -8,6 +8,8 @@ import com.firefly.derivative.util.MathEx;
  * 幂函数
  */
 public class Power extends OperationBinary {
+    private static final long serialVersionUID = 1L;
+
     private double calcA=Double.MAX_VALUE,calcB=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 //    private double derA_A,derA_B,derA_Val;
 //    private Function derADx;

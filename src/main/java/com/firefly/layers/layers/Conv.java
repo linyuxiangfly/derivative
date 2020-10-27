@@ -16,6 +16,8 @@ import com.firefly.math.ConvUtil;
  * 卷积层
  */
 public class Conv implements Layer {
+    private static final long serialVersionUID = 1L;
+
     private ThreeDimShape inputShape;//输入形状
     private ThreeDimShape inputShapeExpand;//输入参数扩大的形状
     private ThreeDimShape unitShape;//输出单元数

@@ -6,6 +6,8 @@ import java.lang.reflect.Array;
  * 多维数据
  */
 public class MultiDim implements java.io.Serializable{
+    private static final long serialVersionUID = 1L;
+
     private Class<?> type;
     private Shape shape;
     private Object data;

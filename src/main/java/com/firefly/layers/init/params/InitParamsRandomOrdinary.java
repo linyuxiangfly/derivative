@@ -10,6 +10,8 @@ import java.util.Random;
  * 普通的随机数
  */
 public class InitParamsRandomOrdinary implements InitParamsListener {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public void paramWSize(Shape shape) {
 

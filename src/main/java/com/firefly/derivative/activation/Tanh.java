@@ -9,6 +9,8 @@ import com.firefly.layers.data.MultiDim;
  * tanh
  */
 public class Tanh extends OperationActivation {
+    private static final long serialVersionUID = 1L;
+
     private double val=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Tanh(){

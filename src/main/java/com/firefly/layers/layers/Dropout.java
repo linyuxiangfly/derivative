@@ -11,6 +11,8 @@ import com.firefly.math.Binomial;
  * Dropout层
  */
 public class Dropout implements Layer {
+    private static final long serialVersionUID = 1L;
+
     private static float KEEP_PROB_DEFAULT=1.0F;
     private Shape inputShape;//输入形状
     private Shape unitShape;//输出形状

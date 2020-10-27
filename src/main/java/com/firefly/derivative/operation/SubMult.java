@@ -7,6 +7,8 @@ import com.firefly.derivative.core.OperationMultiple;
  * 减法，多参数
  */
 public class SubMult extends OperationMultiple {
+    private static final long serialVersionUID = 1L;
+
     public SubMult(){
 
     }

@@ -4,6 +4,8 @@ package com.firefly.layers.data;
  * 2维
  */
 public class TwoDimShape extends Shape{
+    private static final long serialVersionUID = 1L;
+
     public static final int X=0;//X轴
     public static final int Y=1;//Y轴
 

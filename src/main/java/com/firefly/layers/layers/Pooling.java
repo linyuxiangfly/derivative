@@ -11,6 +11,8 @@ import com.firefly.layers.enums.PollingType;
  * 池化层
  */
 public class Pooling implements Layer {
+    private static final long serialVersionUID = 1L;
+
     private ThreeDimShape inputShape;//输入形状
     private PollingType pollingType;
     private Shape unitShape;//输出单元数

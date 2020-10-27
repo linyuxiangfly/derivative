@@ -7,6 +7,8 @@ import com.firefly.derivative.core.OperationMultiple;
  * 除法，多参数
  */
 public class DivMult extends OperationMultiple {
+    private static final long serialVersionUID = 1L;
+
     public DivMult(){
 
     }

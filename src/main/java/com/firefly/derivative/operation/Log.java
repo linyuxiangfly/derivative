@@ -8,6 +8,8 @@ import com.firefly.derivative.util.MathEx;
  * log
  */
 public class Log extends OperationBinary {
+    private static final long serialVersionUID = 1L;
+
     private double calcA=Double.MAX_VALUE,calcB=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Log(){

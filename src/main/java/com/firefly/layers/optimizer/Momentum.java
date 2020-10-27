@@ -13,6 +13,8 @@ import java.util.Map;
  * Momentum（动量） 在 SGD 的基础上引入了一个变量 - 速度 v 和一个超参数 - 指数衰减平均 \alpha
  */
 public class Momentum implements Optimizer {
+    private static final long serialVersionUID = 1L;
+
     private double rate;
     private double decay;
 

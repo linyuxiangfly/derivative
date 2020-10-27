@@ -9,6 +9,8 @@ import com.firefly.layers.data.ShapeIndex;
  * Softmax层
  */
 public class Softmax implements Layer {
+    private static final long serialVersionUID = 1L;
+
     private Shape inputShape;//输入形状
     private Shape unitShape;//输出形状
 

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Sequential implements Model {
+    private static final long serialVersionUID = 1L;
+
     private List<Layer> layers;
     private List<MultiDim> layersOut;
     private List<MultiDim> layersInputPrtGrad;//每层的识差/输入的梯度

@@ -8,6 +8,8 @@ import com.firefly.derivative.util.MathEx;
  * 除法
  */
 public class Div extends OperationBinary {
+    private static final long serialVersionUID = 1L;
+
     private double calcA=Double.MAX_VALUE,calcB=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Div(){

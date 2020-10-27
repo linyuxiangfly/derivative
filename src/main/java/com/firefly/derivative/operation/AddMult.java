@@ -8,6 +8,8 @@ import com.firefly.derivative.core.OperationMultiple;
  * 加法，多参数
  */
 public class AddMult extends OperationMultiple {
+    private static final long serialVersionUID = 1L;
+
     public AddMult(){
 
     }

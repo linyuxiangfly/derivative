@@ -8,6 +8,8 @@ import com.firefly.derivative.util.MathEx;
  * tan
  */
 public class Tan extends OperationUnary {
+    private static final long serialVersionUID = 1L;
+
     private double val=Double.MAX_VALUE,calcVal=Double.MAX_VALUE;
 
     public Tan(){

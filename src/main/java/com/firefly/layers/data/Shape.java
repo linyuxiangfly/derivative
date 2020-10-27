@@ -4,6 +4,8 @@ package com.firefly.layers.data;
  * 形状
  */
 public class Shape implements java.io.Serializable{
+    private static final long serialVersionUID = 1L;
+
     private int[] dims;//每个维度的数据数量
     private int[] dimsNum;//每个维度转为1维的数量
 

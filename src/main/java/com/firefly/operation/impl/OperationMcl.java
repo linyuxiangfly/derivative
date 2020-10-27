@@ -5,6 +5,8 @@ import com.firefly.layers.data.ShapeIndex;
 import com.firefly.operation.core.DoubleBinary;
 
 public class OperationMcl implements DoubleBinary {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public double calc(double a, double b) {
         return a*b;

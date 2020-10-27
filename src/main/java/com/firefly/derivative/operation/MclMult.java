@@ -7,6 +7,8 @@ import com.firefly.derivative.core.OperationMultiple;
  * 乘法，多参数
  */
 public class MclMult extends OperationMultiple {
+    private static final long serialVersionUID = 1L;
+
     public MclMult(){
 
     }

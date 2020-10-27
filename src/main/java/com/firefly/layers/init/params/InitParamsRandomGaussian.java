@@ -11,6 +11,8 @@ import java.util.Random;
  * 标准正态随机分布
  */
 public class InitParamsRandomGaussian implements InitParamsListener {
+    private static final long serialVersionUID = 1L;
+
     private Random random;
 
     public InitParamsRandomGaussian(){

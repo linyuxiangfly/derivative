@@ -8,6 +8,8 @@ import com.firefly.layers.data.ShapeIndex;
  * 单目运算符
  */
 public class OperationActivation extends OperationUnary {
+    private static final long serialVersionUID = 1L;
+
     private MultiDim relations;//关联的参数
 
     public OperationActivation(){

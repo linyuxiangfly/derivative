@@ -11,6 +11,8 @@ import java.util.Random;
  * 标准正态随机分布，每个参数都是隔离的
  */
 public class InitParamsRandomGaussianPartition implements InitParamsListener {
+    private static final long serialVersionUID = 1L;
+
     private MultiDim randomW;
     private MultiDim randomB;
 

@@ -18,6 +18,8 @@ import com.firefly.math.Linalg;
  * 全连接层
  */
 public class Dense implements Layer {
+    private static final long serialVersionUID = 1L;
+
     private Shape inputShape;
     private Shape unitShape;
     private int inputs;//输出单元数

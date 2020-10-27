@@ -12,6 +12,8 @@ import java.util.Map;
  * Adam 直观的来讲就是融合了 Momentum 和 AdaGrad 方法
  */
 public class Adam implements Optimizer {
+    private static final long serialVersionUID = 1L;
+
     private double rate;
     private double beta1;
     private double beta2;

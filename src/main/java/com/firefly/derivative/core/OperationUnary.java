@@ -6,6 +6,8 @@ import com.firefly.derivative.operation.Const;
  * 单目运算符
  */
 public class OperationUnary implements Function {
+    private static final long serialVersionUID = 1L;
+
     private Function val;
 
     public OperationUnary(){

@@ -1,8 +1,6 @@
 package com.firefly.math;
 
-import com.firefly.layers.data.FourDimShape;
 import com.firefly.layers.data.MultiDim;
-import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ThreeDimShape;
 
 public class ConvUtil {

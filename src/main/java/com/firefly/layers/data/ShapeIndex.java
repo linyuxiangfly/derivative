@@ -4,6 +4,8 @@ package com.firefly.layers.data;
  * 形状，对应的位置
  */
 public class ShapeIndex implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Shape shape;
     private int[] dimIndex;//每个维度的下标
 

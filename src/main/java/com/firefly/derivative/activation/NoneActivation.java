@@ -8,6 +8,8 @@ import com.firefly.layers.data.MultiDim;
  * 不需要激活函数
  */
 public class NoneActivation extends OperationActivation {
+    private static final long serialVersionUID = 1L;
+
     public NoneActivation(){
 
     }

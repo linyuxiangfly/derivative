@@ -13,6 +13,8 @@ import java.util.Map;
  * 随机梯度下降法
  */
 public class Sgd implements Optimizer {
+    private static final long serialVersionUID = 1L;
+
     private double rate;
     //临时用的
     private Map<MultiDim,MultiDim> temp=new Hashtable<>();

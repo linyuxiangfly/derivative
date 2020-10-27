@@ -4,6 +4,8 @@ package com.firefly.layers.data;
  * 4维
  */
 public class FourDimShape extends Shape{
+    private static final long serialVersionUID = 1L;
+
     public static final int X=0;//X轴
     public static final int Y=1;//Y轴
     public static final int Z=2;//Z轴

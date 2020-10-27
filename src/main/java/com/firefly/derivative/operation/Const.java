@@ -6,6 +6,8 @@ import com.firefly.derivative.core.Function;
  * 常量
  */
 public class Const implements Function {
+    private static final long serialVersionUID = 1L;
+
     double val;
 
     public Const(double val){

@@ -11,6 +11,8 @@ import com.firefly.layers.data.ShapeIndex;
  * leaky relu
  */
 public class LRelu extends OperationActivation {
+    private static final long serialVersionUID = 1L;
+
     private Function minVal=null;
 
     public LRelu(){

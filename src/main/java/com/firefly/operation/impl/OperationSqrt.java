@@ -5,6 +5,8 @@ import com.firefly.layers.data.ShapeIndex;
 import com.firefly.operation.core.DoubleUnary;
 
 public class OperationSqrt implements DoubleUnary {
+    private static final long serialVersionUID = 1L;
+
 
     @Override
     public double calc(double a) {

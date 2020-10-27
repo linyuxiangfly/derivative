@@ -6,6 +6,8 @@ import com.firefly.derivative.operation.Const;
  * 多目运算符
  */
 public class OperationMultiple implements Function {
+    private static final long serialVersionUID = 1L;
+
     private Function[] params;
 
     public OperationMultiple(){

@@ -10,6 +10,8 @@ import com.firefly.math.Binomial;
  * 缩放层
  */
 public class Zoom implements Layer {
+    private static final long serialVersionUID = 1L;
+
     private Shape inputShape;//输入形状
     private Shape unitShape;//输出形状
     private boolean hasInputMinMax;//是否有输入的最大值和最小值

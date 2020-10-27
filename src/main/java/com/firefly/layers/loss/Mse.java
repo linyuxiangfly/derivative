@@ -10,6 +10,8 @@ import com.firefly.math.Linalg;
  * 均方误差（MSE，mean squared error）
  */
 public class Mse implements Loss {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public void calc(MultiDim input, MultiDim targetVal, MultiDim out) {
         MultiDim error=new MultiDim(input.getShape());
