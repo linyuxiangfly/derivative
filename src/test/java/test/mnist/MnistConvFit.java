@@ -78,7 +78,7 @@ public class MnistConvFit {
                 }
 
                 Model finalModel = model;
-                model.fit(train_x, train_y, 1, 32,
+                model.fit(train_x, train_y, 1, 1,
                         new LossCallBackListener() {
                             @Override
                             public void onLoss(double val) {
@@ -94,14 +94,8 @@ public class MnistConvFit {
 
                             @Override
                             public void onProcess(int process, int epoch, double currentProgress, double loss,long takeUpTime) {
-                                if(lastProcessStr!=null){
-                                    for (int j = 0; j < lastProcessStr.length(); j++) {
-                                        System.out.print("\b");
-                                    }
-                                }
-
                                 //每个阶段保存一下模型
-                                if(currentProgress-lastProgress>0.01){
+                                if(currentProgress-lastProgress>0.05){
                                     lastProgress=currentProgress;
                                     try{
                                         //导入并进行预测
@@ -112,6 +106,12 @@ public class MnistConvFit {
                                         acc=getAccuracy(finalModel,test_x,test_y);
                                     }catch (Exception e){
                                         e.printStackTrace();
+                                    }
+                                }
+
+                                if(lastProcessStr!=null){
+                                    for (int j = 0; j < lastProcessStr.length(); j++) {
+                                        System.out.print("\b");
                                     }
                                 }
 
