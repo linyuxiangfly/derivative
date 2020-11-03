@@ -7,10 +7,17 @@ import com.firefly.layers.data.ThreeDimShape;
 import com.firefly.utils.ModelUtil;
 import test.mnist.data.MnistRead;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MnistConvPredict {
     private static String modelFile="src/test/resources/mnist_model/conv/";
+    private static String errorPath="src/test/resources/mnist_error/conv/";
 
     public static void main(String[] args) {
 //        double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
@@ -158,6 +165,7 @@ public class MnistConvPredict {
 //                System.out.println(yi+"     "+pi+"     ");
             }else{
                 errorNum++;
+//                saveFile((double[][][])x[i].getData(),errorPath+yi+"-"+pi+".png");
 //                System.out.println(yi+"     "+pi+"     "+"      error");
             }
         }
@@ -172,6 +180,35 @@ public class MnistConvPredict {
 //            }
 //            i++;
 //        }
+    }
+
+    private static void saveFile(double[][][] image,String filePath){
+        File file=new File(filePath);
+        try {
+            BufferedImage bufferedImage=double2Image(image);
+            ImageIO.write(
+                    bufferedImage,
+                    "png",
+                    new FileOutputStream(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static BufferedImage double2Image(double[][][] image){
+        BufferedImage b = new BufferedImage(image[0].length, image.length, BufferedImage.TYPE_INT_RGB);
+        Graphics g = b.getGraphics();
+
+        for(int n=0; n<image.length; n++) {
+            for(int m=0; m<image[0].length; m++) {
+                int v=(int)(image[n][m][0]*255);
+                g.setColor(new Color(v, v, v));
+                g.fillRect(m, n, 1, 1);
+            }
+        }
+        return b;
     }
 
     private static void printArray(String title,double[][] vals){
