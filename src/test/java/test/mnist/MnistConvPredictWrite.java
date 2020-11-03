@@ -5,7 +5,7 @@ import com.firefly.layers.data.MultiDim;
 import com.firefly.layers.data.Shape;
 import com.firefly.layers.data.ThreeDimShape;
 import com.firefly.utils.ModelUtil;
-import test.mnist.data.MnistRead;
+import test.mnist.data.LocalRead;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,19 +15,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class MnistConvPredict {
+public class MnistConvPredictWrite {
     private static String modelFile="src/test/resources/mnist_model/conv/";
-    private static String errorPath="src/test/resources/mnist_error/conv/";
+    private static String writePath="src/test/resources/mnist_write/";
 
     public static void main(String[] args) {
-//        double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
-//        double[][] train_labels = one_hot(10,MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE));
+        File[] files=getDirFiles(new File(writePath));
+        double[][] test_images = LocalRead.getImages(files);
+        double[][] testlabels = one_hot(10,LocalRead.getLabels(files));
 
-        double[][] test_images = MnistRead.getImages(MnistRead.TEST_IMAGES_FILE);
-        double[][] testlabels = one_hot(10,MnistRead.getLabels(MnistRead.TEST_LABELS_FILE));
-
-//        MultiDim[] train_x=arr2MultDimThreeDim(train_images,new ThreeDimShape(28,28,1));
-//        MultiDim[] train_y=arr2MultDim(train_labels);
         MultiDim[] test_x=arr2MultDimThreeDim(test_images,new ThreeDimShape(28,28,1));
         MultiDim[] test_y=arr2MultDim(testlabels);
 
@@ -70,6 +66,23 @@ public class MnistConvPredict {
             }
         }
         return max;
+    }
+
+    private static File[] getDirFiles(File dir){
+        if (!dir.exists() || !dir.isDirectory()) {// 判断是否存在目录
+            throw new RuntimeException("dir is not exists");
+        }
+
+        String[] files = dir.list();// 读取目录下的所有目录文件信息
+        File[] retVal=new File[files.length];
+
+        for (int i = 0; i < files.length; i++) {// 循环，添加文件名或回调自身
+            File file = new File(dir, files[i]);
+            if (file.isFile()) {// 如果文件
+                retVal[i]=file;
+            }
+        }
+        return retVal;
     }
 
     private static double[] one_hot(int len,int val){
@@ -166,7 +179,7 @@ public class MnistConvPredict {
             }else{
                 errorNum++;
 //                saveFile((double[][][])x[i].getData(),errorPath+yi+"-"+pi+".png");
-//                System.out.println(yi+"     "+pi+"     "+"      error");
+                System.out.println(yi+"     "+pi+"     "+"      error");
             }
         }
         double rate=((double)(x.length-errorNum))/x.length;

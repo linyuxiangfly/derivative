@@ -459,6 +459,8 @@ y:43.0   y':43.217278859814535
 
 #### 定义需要训练的数组
 ```
+//请参数例子 test.TestNNRelu
+
 //二维数组，第1列是x,第2列是y
 double[][] datas=new double[][]{
         {32.3787591,32},
@@ -485,24 +487,24 @@ double[][] datas=new double[][]{
         {40.8701106,42.5},
         {41.2926849,43}
 };
-double[][] x=new double[datas.length][1];
-double[][] y=new double[datas.length][1];
-
-//将数据除以100，转成0-1的数
+double[][] xx=new double[datas.length][1];
+double[][] yy=new double[datas.length][1];
 for(int i=0;i<datas.length;i++){
-    x[i][0]=datas[i][0]/100.0;
-    y[i][0]=datas[i][1]/100.0;
+    xx[i][0]=datas[i][0]/100.0;
+    yy[i][0]=datas[i][1]/100.0;
 }
+MultiDim[] x=arr2MultDim(xx);
+MultiDim[] y=arr2MultDim(yy);
 
 ```
 
 #### 定义模型
 ```
-Model model=new Sequential(0.04);
-model.add(new Dense(1,1, Relu.class));
+Model model=new Sequential();
+model.add(new Dense(1,1,new Sgd(0.04), ()->new Relu()));
+model.add(new Dropout(0.5f));
 //识差函数
 model.setLossCls(Mse.class);
-//初始化模型
 model.init();
 
 ```
@@ -520,9 +522,18 @@ model.fit(x, y, 10000, 20, new LossCallBackListener() {
 #### 预测
 ```
 for(int i=0;i<x.length;i++){
-    double[] py=model.predict(x[i]);
-    System.out.print(String.format("%.2f   ", py[0]*100));
-    System.out.print(String.format("%.2f   ", y[i][0]*100));
+    MultiDim py=model.predict(x[i]);
+
+    ShapeIndex j=new ShapeIndex(py.getShape());
+    do{
+        System.out.print(String.format("%.10f   ", (double)py.getVal(j)*100));
+    }while(j.next());
+
+    j=new ShapeIndex(y[i].getShape());
+    do{
+        System.out.print(String.format("%.10f   ", (double)y[i].getVal(j)*100));
+    }while(j.next());
+
     System.out.println();
 }
 ```
@@ -551,4 +562,100 @@ for(int i=0;i<x.length;i++){
 41.95   42.00   
 42.60   42.50   
 43.13   43.00  
+```
+
+## 2.6 卷积神经网络训练MNIST例子
+
+#### 加载并加工MNIST数据
+```
+//请参数例子 test.mnist.MnistConvFit 以及 test.mnist.MnistConvPredict
+
+double[][] train_images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
+double[][] train_labels = one_hot(10,MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE));
+
+double[][] test_images = MnistRead.getImages(MnistRead.TEST_IMAGES_FILE,100);
+double[][] testlabels = one_hot(10,MnistRead.getLabels(MnistRead.TEST_LABELS_FILE,100));
+
+MultiDim[] train_x=arr2MultDimThreeDim(train_images,new ThreeDimShape(28,28,1));
+MultiDim[] train_y=arr2MultDim(train_labels);
+MultiDim[] test_x=arr2MultDimThreeDim(test_images,new ThreeDimShape(28,28,1));
+MultiDim[] test_y=arr2MultDim(testlabels);
+
+```
+
+#### 定义模型
+```
+Model model=new Sequential();
+model.add(new Conv(
+        (ThreeDimShape)train_x[0].getShape(),
+        128,
+        5,
+        1,
+        Padding.same,
+        new Adam(0.001,0.9,0.999),
+        () -> new LRelu(0.01),
+        new InitParamsRandomGaussian()));
+
+model.add(new Pooling(PollingType.max,2));
+
+model.add(new Flatten());
+
+model.add(new Dense(
+        10,
+        new Adam(0.001,0.9,0.999),
+        () -> new NoneActivation()));
+
+model.add(new Softmax());
+//识差函数
+model.setLossCls(Cel.class);
+model.init();
+
+```
+#### 训练
+```
+model.fit(train_x, train_y, 1, 1,
+    new LossCallBackListener() {
+        @Override
+        public void onLoss(double val) {
+    //                        System.out.println(String.format("%.10f", val));
+        }
+    },
+    new FitControl() {
+    
+        @Override
+        public void onProcess(int process, int epoch, double currentProgress, double loss,long takeUpTime) {
+            String lastProcessStr=process+"/"+epoch+
+                    "    进度:"+String.format("%.2f %%", currentProgress*100)+
+                    "    误差:"+String.format("%.10f", loss)
+            ;
+            System.out.print(lastProcessStr);
+        }
+    
+        @Override
+        public boolean onIsStop(int process,int epoch,double loss,long takeUpTime) {
+            return false;
+        }
+    }
+);
+```
+
+#### 预测
+```
+int errorNum=0;
+for(int i=0;i<test_x.length;i++){
+    MultiDim py=model.predict(test_x[i]);
+    int pi=maxIndex((double[])py.getData());
+    int yi=maxIndex((double[])test_y[i].getData());
+    if(pi==yi){
+
+    }else{
+        errorNum++;
+    }
+}
+double rate=((double)(test_x.length-errorNum))/test_x.length;
+System.out.println(String.format("准确率：%.4f",rate));
+```
+### 输出
+```
+准确率：0.9812
 ```
